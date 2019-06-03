@@ -68,7 +68,30 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
    * las columnas a la derecha.
    */
   public function testNumerosIncrementales() {
-    $this->assertTrue(TRUE);
+    $carton = new CartonEjemplo;
+    $columas = $carton->columnas();
+    $mayores = [];
+    $menores = [];
+
+    foreach ($columnas as $columna) {
+      $celdasDeLaColumna = celdas_ocupadas($columna);
+      $menor = $celdasDeLaColumna[0];
+      $mayor = $celdasDeLaColumna[0];
+      foreach ($celdasDeLaColumna as $celda) {
+        if ($menor > $celda) {
+          $menor = $celda;
+        }
+        if ($mayor < $celda) {
+          $mayor = $celda;
+        }
+      }
+      $mayores[] = $mayor;
+      $menores[] = $menor;
+    }
+
+    for ($i = 1; $i < count($columnas); ++$i) {
+      $this->assertTrue($menores[$i] > $mayores[$i - 1]);
+    }
   }
 
   /**
