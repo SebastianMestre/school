@@ -24,7 +24,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
   public function testCincoNumerosPorFila() {
     $carton = new CartonEjemplo;
     foreach ($carton->filas() as $fila) {
-      $this->assertTrue(count($fila) == 5);
+      $this->assertTrue(count(celdas_ocupadas($fila)) == 5);
     }
   }
 
@@ -56,7 +56,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
     $carton = new CartonEjemplo;
     $cantidadConUnaSolaOcupada = 0;
     foreach ($carton->columnas() as $columna) {
-      if (count($celdas_ocupadas(columna)) == 1) {
+      if (count(celdas_ocupadas($columna)) == 1) {
         $cantidadConUnaSolaOcupada++;
       }
     }
@@ -79,7 +79,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
     $filas = $carton->filas();
     foreach ($filas as $fila) {
       for ($i = 1; $i < count($fila); ++$i) {
-        $this->assertFalse($fila[i-1] == 0 && $fila[i] == 0);
+        $this->assertFalse($fila[$i - 1] == 0 && $fila[$i] == 0);
       }
     }
   }
