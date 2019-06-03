@@ -78,7 +78,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
     $carton = new CartonEjemplo;
     $filas = $carton->filas();
     foreach ($filas as $fila) {
-      for ($i = 1; $i < count($fila); ++i) {
+      for ($i = 1; $i < count($fila); ++$i) {
         $this->assertFalse($fila[i-1] == 0 && $fila[i] == 0);
       }
     }
