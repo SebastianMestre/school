@@ -74,7 +74,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
     $menores = [];
 
     foreach ($columnas as $columna) {
-      $celdasDeLaColumna = celdas_ocupadas($columna);
+      $celdasDeLaColumna = array_values(celdas_ocupadas($columna));
       $menor = $celdasDeLaColumna[0];
       $mayor = $celdasDeLaColumna[0];
       foreach ($celdasDeLaColumna as $celda) {
