@@ -69,7 +69,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
    */
   public function testNumerosIncrementales() {
     $carton = new CartonEjemplo;
-    $columas = $carton->columnas();
+    $columnas = $carton->columnas();
     $mayores = [];
     $menores = [];
 
