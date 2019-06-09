@@ -34,8 +34,8 @@ class CartonJs implements CartonInterface {
     foreach($fila as $pos_celda => $celda){
         $columnas_carton[$pos_celda][] = $celda;
       }
-    return $columnas_carton;
     }
+    return $columnas_carton;
   }
 
   /**
