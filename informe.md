@@ -61,11 +61,8 @@ El archivo __'composer.json'__ describe las dependencias de nuestro proyecto. La
 
 A diferencia de este ultimo, __'composer.lock'__ simplemente enlista todos los paquetes descargados y sus respectivas versiones. Es importante ya que de esta manera establece cuales son las versiones especificas ligadas a este proyecto. Debido a esto, es primordial añadir este archivo a nustro repositorio ya que de esta manera nos aseguramos de que todos los contribuidores del proyecto utilicen las versiones correctas.
 
-<<<<<<< HEAD
 Utilizamos `autoload` para mapear las namespaces que queramos utilizar a un directorio en particular. En este caso, el namespace utilizado sera __Bingo__, el cual estara mapeado a nuestro directorio __'src'__. De esta manera, podremos utilizar las clases definidas dentro de este directorio sin tener que definiliras explicitamente en nuestro codigo. PSR-4 es el estandar PHP que define las normas a seguir por el `autoload`. En esta [pagina web](https://www.php-fig.org/psr/psr-4/) se detallan las especificaciones del mismo.
 
-=======
->>>>>>> e1a2285560b07ea6a1b99253ca2f5bf33b7c40a6
 ## Alternativas a composer
 
 Existen otras alternativas a composer, con soporte para otros lenguajes. Para __NodeJs__, el administrador de dependencias por defecto es __NPM__. A su vez, __Yarn__ ofrece soporte para NPM principalmente, aunque en teoria puede utilizarse con cualquier lenguaje. Por otro lado, __Bundle__ representa la opcion para __Ruby__.
