@@ -1,11 +1,60 @@
 # Informe
 
 ## .gitignore
+
 El archivo .gitignore indica a git que archivos debe ignorar a la hora de ejecutar operaciones como git-add y git-status, entre otras.
 
 En este caso, se le indica a git que ignore la carpeta vendor. esta carpeta contiene los archivos pertinetes a programas de terceros, como TravisCI.
 
 ## travis.yml
+
+El archivo travis.yml sirve para dar las especificaciones requeridas para poner travis en funcionamiento.
+
+La linea:
+
+```yml
+
+language: php
+
+```
+
+especifica el lenguaje en el cual travis debera compilar los archivos especificados. Las lineas:
+
+```yml
+
+php:
+  - 7.2
+
+```
+
+indican la version de php que se debera utilizar. Luego encontramos las lineas:
+
+```yml
+
+install:
+  - composer update --prefer-source
+
+  ```
+
+`composer` es un administrador de dependencias, el cual se encarga de instalar dentro de nuestro proyecto las librerias requeridas. En el caso de estas requerir de otras librerias, composer instalara estas tambien.
+
+`update` indica que deben actualizarse las dependencias y el archivo 'composer.lock' cada vez que el entorno PHP se actualice en travis (esto suele ser cada 30-60 dias).
+
+`--prefer-source` se refiere a la fuente de donde seran instalados los respectivos paquetes. Al indicar 'source' como fuente, estos seran descargados desde el repositorio fuente. En este caso, este sera GitHub.
+
+Por ultimo, las lineas:
+
+```yml
+
+script:
+  - php vendor/bin/phpunit --color tests
+
+  ```
+
+Utilizamos `script` para indicar los comandos a utilizar cuando despleguemos nuestro proyecto. Estos estaran ubicados en `"vendor/bin/phpunit"`.
+
+`--color` 
+
 
 ## composer.json y compose.lock
 
