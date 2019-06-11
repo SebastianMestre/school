@@ -60,7 +60,7 @@ class FabricaCartones {
 
   protected function validarColumnaCompleta($carton) {
     foreach ($carton as $columna) {
-      if(count(celdas_ocupadas($columna)) == 3)
+      if(count(array_filter($columna)) == 3)
         return false;
     }
     return true;
@@ -69,7 +69,7 @@ class FabricaCartones {
   protected function validarTresCeldasIndividuales($carton) {
     $cantidadConUnaSolaOcupada = 0;
     foreach ($carton as $columna) {
-      if (count(celdas_ocupadas($columna)) == 1) {
+      if (count(array_filter($columna)) == 1) {
         $cantidadConUnaSolaOcupada++;
       }
     }
@@ -82,7 +82,7 @@ class FabricaCartones {
     $mayores = [];
     $menores = [];
     foreach ($columnas as $columna) {
-      $celdasDeLaColumna = celdas_ocupadas($columna);
+      $celdasDeLaColumna = array_filter($columna);
       $mayores[] = max($celdasDeLaColumna);
       $menores[] = min($celdasDeLaColumna);
     }
