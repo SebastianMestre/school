@@ -9,7 +9,8 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
   public static function cartonProvider () {
     return [
       [new CartonEjemplo],
-      [new CartonJs]
+      [new CartonJs],
+      [new Carton((new FabricaCartones)->intentoCarton())],
     ];
   }
   
