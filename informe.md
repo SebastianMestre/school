@@ -55,7 +55,7 @@ script:
 
 Utilizamos `script` para indicar los comandos a utilizar cuando despleguemos nuestro proyecto. Estos estaran ubicados en `"vendor/bin/phpunit"`.
 
-`--color` . . .
+`test` Indica a php que los unit tests estan localizados en la carpeta test
 
 ## composer.json y compose.lock
 
