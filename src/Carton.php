@@ -2,8 +2,6 @@
 
 namespace Bingo;
 
-require 'CartonInterface.php';
-
 /**
  * Este Carton fue implementado durante la evaluacion.
  */
