@@ -21,17 +21,19 @@ class VerificacionesBasicasCartonTest extends TestCase {
 
   /**
    * Verifica que cada carton tenga 15 números.
+   *
+   * @dataProvider cartones
    */
-  public function testQuinceNumerosPorCarton() {
-    $carton = new CartonEjemplo;
+  public function testQuinceNumerosPorCarton(CartonInterface $carton) {
     $this->assertCount(15, $carton->numerosDelCarton());
   }
 
   /**
    * Verifica que no haya números repetidos en el carton.
+   *
+   * @dataProvider cartones
    */
-  public function testNumerosNoRepetidos() {
-    $carton = new CartonEjemplo;
+  public function testNumerosNoRepetidos(CartonInterface $carton) {
     $numeros_analizados = [];
     foreach ($carton->filas() as $fila) {
       foreach (celdas_ocupadas($fila) as $celda) {
@@ -44,12 +46,22 @@ class VerificacionesBasicasCartonTest extends TestCase {
 
   /**
    * Verifica que el metodo tieneNumero funcione correctamente.
+   *
+   * @dataProvider cartones
    */
-  public function testTieneNumero() {
-    $carton = new CartonEjemplo;
+  public function testTieneNumero(CartonInterface $carton) {
     $this->assertTrue($carton->tieneNumero(55));
-    $this->assertFalse($carton->tieneNumero(1));
+    $this->assertFalse($carton->tieneNumero(91));
   }
 
+  /**
+   * Devuelve una lista de objetos para usar con dataProvider
+   */
+  public function cartones() {
+    return [
+      [new CartonEjemplo],
+      [new CartonJs],
+    ];
+  }
 
 }

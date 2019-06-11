@@ -14,7 +14,7 @@ class CartonJs implements CartonInterface {
     $this->numeros_carton = [
       [4,0,0,31,40,52,0,0,80],
       [0,13,0,39,48,0,66,72,0],
-      [1,0,27,0,0,50,0,73,86],
+      [1,0,27,0,0,55,0,73,86],
     ];
   }
 
@@ -57,7 +57,7 @@ class CartonJs implements CartonInterface {
    * {@inheritdoc}
    */
   public function tieneNumero(int $numero) {
-    return in_array($numero, $this->numeros_carton);
+    return in_array($numero, $this->numerosDelCarton());
   }
 
 }
