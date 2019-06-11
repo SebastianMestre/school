@@ -43,17 +43,6 @@ class VerificacionesBasicasCartonTest extends TestCase {
     }
   }
 
-
-  /**
-   * Verifica que el metodo tieneNumero funcione correctamente.
-   *
-   * @dataProvider cartones
-   */
-  public function testTieneNumero(CartonInterface $carton) {
-    $this->assertTrue($carton->tieneNumero(55));
-    $this->assertFalse($carton->tieneNumero(91));
-  }
-
   /**
    * Devuelve una lista de objetos para usar con dataProvider
    */
