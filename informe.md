@@ -6,6 +6,8 @@ El archivo .gitignore indica a git que archivos debe ignorar a la hora de ejecut
 
 En este caso, se le indica a git que ignore la carpeta vendor. esta carpeta contiene los archivos pertinetes a programas de terceros, como TravisCI.
 
+.gitignore no puede ignorar archivos que git ya trackea.
+
 ## travis.yml
 
 El archivo __'travis.yml'__ sirve para dar las especificaciones requeridas para poner travis en funcionamiento.
