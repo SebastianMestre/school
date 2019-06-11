@@ -14,13 +14,13 @@ class FabricaCartones {
   }
 
   protected function cartonEsValido($carton) {
-    if (validarUnoANoventa($carton) &&
-      validarCincoNumerosPorFila($carton) &&
-      validarColumnaNoVacia($carton) &&
-      validarColumnaCompleta($carton) &&
-      validarTresCeldasIndividuales($carton) &&
-      validarNumerosIncrementales($carton) &&
-      validarFilasConVaciosUniformes($carton)
+    if ($this->validarUnoANoventa($carton) &&
+      $this->validarCincoNumerosPorFila($carton) &&
+      $this->validarColumnaNoVacia($carton) &&
+      $this->validarColumnaCompleta($carton) &&
+      $this->validarTresCeldasIndividuales($carton) &&
+      $this->validarNumerosIncrementales($carton) &&
+      $this->validarFilasConVaciosUniformes($carton)
     ) {
       return TRUE;
     }
