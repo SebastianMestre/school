@@ -38,13 +38,13 @@ class FabricaCartones {
   }
 
   protected function validarCincoNumerosPorFila($carton) {
-    foreach ($columnas as $indice_columna => $fila) {
+    foreach ($carton as $indice_columna => $fila) {
       foreach ($fila as $indice_fila => $celda) {
         $filas[$indice_fila][$indice_columna] = $celda;
       }
     }
     foreach ($filas as $fila) {
-      if(count(celdas_ocupadas($fila)) != 5)
+      if(count(array_filter($fila)) != 5)
         return false;
     }
     return true;
@@ -95,7 +95,7 @@ class FabricaCartones {
   }
 
   protected function validarFilasConVaciosUniformes($carton) {
-    foreach ($columnas as $indice_columna => $fila) {
+    foreach ($carton as $indice_columna => $fila) {
       foreach ($fila as $indice_fila => $celda) {
         $filas[$indice_fila][$indice_columna] = $celda;
       }
