@@ -28,31 +28,85 @@ class FabricaCartones {
   }
 
   protected function validarUnoANoventa($carton) {
-
+    foreach ($carton as $fila) {
+      foreach (array_filter($fila) as $celda) {
+        if (1 <= $celda && $celda <= 90) {
+        } else { return false; }
+      }
+    }
+    return true;
   }
 
   protected function validarCincoNumerosPorFila($carton) {
-
+    foreach ($columnas as $indice_columna => $fila) {
+      foreach ($fila as $indice_fila => $celda) {
+        $filas[$indice_fila][$indice_columna] = $celda;
+      }
+    }
+    foreach ($filas as $fila) {
+      if(count(celdas_ocupadas($fila)) != 5)
+        return false;
+    }
+    return true;
   }
 
   protected function validarColumnaNoVacia($carton) {
-
+    foreach ($carton as $columna) {
+      if(count(array_filter($columna)) < 1)
+        return false;
+    }
+    return true;
   }
 
   protected function validarColumnaCompleta($carton) {
-
+    foreach ($carton as $columna) {
+      if(count(celdas_ocupadas($columna)) == 3)
+        return false;
+    }
+    return true;
   }
 
   protected function validarTresCeldasIndividuales($carton) {
-
+    $cantidadConUnaSolaOcupada = 0;
+    foreach ($carton as $columna) {
+      if (count(celdas_ocupadas($columna)) == 1) {
+        $cantidadConUnaSolaOcupada++;
+      }
+    }
+    return ($cantidadConUnaSolaOcupada == 3);
   }
 
   protected function validarNumerosIncrementales($carton) {
+    $columnas = $carton;
+    
+    $mayores = [];
+    $menores = [];
+    foreach ($columnas as $columna) {
+      $celdasDeLaColumna = celdas_ocupadas($columna);
+      $mayores[] = max($celdasDeLaColumna);
+      $menores[] = min($celdasDeLaColumna);
+    }
 
+    for ($i = 1; $i < count($columnas); ++$i) {
+      if($menores[$i] <= $mayores[$i - 1])
+        return false;
+    }
+    return true;
   }
 
   protected function validarFilasConVaciosUniformes($carton) {
-
+    foreach ($columnas as $indice_columna => $fila) {
+      foreach ($fila as $indice_fila => $celda) {
+        $filas[$indice_fila][$indice_columna] = $celda;
+      }
+    }
+    foreach ($filas as $fila) {
+      for ($i = 2; $i < count($fila); ++$i) {
+        if($fila[$i - 2] == 0 && $fila[$i - 1] == 0 && $fila[$i] == 0)
+          return false;
+      }
+    }
+    return true;
   }
 
 
