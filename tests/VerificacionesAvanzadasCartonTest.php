@@ -21,7 +21,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
    */
   public function testUnoANoventa(CartonInterface $carton) {
     foreach ($carton->filas() as $fila) {
-      foreach (celdas_ocupadas($fila) as $celda) {
+      foreach (array_filter($fila) as $celda) {
         $this->assertTrue(1 <= $celda && $celda <= 90);
       }
     }
@@ -36,7 +36,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
    */
   public function testCincoNumerosPorFila(CartonInterface $carton) {
     foreach ($carton->filas() as $fila) {
-      $this->assertTrue(count(celdas_ocupadas($fila)) == 5);
+      $this->assertTrue(count(array_filter($fila)) == 5);
     }
   }
 
@@ -47,7 +47,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
    */
   public function testColumnaNoVacia(CartonInterface $carton) {
     foreach ($carton->columnas() as $columna) {
-      $this->assertTrue(count(celdas_ocupadas($columna)) >= 1);
+      $this->assertTrue(count(array_filter($columna)) >= 1);
     }
   }
 
@@ -58,7 +58,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
    */
   public function testColumnaCompleta(CartonInterface $carton) {
     foreach ($carton->columnas() as $columna) {
-      $this->assertTrue(count(celdas_ocupadas($columna)) != 3);
+      $this->assertTrue(count(array_filter($columna)) != 3);
     }
   }
 
@@ -71,7 +71,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
   public function testTresCeldasIndividuales(CartonInterface $carton) {
     $cantidadConUnaSolaOcupada = 0;
     foreach ($carton->columnas() as $columna) {
-      if (count(celdas_ocupadas($columna)) == 1) {
+      if (count(array_filter($columna)) == 1) {
         $cantidadConUnaSolaOcupada++;
       }
     }
@@ -90,7 +90,7 @@ class VerificacionesAvanzadasCartonTest extends TestCase {
     $mayores = [];
     $menores = [];
     foreach ($columnas as $columna) {
-      $celdasDeLaColumna = celdas_ocupadas($columna);
+      $celdasDeLaColumna = array_filter($columna);
       $mayores[] = max($celdasDeLaColumna);
       $menores[] = min($celdasDeLaColumna);
     }
