@@ -26,14 +26,14 @@
 ##
 
 heap_push:
-	sw $s0, 0($sp)
-	sw $s2, 4($sp)
-	sw $s3, 8($sp)
-	sw $s4, 12($sp)
-	sw $s5, 16($sp)
-	sw $s6, 20($sp)
-	sw $s7, 24($sp)
-	addi $sp, $sp, 28
+	sw $s0, -0($sp)
+	sw $s2, -4($sp)
+	sw $s3, -8($sp)
+	sw $s4, -12($sp)
+	sw $s5, -16($sp)
+	sw $s6, -20($sp)
+	sw $s7, -24($sp)
+	addi $sp, $sp, -28
 
 	move $s0, $a0
 	move $s2, $a2
@@ -73,14 +73,14 @@ heap_push:
 		j heap_push_loop_check
 	heap_push_loop_end:
 
-	addi $sp, $sp, -28
-	lw $s0, 0($sp)
-	lw $s2, 4($sp)
-	lw $s3, 8($sp)
-	lw $s4, 12($sp)
-	lw $s5, 16($sp)
-	lw $s6, 20($sp)
-	lw $s7, 24($sp)
+	addi $sp, $sp, 28
+	lw $s0, -0($sp)
+	lw $s2, -4($sp)
+	lw $s3, -8($sp)
+	lw $s4, -12($sp)
+	lw $s5, -16($sp)
+	lw $s6, -20($sp)
+	lw $s7, -24($sp)
 
 	jr $ra
 
