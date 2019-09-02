@@ -43,16 +43,16 @@ heap_push:
 	sw $s2, ($s4)
 
 	heap_push_loop_check:
-		; if i == 0
-		;     goto end
+		# if i == 0
+		#     goto end
 		beqz $s3, heap_push_loop_end
 
-		; j = (i-1)/2 # parent of i 
+		# j = (i-1)/2 # parent of i 
 		addi $s5, $s3, -1
 		sra $s5, $s5, 1
 
-		; if arr[i] < arr[j]
-		;     goto end
+		# if arr[i] < arr[j]
+		#     goto end
 		add $s6, $s0, $s5
 		lw $s7, ($s6)
 
@@ -61,15 +61,15 @@ heap_push:
 		
 		bltz $v0, heap_push_loop_end
 	heap_push_loop_body:
-		; swap(arr[i], arr[j])
+		# swap(arr[i], arr[j])
 		sw $s7, ($s4)
 		sw $s2, ($s6)
 
-		; i = j
+		# i = j
 		move $s3, $s5
 		move $s4, $s6
 
-		; goto check
+		# goto check
 		j heap_push_loop_check
 	heap_push_loop_end:
 
