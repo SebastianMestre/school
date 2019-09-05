@@ -1,3 +1,10 @@
+##
+# Enunciado:
+#
+# Implementar la funcion que imprime los movimientos necesarios para resolver
+# el juego "Torres de Hanoi". Para hacer esto se puede seguir el pseudo codigo
+# presente en el campus virtual.
+##
 
 .data
 msg_pretty_print_str0: .asciiz "disco "
