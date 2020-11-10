@@ -24,7 +24,7 @@ def pedir_nombre():
 	nombre = prompt("Escriba su nombre...")
 	return nombre
 
-# [String] RegistroJugador String -> String
+# [String] RegistroJugador -> String
 def elegir_palabra(palabras, registro):
 	palabra = random.choice(palabras)
 	while palabra in registro:
@@ -32,7 +32,9 @@ def elegir_palabra(palabras, registro):
 	return palabra
 
 # String -> ResultadoPartida
+# Hace E/S por pantalla
 def jugar(palabra):
+	# TODO: implementar
 	return (False, 5)
 
 # RegistroJugador String ResultadoPartida -> None
