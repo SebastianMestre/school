@@ -1,3 +1,4 @@
+import random
 
 #   El resultado de una partida esta modelado por una tupla
 # Tuple(Bool, Int)
@@ -21,7 +22,7 @@
 
 # () -> String
 def pedir_nombre():
-	nombre = prompt("Escriba su nombre...")
+	nombre = input("Escriba su nombre...")
 	return nombre
 
 # [String] RegistroJugador -> String
@@ -59,7 +60,7 @@ def partida(palabras, registro):
 def main(camino_al_lemario, camino_al_registro):
 	lemario = leer_lemario(camino_al_lemario)
 	registro = leer_registro(camino_al_registro)
-	decision = prompt("Quiere jugar? (si/*)...")
+	decision = input("Quiere jugar? (si/*)...")
 	if decision == "si":
 		partida(lemario, registro)
 		escribir_registro(camino_al_registro, registro)
