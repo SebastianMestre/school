@@ -1,0 +1,19 @@
+#   El resultado de una partida esta modelado por una tupla
+# Tuple(Bool, Int)
+#   Esta contiene la condicion de exito, y la cantidad de
+# intentos
+
+#   El registro de juego de un jugador esta modelado por un
+# Dict(Bool, Int)
+#   Por cada partida del jugador, se asocia la palabra de la
+# partida con el resultado de la misma
+
+#   El registro completo esta modelado por un diccionario de
+# registros de jugador. Eso es, un Dict(Dict(Tuple(Bool, Int)))
+#   El nombre de un jugador se asocia con su registro
+
+#   En todo el proyecto usamos los siguientes alias:
+#
+# ResultadoPartida = Tuple(Bool, Int)
+# RegistroJugador  = Dict(ResultadoPartida)
+# RegistroCompleto = Dict(RegistroJugador)
