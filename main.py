@@ -1,5 +1,6 @@
 import random
 
+import io
 from ahorcado_v1 import jugar
 
 
@@ -35,10 +36,10 @@ def partida(palabras, registro):
 # String String -> None
 # Hace E/S con archivos
 def main(camino_al_lemario, camino_al_registro):
-	lemario = leer_lemario(camino_al_lemario)
-	registro = leer_registro(camino_al_registro)
+	lemario = io.leer_lemario(camino_al_lemario)
+	registro = io.leer_registro(camino_al_registro)
 	decision = input("Quiere jugar? (si/*)...")
 	if decision == "si":
 		partida(lemario, registro)
-		escribir_registro(camino_al_registro, registro)
+		io.escribir_registro(camino_al_registro, registro)
 	print("bye.")
