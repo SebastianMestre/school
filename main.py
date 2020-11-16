@@ -42,4 +42,3 @@ def main(camino_al_lemario, camino_al_registro):
 	if decision == "si":
 		partida(lemario, registro)
 		io.escribir_registro(camino_al_registro, registro)
-	print("bye.")
