@@ -1,5 +1,7 @@
 import random
 
+from ahorcado_v1 import jugar
+
 
 # () -> String
 def pedir_nombre():
@@ -12,12 +14,6 @@ def elegir_palabra(palabras, registro):
 	while palabra in registro:
 		palabra = random.choice(palabras)
 	return palabra
-
-# String -> ResultadoPartida
-# Hace E/S por pantalla
-def jugar(palabra):
-	# TODO: implementar
-	return (False, 5)
 
 # RegistroJugador String ResultadoPartida -> None
 # Muta el registro
