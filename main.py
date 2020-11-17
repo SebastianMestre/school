@@ -44,5 +44,8 @@ def main(camino_al_lemario, camino_al_registro):
 		partida(lemario, registro)
 		archivos.escribir_registro(camino_al_registro, registro)
 
+
+#--------------------------------------------------		
+# Inicia el juego
 main(sys.argv[1], sys.argv[2])
 
