@@ -5,6 +5,7 @@
 def leer_lemario(path):
 	f = open(path, "r", encoding="latin1")
 	lines = f.readlines()
+	f.close()
 	# readlines deja un '\n' al final de cada lines asique armo un nuevo array
 	# sin el ultimo caracter de cada linea
 	result = [line[:-1] for line in lines]
