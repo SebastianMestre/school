@@ -1,14 +1,10 @@
-# Helper para input/output y manipulacion de archivos
+# Helper para manipulacion de archivos
+
 
 
 # String -> [String]
 def leer_lemario(path):
-	f = open(path, "r", encoding="latin1")
-	lines = f.readlines()
-	f.close()
-	# readlines deja un '\n' al final de cada lines asique armo un nuevo array
-	# sin el ultimo caracter de cada linea
-	result = [line[:-1] for line in lines]
+	result = leer_lineas(path)
 	return result
 
 # String -> RegistroCompleto
@@ -20,6 +16,17 @@ def leer_registro(path):
 def escribir_registro(path, registro):
     #TODO
     return
+
+# String -> [String]
+# Toma un archivo y retorna las lineas del mismo normalizadas (sin separador)
+def leer_lineas(path):
+    f = open(path, "r", encoding="latin1")
+    lines = f.readlines()
+    # readlines deja un '\n' al final de cada lines asique armo un nuevo array
+	# sin el ultimo caracter de cada linea
+    lines = [line[:-1] for line in lines]
+    f.close()
+    return lines
 
 # String -> Boolean
 # Toma una linea del archivo registro y determina si es el nombre de un jugador
