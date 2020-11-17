@@ -20,3 +20,10 @@ def leer_registro(path):
 def escribir_registro(path, registro):
     #TODO
     return
+
+# String -> Boolean
+# Toma una linea del archivo registro y determina si es el nombre de un jugador
+def es_nombre_jugador(line):
+    sep = ','
+    es_partida = sep in line    # si hay un separador entonces la linea determina una partida
+    return not es_partida       # si no es partida entonces es nombre de jugador 
