@@ -3,16 +3,19 @@
 
 
 # Archivo -> [String]
+# Toma un archivo de lemario y retorna un lemario
 def leer_lemario(path):
 	result = leer_lineas(path)
 	return result
 
 # Archivo -> RegistroCompleto
+# Toma un archivo de registro y retorna un registro completo
 def leer_registro(path):
     #TODO
     return {}
 
 # Archivo -> None
+# Toma un archivo y un registro completo y guarda el segundo en el primero
 def escribir_registro(path, registro):
     #TODO
     return
