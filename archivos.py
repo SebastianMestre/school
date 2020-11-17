@@ -2,22 +2,22 @@
 
 
 
-# String -> [String]
+# Archivo -> [String]
 def leer_lemario(path):
 	result = leer_lineas(path)
 	return result
 
-# String -> RegistroCompleto
+# Archivo -> RegistroCompleto
 def leer_registro(path):
     #TODO
     return {}
 
-# String -> None
+# Archivo -> None
 def escribir_registro(path, registro):
     #TODO
     return
 
-# String -> [String]
+# Archivo -> [String]
 # Toma un archivo y retorna las lineas del mismo normalizadas (sin separador)
 def leer_lineas(path):
     f = open(path, "r", encoding="latin1")

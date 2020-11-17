@@ -34,7 +34,7 @@ def partida(palabras, registro):
 	resultado_del_juego = jugar(palabra)
 	actualizar_registro(registro[nombre], palabra, resultado_del_juego)
 
-# String String -> None
+# Archivo Archivo -> None
 # Hace E/S con archivos
 def main(camino_al_lemario, camino_al_registro):
 	lemario = archivos.leer_lemario(camino_al_lemario)
