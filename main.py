@@ -13,6 +13,10 @@ def pedir_nombre():
 
 # [String] RegistroJugador -> String
 def elegir_palabra(palabras, registro):
+    #  Esta forma de elegir es simple y da probabilidad uniforme sobre
+    # el conjunto de palabras que todavia no se jugaron.
+    #  Tiene el problema de no terminar cuando un jugador ya jugo
+    # todas las palabras del lemario
 	palabra = random.choice(palabras)
 	while palabra in registro:
 		palabra = random.choice(palabras)
