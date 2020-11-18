@@ -9,18 +9,15 @@ def leer_lemario(path):
 	result = leer_lineas(path)
 	return result
 
-# Archivo -> RegistroCompleto
-# Toma un archivo de registro y retorna un registro completo
-def leer_registro(path):
+# [String] -> RegistroCompleto
+# Toma el contenido de un archivo y construye un registro completo
+def deserializar_registro(lineas):
     sep = separador()                           # separador de valores en la entrada
-
     registro_completo = modelo.new_registro()   # crea registro de juego
+    jugador = None                              # el jugador cuyo registro estamos leyendo
 
-    # lee del archivo de registro
-    lines = leer_lineas(path)
     # itera sobre el contenido del archivo
-    jugador=None
-    for line in lines:
+    for line in lineas:
         if es_nombre_jugador(line):                             # si la linea corresponde al nombre de un jugador
             jugador = line                                          # guarda el nombre en 'jugador'
             registro_completo[jugador] = modelo.new_jugador()       # crea un RegistroJugador en el registro completo
@@ -39,6 +36,13 @@ def leer_registro(path):
             registro_completo[jugador] = registro_jugador_actualizado
 
     return registro_completo
+
+# Archivo -> RegistroCompleto
+# Toma un archivo de registro y retorna un registro completo
+def leer_registro(path):
+    # lee del archivo de registro
+    lineas = leer_lineas(path)
+    return deserializar_registro(lineas)
 
 # Archivo -> None
 # Toma un archivo y un registro completo y guarda el segundo en el primero
