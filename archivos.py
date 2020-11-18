@@ -61,7 +61,37 @@ def leer_lineas(path):
 def es_nombre_jugador(line):
     sep = separador()
     es_partida = sep in line    # si hay un separador entonces la linea determina una partida
-    return not es_partida       # si no es partida entonces es nombre de jugador 
+    return not es_partida       # si no es partida entonces es nombre de jugador
+
+# String  RegistroJugador -> [String]
+# Toma un nombre de jugador y el RegistroJugador asociado y retorna una lista con jugador
+# como cabecera y cada partida de la forma 'palabra, condicion, intentos'
+def format_registro_jugador(jugador, partidas):
+    result = list()
+    result.append(jugador)
+
+    for palabra,resultado in partidas.items():
+        val = format_partida(palabra, resultado)
+        result.append(val)
+    return val
+
+# String ResultadoPartida -> String
+# Toma una palabra y un ResultadoPartida y retorna una cadena de la forma
+# 'palabra, condicion, intentos'
+def format_partida(palabra, resultado):
+    sep = separador()
+    
+    # obtiene los valores de la tupla ResultadoPartida
+    (condicion, intentos) = resultado 
+    # construye y retorna cadena 'palabra, condicion, intentos'
+    return palabra + sep + format_condicion(condicion) + sep + str(intentos)
+
+# Boolean -> String
+# Toma una condicion de exito y retorna 'SI' o 'NO' para cada caso
+def format_condicion(condicion):
+    if condicion: return 'SI'
+    else: return 'NO'
+
 # None -> String
 # Devuelve separador para valores inline en lectura/escritura de archvos
 def separador(): return ','
