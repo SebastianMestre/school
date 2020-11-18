@@ -2,6 +2,7 @@ import random
 import sys
 
 import archivos
+import modelo
 from ahorcado_v1 import jugar
 
 
@@ -28,7 +29,7 @@ def partida(palabras, registro):
 
 	nombre = pedir_nombre()
 	if nombre not in registro:
-		registro[nombre] = dict()
+		registro[nombre] = modelo.new_jugador()
 
 	palabra = elegir_palabra(palabras, registro[nombre])
 	resultado_del_juego = jugar(palabra)
