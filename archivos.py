@@ -76,12 +76,12 @@ def es_nombre_jugador(line):
 # como cabecera y cada partida de la forma 'palabra, condicion, intentos'
 def format_registro_jugador(jugador, partidas):
     result = list()
-    result.append(jugador)
+    result.append(jugador + "\n")
 
     for palabra,resultado in partidas.items():
         val = format_partida(palabra, resultado)
-        result.append(val)
-    return val
+        result.append(val + "\n")
+    return result
 
 # String ResultadoPartida -> String
 # Toma una palabra y un ResultadoPartida y retorna una cadena de la forma
