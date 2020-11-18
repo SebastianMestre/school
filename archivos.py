@@ -11,7 +11,7 @@ def leer_lemario(path):
 
 # [String] -> RegistroCompleto
 # Toma el contenido de un archivo y construye un registro completo
-def deserializar_registro(lineas):
+def interpret_registro(lineas):
     sep = separador()                           # separador de valores en la entrada
     registro_completo = modelo.new_registro()   # crea registro de juego
     jugador = None                              # el jugador cuyo registro estamos leyendo
@@ -42,7 +42,7 @@ def deserializar_registro(lineas):
 def leer_registro(path):
     # lee del archivo de registro
     lineas = leer_lineas(path)
-    return deserializar_registro(lineas)
+    return interpret_registro(lineas)
 
 # Archivo -> None
 # Toma un archivo y un registro completo y guarda el segundo en el primero
