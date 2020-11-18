@@ -53,13 +53,16 @@ def escribir_registro(path, registro):
 # Archivo -> [String]
 # Toma un archivo y retorna las lineas del mismo normalizadas (sin separador)
 def leer_lineas(path):
-    f = open(path, "r", encoding="latin1")
-    lines = f.readlines()
-    # readlines deja un '\n' al final de cada lines asique armo un nuevo array
-	# sin el ultimo caracter de cada linea
-    lines = [line[:-1] for line in lines]
-    f.close()
-    return lines
+    try:
+        f = open(path, "r", encoding="latin1")
+        lines = f.readlines()
+        # readlines deja un '\n' al final de cada lines asique armo un nuevo array
+        # sin el ultimo caracter de cada linea
+        lines = [line[:-1] for line in lines]
+        f.close()
+        return lines
+    except:
+        return []
 
 # String -> Boolean
 # Toma una linea del archivo registro y determina si es el nombre de un jugador
