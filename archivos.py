@@ -27,7 +27,7 @@ def leer_registro(path):
         # si la linea no corresponde al nombre de un jugador entonces corresponde a una partida
         else:                                                   
             partida = line.split(sep)                       # guarda [palabra, condicion, intentos] en partida 
-            palabra = val[0]
+            palabra = partida[0]
             resultado_partida = modelo.new_partida(partida) # crea nuevo ResultadoPartida a partir del valor leido
 
             # guarda el RegistroJugador asociado a 'jugador' en 'registro_jugador'
