@@ -12,7 +12,7 @@ def leer_lemario(path):
 # Archivo -> RegistroCompleto
 # Toma un archivo de registro y retorna un registro completo
 def leer_registro(path):
-    sep = ','                                   # separador de valores en la entrada
+    sep = separador()                           # separador de valores en la entrada
 
     registro_completo = modelo.new_registro()   # crea registro de juego
 
@@ -59,6 +59,9 @@ def leer_lineas(path):
 # String -> Boolean
 # Toma una linea del archivo registro y determina si es el nombre de un jugador
 def es_nombre_jugador(line):
-    sep = ','
+    sep = separador()
     es_partida = sep in line    # si hay un separador entonces la linea determina una partida
     return not es_partida       # si no es partida entonces es nombre de jugador 
+# None -> String
+# Devuelve separador para valores inline en lectura/escritura de archvos
+def separador(): return ','
