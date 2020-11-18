@@ -11,7 +11,7 @@ def new_jugador():
     return dict()
 
 # [String] -> ResultadoPartida
-# Toma una lista del tipo [palabra, resultado, intentos] y retorna un ResultadoPartida
+# Toma una lista del tipo [palabra, condicion, intentos] y retorna un ResultadoPartida
 def new_partida(val):
     return (val[1], val[2])
 
