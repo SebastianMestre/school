@@ -19,6 +19,7 @@ def leer_registro(path):
     # lee del archivo de registro
     lines = leer_lineas(path)
     # itera sobre el contenido del archivo
+    jugador=None
     for line in lines:
         if es_nombre_jugador(line):                             # si la linea corresponde al nombre de un jugador
             jugador = line                                          # guarda el nombre en 'jugador'
