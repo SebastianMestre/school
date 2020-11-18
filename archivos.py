@@ -61,7 +61,7 @@ def leer_lineas(path):
         lines = [line[:-1] for line in lines]
         f.close()
         return lines
-    except:
+    except FileNotFoundError:
         return []
 
 # String -> Boolean
