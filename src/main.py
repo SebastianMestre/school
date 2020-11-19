@@ -5,6 +5,8 @@ import src.modelo as modelo
 from src.ahorcado_v1 import jugar
 
 
+#TODO comentar como la gente /:
+
 # () -> String
 def pedir_nombre():
 	nombre = input("Escriba su nombre...")
