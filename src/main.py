@@ -1,9 +1,9 @@
 import random
 import sys
 
-import archivos
-import modelo
-from ahorcado_v1 import jugar
+import src.archivos as archivos
+import src.modelo as modelo
+from src.ahorcado_v1 import jugar
 
 
 # () -> String
@@ -13,13 +13,19 @@ def pedir_nombre():
 
 # [String] RegistroJugador -> String
 def elegir_palabra(palabras, registro):
-    #  Esta forma de elegir es simple y da probabilidad uniforme sobre
-    # el conjunto de palabras que todavia no se jugaron.
-    #  Tiene el problema de no terminar cuando un jugador ya jugo
-    # todas las palabras del lemario
-	palabra = random.choice(palabras)
-	while palabra in registro:
-		palabra = random.choice(palabras)
+	palabras_usadas = set(registro.keys())	# toma las palabras usadas del registro y las guarda en un conjunto
+	palabras_tuple = tuple(palabras)	# crea una tupla con el lemario para poder elegir palabras aleatoriamente
+
+	if palabras <= palabras_usadas:
+		# si todas las palabras del lemario han sido utilizadas, se elige cualquiera y se sobreescribe el registro
+		palabras_usadas = {} 
+
+		# Solucion alternativa: el programa termina.
+		# sys.exit('Todas las palabras del lemario ya han sido jugadas. El juego terminara ahora.')
+	
+	palabra = random.choice(palabras_tuple)
+	while palabra in palabras_usadas:
+		palabra = random.choice(palabras_tuple)
 	return palabra
 
 # RegistroJugador String ResultadoPartida -> None
@@ -48,7 +54,6 @@ def main(camino_al_lemario, camino_al_registro):
 	if decision == "si":
 		partida(lemario, registro)
 		archivos.escribir_registro(camino_al_registro, registro)
-
 
 #--------------------------------------------------		
 # Inicia el juego

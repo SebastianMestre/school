@@ -1,13 +1,13 @@
 # Helper para manipulacion de archivos
 
-import modelo
+import src.modelo as modelo
 
 
 # Archivo -> [String]
 # Toma un archivo de lemario y retorna un lemario
 def leer_lemario(path):
 	result = leer_lineas(path)
-	return result
+	return set(result)  # usamos un conjunto para guardar el lemario
 
 # [String] -> RegistroCompleto
 # Toma el contenido de un archivo y construye un registro completo
