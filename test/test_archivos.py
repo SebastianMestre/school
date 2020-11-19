@@ -1,20 +1,22 @@
 from src.archivos import *
 from test.helper import get_content
 
+import os.path
+
 def test_leer_lemario():
-    path = r'test\lemario_sample.txt'
+    path = os.path.join("test", "lemario_sample.txt")
 
     expected_output = {'aaronico', 'aaronita', 'aba', 'ababa', 'ababillarse'}
     assert leer_lemario(path) == expected_output
 
 def test_leer_registro():
-    path = r'test\registro_sample.txt'
+    path = os.path.join("test", "registro_sample.txt")
 
     expected_output = {'Federico': {'cohete': (True, 5), 'repasador': (True, 9)}, 'Carlos': {'abecedario': (False, 8)}}
     assert leer_registro(path) == expected_output
 
 def test_escribir_registro():
-    path = r'test\blank.txt'
+    path = os.path.join("test", "blank.txt")
     
     registro = {'Federico': {'cohete': (True, 5), 'repasador': (True, 9)}, 'Carlos': {'abecedario': (False, 8)}}
     escribir_registro(path, registro)
@@ -29,7 +31,7 @@ def test_interpret_registro():
     assert interpret_registro(lineas) == expected_output
 
 def test_leer_lineas():
-    path = r'test\lemario_sample.txt'
+    path = os.path.join("test", "lemario_sample.txt")
     expected_output = ['aaronico', 'aaronita', 'aba', 'ababa', 'ababillarse']
     assert leer_lineas(path) == expected_output
 
