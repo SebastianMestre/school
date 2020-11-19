@@ -38,4 +38,6 @@ def interpret_resultado(condicion, intentos):
 def interpret_condicion(condicion):
     if condicion == 'SI': return True
     elif condicion == 'NO': return False
-    else: raise ValueError
+    else: 
+        print('\'{}\' no es un valor valido'.format(condicion))
+        raise ValueError
