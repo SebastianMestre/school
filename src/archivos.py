@@ -62,6 +62,7 @@ def leer_lineas(path):
         lines = f.readlines()
         # readlines deja un '\n' al final de cada lines asique armo un nuevo array
         # sin el ultimo caracter de cada linea
+		# el archivo debera tener siempre la ultima linea en blanco
         lines = [line[:-1] for line in lines]
         f.close()
         return lines
