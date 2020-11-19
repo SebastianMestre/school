@@ -22,8 +22,8 @@ def agregar_partida(registro_jugador, palabra, resultado_partida):
     registro_jugador[palabra] = resultado_partida
     return registro_jugador
 
-# (String, String) -> ResultadoPartida
-# Toma una tupla ('condicion', 'intentos') y retorna un ResultadoPartida
+# String String -> ResultadoPartida
+# Toma dos valores 'condicion', 'intentos' y retorna un ResultadoPartida
 def interpret_resultado(condicion, intentos):
     try:
         intentos = int(intentos)
