@@ -9,6 +9,23 @@ def leer_lemario(path):
 	result = leer_lineas(path)
 	return set(result)  # usamos un conjunto para guardar el lemario
 
+# Archivo -> RegistroCompleto
+# Toma un archivo de registro y retorna un registro completo
+def leer_registro(path):
+    # lee del archivo de registro
+    lineas = leer_lineas(path)
+    return interpret_registro(lineas)
+
+# Archivo -> None
+# Toma un archivo y un registro completo y guarda el segundo en el primero
+def escribir_registro(path, registro):
+    f = open(path, 'w', encoding="latin1")
+    for jugador,partidas in registro.items():
+        lines = format_registro_jugador(jugador, partidas)  # formatea registro
+        f.writelines(lines)                                 # guarda registro en el archivo
+    f.close()
+    return
+
 # [String] -> RegistroCompleto
 # Toma el contenido de un archivo y construye un registro completo
 def interpret_registro(lineas):
@@ -36,23 +53,6 @@ def interpret_registro(lineas):
             registro_completo[jugador] = registro_jugador_actualizado
 
     return registro_completo
-
-# Archivo -> RegistroCompleto
-# Toma un archivo de registro y retorna un registro completo
-def leer_registro(path):
-    # lee del archivo de registro
-    lineas = leer_lineas(path)
-    return interpret_registro(lineas)
-
-# Archivo -> None
-# Toma un archivo y un registro completo y guarda el segundo en el primero
-def escribir_registro(path, registro):
-    f = open(path, 'w', encoding="latin1")
-    for jugador,partidas in registro.items():
-        lines = format_registro_jugador(jugador, partidas)  # formatea registro
-        f.writelines(lines)                                 # guarda registro en el archivo
-    f.close()
-    return
 
 # Archivo -> [String]
 # Toma un archivo y retorna las lineas del mismo normalizadas (sin separador)
