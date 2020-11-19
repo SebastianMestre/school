@@ -7,7 +7,11 @@ import src.modelo as modelo
 # Toma un archivo de lemario y retorna un lemario
 def leer_lemario(path):
 	result = leer_lineas(path)
-	return set(result)  # usamos un conjunto para guardar el lemario
+	if result:			# chequea que el resultado no este vacio 
+		return set(result)  # usamos un conjunto para guardar el lemario
+	else:
+		print('El lemario no existe o se encuentra vacio')
+		raise FileNotFoundError
 
 # Archivo -> RegistroCompleto
 # Toma un archivo de registro y retorna un registro completo
