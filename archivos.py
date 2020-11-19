@@ -47,7 +47,7 @@ def leer_registro(path):
 # Archivo -> None
 # Toma un archivo y un registro completo y guarda el segundo en el primero
 def escribir_registro(path, registro):
-    f = open(path, 'w')
+    f = open(path, 'w', encoding="latin1")
     for jugador,partidas in registro.items():
         lines = format_registro_jugador(jugador, partidas)  # formatea registro
         f.writelines(lines)                                 # guarda registro en el archivo
