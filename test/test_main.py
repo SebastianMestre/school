@@ -20,5 +20,18 @@ def test_elegir_palabra():
 		elegir_palabra(palabras, registro)
 
 def test_preparar_partida():
-	# TODO
-	assert True
+	palabras = set(['cohete', 'repasador'])
+	registro = {'Sebas': {'repasador': (False, 10)}}
+
+	# agrega un jugador que no esta al registro
+	preparar_partida('Santi', palabras, registro)
+
+	expected_output = {'Santi': {}, 'Sebas': {'repasador': (False, 10)}}
+	assert registro == expected_output
+
+	registro = {'Santi': {'cohete': (True, 5), 'repasador': (True, 9)}, 'Sebas': {'repasador': (False, 10)}}
+
+	# limpia el registro de un jugador si ya jugo todas las palabras
+	preparar_partida('Santi', palabras, registro)
+	expected_output = {'Santi': {}, 'Sebas': {'repasador': (False, 10)}}
+	assert registro == expected_output
