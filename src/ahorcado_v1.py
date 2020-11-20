@@ -47,7 +47,7 @@ def esLetra1(letra):
 	try:
 		ord(letra)		#Transforma un caracter en su correspondiente código Unicode.
 	except TypeError:
-		print("Excepción en esLetra1: No es un caracter.")  #Si el elemento ingresado no es un caracter, captura la excepción.
+		print("Excepción en esLetra1: No es un caracter.\n")  #Si el elemento ingresado no es un caracter, captura la excepción.
 		return False
 	
 	#Determina si el código corresponde a un caracter
@@ -65,7 +65,7 @@ def esLetra2(letra):
 	try:
 		return letra in abc
 	except TypeError:
-		print("Excepción en esLetra2: No es un caracter.")
+		print("Excepción en esLetra2: No es un caracter.\n")
 		return False
 #--------------------------------------------------
 		
