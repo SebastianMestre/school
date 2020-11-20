@@ -47,7 +47,7 @@ def preparar_partida(nombre, palabras, registro):
 		#   Notar que, como la lista de palabras no esta vacia, elegir_palabra
 		# siempre devuelve una palabra despues de limpiar el registro del jugador
 		registro[nombre] = modelo.new_jugador()
-		palabra = elegir_palabra(palabras, registro[jugador])
+		palabra = elegir_palabra(palabras, registro[nombre])
 	
 	return palabra
 
