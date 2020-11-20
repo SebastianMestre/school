@@ -5,9 +5,8 @@ import src.modelo as modelo
 from src.ahorcado_v1 import jugar
 
 
-#TODO comentar como la gente /:
-
 # () -> String
+# Pide el nombre del jugador por consola
 def pedir_nombre():
 	nombre = input("Escriba su nombre...")
 	return nombre
@@ -53,20 +52,21 @@ def preparar_partida(nombre, palabras, registro):
 	return palabra
 
 # RegistroJugador String ResultadoPartida -> None
-# Muta el registro
+# Muta el registro: agrega nueva partida al registro del jugador
 def actualizar_registro(registro, palabra, resultado_del_juego):
 	registro[palabra] = resultado_del_juego
 
 
 # String [String] RegistroCompleto -> None
-# Muta el registro
+# Muta el registro: da comienzo a una partida y inicializa/actualiza el registro del jugador
 def partida(nombre, palabras, registro):
 	palabra = preparar_partida(nombre, palabras, registro)
 	resultado_del_juego = jugar(palabra)
 	actualizar_registro(registro[nombre], palabra, resultado_del_juego)
 
 # Archivo Archivo -> None
-# Hace E/S con archivos
+# Funcion principal del juego. Hace E/S salida con archivos, toma input del jugador por consola
+# y da comienzo al juego
 def main(camino_al_lemario, camino_al_registro):
 	lemario = archivos.leer_lemario(camino_al_lemario)
 	registro = archivos.leer_registro(camino_al_registro)

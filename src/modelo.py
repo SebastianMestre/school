@@ -29,7 +29,7 @@ def interpret_resultado(condicion, intentos):
         intentos = int(intentos)
         condicion = interpret_condicion(condicion)      # interpreta condicion
     except ValueError:
-        print('Error en la entrada para el ResultadoPartida')
+        print('Error en la entrada para el ResultadoPartida\n')
         raise
     return (condicion, intentos)
 

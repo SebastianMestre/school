@@ -10,7 +10,7 @@ def leer_lemario(path):
 	if result:			# chequea que el resultado no este vacio 
 		return set(result)  # usamos un conjunto para guardar el lemario
 	else:
-		print('El lemario no existe o se encuentra vacio')
+		print('El lemario no existe o se encuentra vacio\n')
 		raise FileNotFoundError
 
 # Archivo -> RegistroCompleto
