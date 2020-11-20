@@ -7,7 +7,7 @@ try:
     lemario = sys.argv[1]
 except IndexError:
     # si no fue pasado ningun argumento se termina el programa 
-    sys.exit('Error: deben ingresarse la ubicacion de los archivos \'lemario\' y \'registro\' al correr el programa')
+    sys.exit('Error: debe ingresarse la ubicacion de los archivos \'lemario\' y \'registro\' al correr el programa')
 
 # intentamos leer el el argumento que corresponde al lemario
 try:
