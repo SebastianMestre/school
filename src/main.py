@@ -11,7 +11,7 @@ def pedir_nombre():
 	nombre = input("Escriba su nombre...")
 	return nombre
 
-# [String] RegistroJugador -> String
+# Set(String) RegistroJugador -> String
 # Toma una lista de palabras y un registro de jugador, y elije una palabra no jugada.
 # En caso de haberse utilizado todas las palabras, eleva un ValueError
 def elegir_palabra(palabras, registro):
@@ -29,7 +29,7 @@ def elegir_palabra(palabras, registro):
 		palabra = random.choice(palabras_tuple)
 	return palabra
 
-# String [String] RegistroCompleto -> String
+# String Set(String) RegistroCompleto -> String
 # Prepara el registro apropiadamente, y garantiza la eleccion de una palabra para jugar
 # Asume que la lista de palabras no esta vacia
 def preparar_partida(nombre, palabras, registro):
@@ -57,7 +57,7 @@ def actualizar_registro(registro, palabra, resultado_del_juego):
 	registro[palabra] = resultado_del_juego
 
 
-# String [String] RegistroCompleto -> None
+# String Set(String) RegistroCompleto -> None
 # Muta el registro: da comienzo a una partida y inicializa/actualiza el registro del jugador
 def partida(nombre, palabras, registro):
 	palabra = preparar_partida(nombre, palabras, registro)

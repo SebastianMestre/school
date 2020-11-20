@@ -3,7 +3,7 @@
 import src.modelo as modelo
 
 
-# Archivo -> [String]
+# Archivo -> Set(String)
 # Toma un archivo de lemario y retorna un lemario
 def leer_lemario(path):
 	result = leer_lineas(path)
