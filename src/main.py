@@ -14,44 +14,56 @@ def pedir_nombre():
 
 # [String] RegistroJugador -> String
 # Toma una lista de palabras y un registro de jugador, y elije una palabra no jugada.
-# En caso de haberse utilizado todas las palabras, se retorna una cadena vacia ''
+# En caso de haberse utilizado todas las palabras, eleva un ValueError
 def elegir_palabra(palabras, registro):
 	palabras_usadas = set(registro.keys())	# toma las palabras usadas del registro y las guarda en un conjunto
 	palabras_tuple = tuple(palabras)	# crea una tupla con el lemario para poder elegir palabras aleatoriamente
 
+	# si todas las palabras del lemario han sido utilizadas, elevamos un error
 	if palabras <= palabras_usadas:
-		# si todas las palabras del lemario han sido utilizadas, retornamos ''
-		return ''
+		raise ValueError
 		# Solucion alternativa: el programa termina.
 		# sys.exit('Todas las palabras del lemario ya han sido jugadas. El juego terminara ahora.')
-	else:
+
+	palabra = random.choice(palabras_tuple)
+	while palabra in palabras_usadas:
 		palabra = random.choice(palabras_tuple)
-		while palabra in palabras_usadas:
-			palabra = random.choice(palabras_tuple)
-		return palabra
+	return palabra
+
+# String [String] RegistroCompleto -> String
+# Prepara el registro apropiadamente, y garantiza la eleccion de una palabra para jugar
+# Asume que la lista de palabras no esta vacia
+def preparar_partida(nombre, palabras, registro):
+	if len(palabras) == 0:
+		raise ValueError
+
+	if nombre not in registro:
+		registro[nombre] = modelo.new_jugador()
+
+	try:
+		palabra = elegir_palabra(palabras, registro[nombre])
+	except ValueError:
+		#  No quedan palabras por jugar: vaciamos el registro del jugador y
+		# volvemos a elegir una palabra
+		#   Notar que, como la lista de palabras no esta vacia, elegir_palabra
+		# siempre devuelve una palabra despues de limpiar el registro del jugador
+		registro[nombre] = modelo.new_jugador()
+		palabra = elegir_palabra(palabras, registro[jugador])
+	
+	return palabra
 
 # RegistroJugador String ResultadoPartida -> None
 # Muta el registro
 def actualizar_registro(registro, palabra, resultado_del_juego):
 	registro[palabra] = resultado_del_juego
 
+
 # String [String] RegistroCompleto -> None
 # Muta el registro
 def partida(nombre, palabras, registro):
-
-	if nombre not in registro:
-		registro[nombre] = modelo.new_jugador()
-
-	palabra = elegir_palabra(palabras, registro[nombre])
-	# si la cadena no esta vacia, damos comienzo al juego
-	if palabra:
-		resultado_del_juego = jugar(palabra)
-		actualizar_registro(registro[nombre], palabra, resultado_del_juego)
-	# si no es asi, entonces no quedan palabras por jugar
-	# en ese caso, vaciamos el registro del jugador y llamamos de nuevo a la funcion
-	else:
-		registro[nombre] = modelo.new_jugador()
-		partida(nombre, palabras, registro)	
+	palabra = preparar_partida(nombre, palabras, registro)
+	resultado_del_juego = jugar(palabra)
+	actualizar_registro(registro[nombre], palabra, resultado_del_juego)
 
 # Archivo Archivo -> None
 # Hace E/S con archivos
