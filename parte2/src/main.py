@@ -1,10 +1,62 @@
 import copy
+import random
 
 import src.archivos as archivos
 
+def tiene_repeticiones(dimension, tablero, palabras):
+	return False
+
+def recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x, y):
+	# si nos fuimos por abajo, ya terminamos
+	if y >= dimension:
+		if tiene_repeticiones(dimension, tablero, palabras):
+			return None
+		else:
+			return tablero
+
+	# si nos fuimos por el costado, pasamos a la siguiente fila
+	if x >= dimension:
+		return recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, 0, y+1)
+
+	# si la posicion actual ya esta rellena, pasamos a la siguiente
+	if tablero[x][y] != '?':
+		return recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x+1, y)
+
+	opciones = list("abcdefghijklmnopqrstuvwxyz")
+	random.shuffle(opciones)
+
+	for letra in opciones:
+		tablero[x][y] = letra
+		resultado = recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x+1, y)
+		if resultado == None:
+			continue
+		else:
+			return resultado
+
+	return None
+
+def rellenar_posiciones_vacias(dimension, tablero, palabras):
+	return recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, 0, 0)
+
+# recursion_sopa_de_letras : Int Tablero [PalabrasConDireccion] Int -> (Tablero | None)
+# Toma un tablero incompleto y le agrega las palabras en la lista dada, a partir
+# del indice dado.
+# Una vez hecho esto, rellena los lugares vacios con caracteres aleatorios,
+# evitando repetir palabras de la sopa de letras.
+# Si esto no es posible, devuelve None
+#
+# Terminacion:
+# En cada llamada recursiva sumamos 1 a indice, hasta que alcanza la longitud de
+# la lista de palabras, por lo que la profundidad de la recursion esta acotada.
+# Dentro de la funcion, iteramos hasta dimension dos veces, de forma anidada, y
+# dentro de esta iteracion, iteramos por cada letra de una palabra. Todas estas
+# cosas estan acotadas, por lo que la iteracion en si esta acotada.
+# Entonces, la funcion termina.
 def recursion_sopa_de_letras(dimension, tablero, palabras, indice):
-	if indice == len(palabras):
-		return tablero
+	if indice >= len(palabras):
+		# esto significa que logramos posicionar todas las palabras. Ahora
+		# pasamos a rellenar las posiciones vacias.
+		return rellenar_posiciones_vacias(dimension, tablero, palabras)
 
 	# Estas listas indican la diferencia de posicion entre letras consecutivas
 	# de una palabra en la sopa de letras, dependiendo de la direccion
@@ -55,9 +107,8 @@ def recursion_sopa_de_letras(dimension, tablero, palabras, indice):
 			if not posible:
 				continue
 
-			# si resulta ser viable, llegamos a este punto, e intentamos poner
-			# mas palabras sobre el tablero.
-
+			# si resulta ser viable, intentamos poner la siguiente palabra sobre
+			# el tablero. (indicamos esto sumando 1 al indice)
 			resultado = recursion_sopa_de_letras(dimension, mi_tablero, palabras, indice+1)
 
 			# Si recibimos un tablero, entonces es posible posicionar todas las
