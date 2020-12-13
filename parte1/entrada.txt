@@ -1,0 +1,10 @@
+8
+maria 1
+cohete 2
+tela 0
+cohete 2
+fibron 3
+monitor 0
+monitor 1
+pepito 4
+BASTA
