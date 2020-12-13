@@ -6,5 +6,4 @@ cohete 2
 fibron 3
 monitor 0
 monitor 1
-pepito 4
 BASTA
