@@ -1,4 +1,5 @@
 import random
+import sys
 
 import src.archivos as archivos
 import src.generar as generar
@@ -35,4 +36,7 @@ def main(camino_lemario, camino_entrada, camino_salida):
 	(dimension, palabras) = archivos.leer_entrada(camino_entrada)
 	palabras_validas = validar_entrada(dimension, lemario, palabras)
 	sopa_de_letras = generar.generar_sopa_de_letras(dimension, palabras_validas)
-	archivos.escribir_sopa_de_letras(camino_salida, sopa_de_letras)
+	if sopa_de_letras == None:
+		sys.exit("No se puede generar una sopa de letras de las caracteristicas pedidas")
+	else:
+		archivos.escribir_sopa_de_letras(camino_salida, sopa_de_letras)
