@@ -26,6 +26,13 @@ Luego, toma palabras seguidas de un entero, hasta que se ingresa la cadena 'BAST
 
 Finalmente, escribe la salida al archivo `salida`
 
+### Tests
+
+Los tests se encuentran en el subdirectorio `parte1/test/`. Para correrlos, se
+deben compilar usando `cd parte1/test; cc main.c ../src/implementacion.c -o tests`
+(O simplemente `cd parte1/test; make` si se esta en Linux o WSL). Luego, se
+pueden correr con `./tests`
+
 ## Programa en Python
 
 ### Instrucciones
@@ -41,4 +48,4 @@ Lee la informacion necesaria y luego escribe la sopa de letras al archivo indica
 ### Tests
 
 los tests se encuentran en el subdirectorio `parte2/test/`. Para correr los
-tests, se debe correr PyTest en el subdirectorio `parte2/`.
+tests, se debe correr PyTest en el subdirectorio `parte2/`. (`cd parte2; python3 -m pytest`)
