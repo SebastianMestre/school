@@ -116,38 +116,43 @@ def recursion_sopa_de_letras(dimension, tablero, palabras, indice):
 
 	(palabra, direccion) = palabras[indice]
 
-	# probamos todas las posiciones iniciales para una palabra
+	posiciones = []
 	for x0 in range(dimension):
 		for y0 in range(dimension):
+			posiciones.append((x0, y0))
 
-			dx, dy = direcciones[direccion]
+	random.shuffle(posiciones)
 
-			# Si la palabra se sale del tablero, no la podemos poner en este lugar
-			if not palabra_entra_en_tablero(dimension, palabra, x0, y0, dx, dy):
-				continue
+	# probamos todas las posiciones iniciales para una palabra
+	for x0, y0 in posiciones:
+		dx, dy = direcciones[direccion]
 
-			# ahora, vamos a intentar escribir la palabra sobre el tablero.
+		# Si la palabra se sale del tablero, no la podemos poner en este lugar
+		if not palabra_entra_en_tablero(dimension, palabra, x0, y0, dx, dy):
+			continue
 
-			# primero copiamos el tablero para evitar sobreescribir los datos
-			# que vamos a necesitar al intentar usar otra posicion inicial
-			mi_tablero = copy.deepcopy(tablero)
+		# ahora, vamos a intentar escribir la palabra sobre el tablero.
 
-			# vemos si es posible poner la palabra en el tablero
-			posible = escanear(mi_tablero, palabra, x0, y0, dx, dy)
+		# primero copiamos el tablero para evitar sobreescribir los datos
+		# que vamos a necesitar al intentar usar otra posicion inicial
+		mi_tablero = copy.deepcopy(tablero)
 
-			# si vemos que la posicion que elegimos no es viable, pasamos a la
-			# siguiente posibilidad
-			if not posible:
-				continue
+		# vemos si es posible poner la palabra en el tablero
+		posible = escanear(mi_tablero, palabra, x0, y0, dx, dy)
 
-			# si resulta ser viable, ponemos la palabra sobre el tablero, y
-			# pasamos a la siguiente palabra. (haciendo recursion en indice+1)
-			escribir(mi_tablero, palabra, x0, y0, dx, dy)
-			resultado = recursion_sopa_de_letras(dimension, mi_tablero, palabras, indice+1)
+		# si vemos que la posicion que elegimos no es viable, pasamos a la
+		# siguiente posibilidad
+		if not posible:
+			continue
 
-			# Si recibimos un tablero, entonces es posible armar una sopa completa
-			if resultado != None:
-				return resultado
+		# si resulta ser viable, ponemos la palabra sobre el tablero, y
+		# pasamos a la siguiente palabra. (haciendo recursion en indice+1)
+		escribir(mi_tablero, palabra, x0, y0, dx, dy)
+		resultado = recursion_sopa_de_letras(dimension, mi_tablero, palabras, indice+1)
+
+		# Si recibimos un tablero, entonces es posible armar una sopa completa
+		if resultado != None:
+			return resultado
 
 	return None
 
