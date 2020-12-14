@@ -3,16 +3,63 @@ import random
 
 import src.archivos as archivos
 
-def tiene_repeticiones(dimension, tablero, palabras):
-	return False
+def palabra_entra_en_tablero(dimension, palabra, x0, y0, dx, dy):
+	x1 = x0 + (len(palabra) - 1) * dx
+	y1 = y0 + (len(palabra) - 1) * dy
+	return x1 >= 0 and x1 < dimension and y1 >= 0 and y1 < dimension
+
+def es_palindromo(palabra):
+	return palabra == palabra[::-1]
+
+def escanear(tablero, palabra, x, y, dx, dy):
+	for letra in palabra:
+		if tablero[y][x] != letra and tablero[y][x] != '?':
+			return False
+		x += dx
+		y += dy
+	return True
+
+def escribir(tablero, palabra, x, y, dx, dy):
+	for letra in palabra:
+		tablero[y][x] = letra
+		x += dx
+		y += dy
+
+def es_tablero_valido(dimension, tablero, palabras):
+	for palabra, direccion in palabras:
+		palabra_es_palindromo = es_palindromo(palabra)
+
+		direcciones = [(1,0), (-1,0), (0,1), (0,-1), (1,1), (1,-1)]
+		apariciones_por_direccion = [0, 0, 0, 0, 0, 0]
+
+		for i, (dx, dy) in enumerate(direcciones):
+			for x0 in range(dimension):
+				for y0 in range(dimension):
+					if not palabra_entra_en_tablero(dimension, palabra, x0, y0, dx, dy):
+						continue
+					apariciones_por_direccion[i] += escanear(tablero, palabra, x0, y0, dx, dy)
+
+		if apariciones_por_direccion[direccion] != 1:
+			return False
+
+		if palabra_es_palindromo:
+			apariciones_por_direccion[1] = 0
+			apariciones_por_direccion[3] = 0
+
+		apariciones_totales = sum(apariciones_por_direccion)
+
+		if apariciones_totales != 1:
+			return False
+
+	return True
 
 def recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x, y):
 	# si nos fuimos por abajo, ya terminamos
 	if y >= dimension:
-		if tiene_repeticiones(dimension, tablero, palabras):
-			return None
-		else:
+		if es_tablero_valido(dimension, tablero, palabras):
 			return tablero
+		else:
+			return None
 
 	# si nos fuimos por el costado, pasamos a la siguiente fila
 	if x >= dimension:
