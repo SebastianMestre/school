@@ -13,10 +13,17 @@ def palabra_entra_en_tablero(dimension, palabra, x0, y0, dx, dy):
 def es_palindromo(palabra):
 	return palabra == palabra[::-1]
 
-def escanear(tablero, palabra, x, y, dx, dy):
+# escanear : [[String]] String Int Int Int Int Bool -> Bool
+# Responde si una palabra aparece desde la posicion dada, en la direccion dada.
+# Opcionalemente, permite huecos. Osea, considera que una palabra aparece en la
+# posicion dada inculso si algunas letras no estan puestas.
+def escanear(tablero, palabra, x, y, dx, dy, permitir_huecos=False):
 	for letra in palabra:
-		if tablero[y][x] != letra and tablero[y][x] != '?':
-			return False
+		if tablero[y][x] != letra:
+			if not permitir_huecos:
+				return False
+			elif tablero[y][x] != '?':
+				return False
 		x += dx
 		y += dy
 	return True
@@ -69,23 +76,23 @@ def recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x, y):
 		return recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, 0, y+1)
 
 	# si la posicion actual ya esta rellena, pasamos a la siguiente
-	if tablero[x][y] != '?':
+	if tablero[y][x] != '?':
 		return recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x+1, y)
 
 	opciones = list("abcdefghijklmnopqrstuvwxyz")
 	random.shuffle(opciones)
 
 	for letra in opciones:
-		tablero[x][y] = letra
+		tablero[y][x] = letra
 		resultado = recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, x+1, y)
-		if resultado == None:
-			continue
-		else:
+		if resultado != None:
 			return resultado
 
 	return None
 
 def rellenar_posiciones_vacias(dimension, tablero, palabras):
+	if not es_tablero_valido(dimension, tablero, palabras):
+		return None
 	return recursion_rellenar_posiciones_vacias(dimension, tablero, palabras, 0, 0)
 
 # recursion_sopa_de_letras : Int Tablero [PalabrasConDireccion] Int -> (Tablero | None)
@@ -138,7 +145,7 @@ def recursion_sopa_de_letras(dimension, tablero, palabras, indice):
 		mi_tablero = copy.deepcopy(tablero)
 
 		# vemos si es posible poner la palabra en el tablero
-		posible = escanear(mi_tablero, palabra, x0, y0, dx, dy)
+		posible = escanear(mi_tablero, palabra, x0, y0, dx, dy, True)
 
 		# si vemos que la posicion que elegimos no es viable, pasamos a la
 		# siguiente posibilidad
