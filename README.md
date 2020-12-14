@@ -16,6 +16,8 @@ Alternativamente, usando Linux o WSL:
 
 ## Programa en C
 
+### Instrucciones
+
 El programa no toma argumentos por linea de comando.
 
 Al iniciar, lee un entero por entrada estandar (la dimension).
@@ -26,8 +28,17 @@ Finalmente, escribe la salida al archivo `salida`
 
 ## Programa en Python
 
-El programa toma 3 (tres) argumentos por linea de comando. Estos son: camino al lemario, camino a la entrada (la salida del programa anterior), camino a la salida (alli se guardara la sopa de letras)
+### Instrucciones
+
+El programa toma 3 (tres) argumentos por linea de comando. Estos son: camino al
+lemario, camino a la entrada (la salida del programa anterior), camino a la
+salida (alli se guardara la sopa de letras)
 
 Lee la informacion necesaria y luego escribe la sopa de letras al archivo indicado.
 
 (se puede encontrar informacion sobre el modelo de datos en `parte2/modelo.txt`)
+
+### Tests
+
+los tests se encuentran en el subdirectorio `parte2/test/`. Para correr los
+tests, se debe correr PyTest en el subdirectorio `parte2/`.
