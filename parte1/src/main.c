@@ -23,6 +23,12 @@ int leer_int() {
 	return resultado;
 }
 
+void hacer_minuscula(char* str) {
+	for (; *str; ++str)
+		*str = tolower(*str);
+}
+
+
 // Almacena una palabra y su orientacion en la sopa de letras
 // la direccion indica lo siguiente:
 // 0 : horizontal de izquierda a derecha
@@ -56,6 +62,8 @@ bool palabras_iguales(char* s1, char* s2) {
 	bool eq_f = true;
 	bool eq_r = true;
 	for (int i = n; i--;) {
+		// aca usamos tolower por las dudas. Realmente no hace falta porque
+		// pasamos los strings a minusculas cuando se ingresan
 		char c1 = tolower(s1[i]);
 		char c2f = tolower(s2[i]);
 		char c2r = tolower(s2[n-1-i]);
@@ -102,9 +110,11 @@ int main() {
 	while (1) {
 		char* palabra = leer_palabra();
 
-		// TODO: deberia usar una comparacion mas floja?
+		// quizas una comparacion mas debil seria mejor?
 		if (strcmp(palabra, "BASTA") == 0)
 			break;
+
+		hacer_minuscula(palabra);
 
 		int direccion = leer_int();
 
