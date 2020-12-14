@@ -4,21 +4,24 @@
 #include <string.h>
 #include <ctype.h>
 
+// leer_palabra : () -> String
 // lee una palabra desde la entrada estandar
 char* leer_palabra() {
-	// TODO: soportar distintos largos de palabra con menos desperdicio
+	// esto es medio feo porque se rompe con strings muy grandes y desperdicia
+	// espacio para strings chicos, pero la solucion a eso es molesta y creo que
+	// no hace falta para este TP
 	char* buffer = malloc(100);
-	scanf("%s", buffer);
+	scanf("%99s", buffer);
 	return buffer;
 }
 
+// leer_int : () -> Int
 // lee un entero desde la entrada estandar
 int leer_int() {
 	int resultado;
 	scanf("%d", &resultado);
 	return resultado;
 }
-
 
 // Almacena una palabra y su orientacion en la sopa de letras
 // la direccion indica lo siguiente:
@@ -40,7 +43,6 @@ struct lista {
 };
 
 // palabras_iguales : String String -> Bool
-//
 // Responde si dos palabras son iguales, ignorando mayusculas y orientacion
 // Ejemplos:
 // "SEBASTIAN" es igual a    "sebastian"
@@ -63,6 +65,7 @@ bool palabras_iguales(char* s1, char* s2) {
 	return eq_f || eq_r;
 }
 
+// lista_insertar! : Lista** PalabraConDireccion -> ()
 // inserta una palabra con direccion a una lista enlazada
 void lista_insertar(struct lista** cabeza, struct palabra_con_direccion datos) {
 	struct lista* nuevo_nodo = malloc(sizeof(struct lista));
@@ -71,6 +74,7 @@ void lista_insertar(struct lista** cabeza, struct palabra_con_direccion datos) {
 	*cabeza = nuevo_nodo;
 }
 
+// lista_contiene_palabra : Lista* String -> Bool
 // responde si una lista contiene una palabra, ignorando mayusculas y direccion
 bool lista_contiene_palabra(struct lista* cabeza, char* palabra) {
 	for (struct lista* it = cabeza; it; it = it->siguiente)
@@ -79,6 +83,7 @@ bool lista_contiene_palabra(struct lista* cabeza, char* palabra) {
 	return false;
 }
 
+// lista_liberar! : Lista* -> ()
 // libera la memoria de una lista, y los strings que contiene
 void lista_liberar(struct lista* cabeza) {
 	while (cabeza) {

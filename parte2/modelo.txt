@@ -1,8 +1,10 @@
-=== Modelo de datos ===
+==== Modelo de datos ===========================================================
 
-representamos una palabra usando un String
+Representamos una palabra usando un String
 
-representamos una palabra con direccion usando una tupla (String, Int). El entero representa la direccion tal como se describe en el enunciado del trabajo. Eso es, siguiendo la siguiente condicion:
+Representamos una palabra con direccion usando una tupla (String, Int). El
+entero representa la direccion tal como se describe en el enunciado del trabajo.
+Eso es, siguiendo la siguiente condicion:
 
  - 0 horizontal hacia la derecha
  - 1 horizontal hacia la izquierda
@@ -10,3 +12,13 @@ representamos una palabra con direccion usando una tupla (String, Int). El enter
  - 3 vertical hacia arriba
  - 4 diagonal hacia la derecha y abajo
  - 5 diagonal hacia la derecha y arriba
+
+Representamos el tablero de una sopa de letras con una lista de listas de
+caracteres (todas estas de igual longitud, igual a la dimension de la sopa).
+Marcamos las casillas cuyo contenido todavia no fue determinado con un signo de
+pregunta ('?'). El tipo de dato es List(List(String)).
+
+Frecuentemente usamos dos enteros para representar una posicion en el tablero.
+
+Frecuentemente usamos dos enteros para representar una diferencia entre
+posiciones en el tablero. (tambien se puede pensar como una direccion)

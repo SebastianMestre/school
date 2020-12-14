@@ -29,6 +29,7 @@ def parse_palabra_con_direccion(linea):
 
 def escribir_sopa_de_letras(camino, sopa):
 	f = open(camino, 'w')
+	f.write("Sopa De Letras\n")
 	lineas = [''.join(fila) + '\n' for fila in sopa]
 	f.writelines(lineas)
 	f.close()
