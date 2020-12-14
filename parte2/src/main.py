@@ -14,16 +14,18 @@ def validar_entrada(dimension, lemario, palabras):
 	palabras_validas = set()
 	palabras_dirigidas_validas = []
 
+
 	for palabra, direccion in palabras:
 		eleccion = palabra
 		# decimos que una palabra es invalida si es demasiado larga, o esta repetida
 		# si esta repetida, mantenemos la primera aparicion, el resto son reemplazadas
-		if len(palabra) > dimension or palabra in palabras_validas:
+		# supongo que una palabra que no esta en el lemario no se considera valida (?)
+		if len(palabra) > dimension or palabra in palabras_validas or palabra not in lemario:
 			eleccion = random.choice(lemario)
 			# al elegir palabras aleatorias, agregamos la condicion de que la
 			# palabra no este en la entrada, para evitar elegirla en este bucle
 			# y posiblemente selecionarla con una direccion distinta
-			while len(eleccion) > dimension or eleccion in palabras_validas or eleccion in palabras_sin_validar:
+			while len(eleccion) > dimension or eleccion in palabras_validas or eleccion not in lemario or eleccion in palabras_sin_validar:
 				eleccion = random.choice(lemario)
 
 		palabras_validas.add(eleccion)
