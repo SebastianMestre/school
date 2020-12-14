@@ -4,6 +4,9 @@ import src.archivos as archivos
 import src.generar as generar
 
 # validar_entrada : Int [String] [(String, Int)] -> [(String, Int)]
+# Devuelve una lista de palabras con direccion, reemplazando las palabras
+# demasiado largas o repetidas con palabras aleatorias del lemario.
+# Mantiene las direcciones.
 def validar_entrada(dimension, lemario, palabras):
 	palabras_sin_validar = set([palabra for palabra, direccion in palabras])
 
