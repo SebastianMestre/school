@@ -32,8 +32,9 @@ int const largo_strings_fijos[CANT_STRINGS_FIJOS] = { 5, 6, 7, 8 };
 char const* const strings_fijos[CANT_STRINGS_FIJOS] = { "salir", "cargar", "evaluar", "imprimir" };
 TokenTag const token_strings_fijos[CANT_STRINGS_FIJOS] = { T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
 
-// TODO: recibir tabla de operadores para reconocerlos
-Tokenizado tokenizar(char const* str) {
+Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
+	// TODO: reconocer operadores
+
 	while (isspace(*str))
 		str += 1;
 
@@ -90,11 +91,9 @@ typedef struct {
 	void* expresion; // TODO reemplazar por Expresion*
 } Parseado;
 
-// TODO: recibir tabla de operadores para reconocerlos
-Parseado parsear(char const* str) {
-	Tokenizado tokenizado = tokenizar(str);
+Parseado parsear(char const* str, TablaOps* tabla_ops) {
+	Tokenizado tokenizado = tokenizar(str, tabla_ops);
 
-	// TODO: parsear
 	switch (tokenizado.tag) {
 	case T_SALIR:
 		return (Parseado){E_SALIR};
@@ -103,7 +102,7 @@ Parseado parsear(char const* str) {
 	case T_EVALUAR:
 		break;
 		str = tokenizado.resto;
-		tokenizado = tokenizar(str);
+		tokenizado = tokenizar(str, tabla_ops);
 		if (tokenizado.tag != T_NOMBRE)
 			return (Parseado){E_INVALIDO, str};
 		return (Parseado){E_EVALUAR, tokenizado.resto, tokenizado.inicio, tokenizado.valor};
@@ -111,7 +110,7 @@ Parseado parsear(char const* str) {
 
 	case T_IMPRIMIR:
 		str = tokenizado.resto;
-		tokenizado = tokenizar(str);
+		tokenizado = tokenizar(str, tabla_ops);
 		if (tokenizado.tag != T_NOMBRE)
 			return (Parseado){E_INVALIDO, str};
 		return (Parseado){E_IMPRIMIR, tokenizado.resto, tokenizado.inicio, tokenizado.valor};
@@ -122,12 +121,12 @@ Parseado parsear(char const* str) {
 		int alias_n = tokenizado.valor;
 
 		str = tokenizado.resto;
-		tokenizado = tokenizar(str);
+		tokenizado = tokenizar(str, tabla_ops);
 		if (tokenizado.tag != T_IGUAL)
 			return (Parseado){E_INVALIDO, str};
 
 		str = tokenizado.resto;
-		tokenizado = tokenizar(str);
+		tokenizado = tokenizar(str, tabla_ops);
 		if (tokenizado.tag != T_CARGAR)
 			return (Parseado){E_INVALIDO, str};
 
@@ -197,12 +196,12 @@ void cargar(Entorno* entorno, char const* alias, int alias_n, void* expresion) {
 	// TODO
 }
 
-void interpretar(TablaOps* tabla) {
+void interpretar(TablaOps* tabla_ops) {
 	Entorno entorno = entorno_crear();
 	while (1) {
 		printf("> ");
 		char const* input = leer_input(&entorno);
-		Parseado parseado = parsear(input);
+		Parseado parseado = parsear(input, tabla_ops);
 
 		switch (parseado.tag) {
 		case E_CARGA:
