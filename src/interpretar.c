@@ -1,1 +1,1 @@
-#include "interpretar.c"
+#include "interpretar.h"
