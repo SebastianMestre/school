@@ -150,6 +150,8 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 // en su propia region de memoria, referenciamos su posicion original en la
 // linea que ingreso el usuario.
 // Esta linea se guarda en su entrada correspondiente en la tabla de aliases
+// especificamente, el puntero al buffer de entrada va en el campo 'input' de
+// EntradaTablaAlias
 
 typedef struct EntradaTablaAlias EntradaTablaAlias;
 struct EntradaTablaAlias {
