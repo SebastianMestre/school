@@ -14,4 +14,6 @@ int main (int argc, char** argv) {
 	cargar_operador(&tabla, "^", 2, potencia);
 
 	interpretar(&tabla);
+
+	tabla_ops_limpiar(&tabla);
 }

@@ -16,4 +16,4 @@ build/parser.o:      src/parser.c src/parser.h src/tabla_ops.h src/funcion_evalu
 
 build/%.o: src/%.c
 	mkdir -p build
-	gcc -c -o $@ $<
+	gcc -fno-omit-frame-pointer -g -c -o $@ $<
