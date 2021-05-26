@@ -7,7 +7,7 @@ clean:
 	rm -f interprete
 .PHONY: clean
 
-build/main.o:        src/main.c src/tabla_ops.h src/funcion_evaluacion.h src/operadores.h
+build/main.o:        src/main.c src/interpretar.h src/tabla_ops.h src/funcion_evaluacion.h src/operadores.h
 build/interpretar.o: src/interpretar.c src/interpretar.h src/tabla_ops.h src/funcion_evaluacion.h
 build/tabla_ops.o:   src/tabla_ops.c src/tabla_ops.h src/funcion_evaluacion.h
 build/operadores.o:  src/operadores.c src/operadores.h

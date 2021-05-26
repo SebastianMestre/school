@@ -93,6 +93,7 @@ typedef struct {
 Parseado parsear(char const* str) {
 	Tokenizado tokenizado = tokenizar(str);
 
+	// TODO: parsear
 	switch (tokenizado.tag) {
 	default:
 		return (Parseado){E_INVALIDO, str};
@@ -124,22 +125,27 @@ Entorno entorno_crear() {
 }
 
 char const* leer_input(Entorno* entorno) {
+	// TODO
 	entorno->buffer_input = NULL;
 	entorno->tamano_buffer_input = 0;
 	return entorno->buffer_input;
 }
 
 void entorno_limpiar(Entorno* entorno) {
+	// TODO
 	return;
 }
 
 int evaluar(Entorno* entorno, char const* alias, int alias_n) {
+	// TODO
 }
 
 void imprimir(Entorno* entorno, char const* alias, int alias_n) {
+	// TODO
 }
 
 void cargar(Entorno* entorno, char const* alias, int alias_n, void* expresion) {
+	// TODO
 }
 
 void interpretar(TablaOps* tabla) {

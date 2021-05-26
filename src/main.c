@@ -1,5 +1,6 @@
 #include "tabla_ops.h"
 #include "operadores.h"
+#include "interpretar.h"
 
 int main (int argc, char** argv) {
 	TablaOps tabla = tabla_ops_crear();
@@ -11,4 +12,6 @@ int main (int argc, char** argv) {
 	cargar_operador(&tabla, "/", 2, division);
 	cargar_operador(&tabla, "%", 2, modulo);
 	cargar_operador(&tabla, "^", 2, potencia);
+
+	interpretar(&tabla);
 }
