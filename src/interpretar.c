@@ -39,7 +39,7 @@ Tokenizado tokenizar(char const* str) {
 	if (*str == '\0')
 		return (Tokenizado){T_FIN, str};
 
-	// TODO? chequear si hay un operador que arranca con =
+	// NICETOHAVE chequear si hay un operador que arranca con =
 	if (*str == '=')
 		return (Tokenizado){T_IGUAL, str+1};
 
@@ -107,7 +107,7 @@ typedef struct {
 	int tamano_buffer_input;
 } Entorno;
 
-Entorno entorno_nuevo() {
+Entorno entorno_crear() {
 	return (Entorno){NULL, 0};
 }
 
@@ -131,7 +131,7 @@ void cargar(Entorno* entorno, char const* alias, int alias_n, void* expresion) {
 }
 
 void interpretar(TablaOps* tabla) {
-	Entorno entorno = entorno_nuevo();
+	Entorno entorno = entorno_crear();
 	while (1) {
 		char const* input = leer_input(&entorno);
 		Parseado parseado = parsear(input);
@@ -148,7 +148,7 @@ void interpretar(TablaOps* tabla) {
 			printf("%d\n", resultado);
 			} break;
 		case E_INVALIDO:
-			puts("Error, saliendo.");
+			puts("Error, saliendo."); // NICETOHAVE mejor error
 		// fallthrough
 		case E_SALIR:
 			entorno_limpiar(&entorno);

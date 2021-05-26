@@ -2,7 +2,7 @@
 #include "operadores.h"
 
 int main (int argc, char** argv) {
-	TablaOps tabla;
+	TablaOps tabla = tabla_ops_crear();
 	
 	cargar_operador(&tabla, "+", 2, suma);
 	cargar_operador(&tabla, "-", 2, resta);
