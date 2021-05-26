@@ -5,45 +5,23 @@
 #include <ctype.h>
 #include <string.h>
 
-typedef enum {
-	T_NOMBRE,   // una cadena alfanumrica
-	T_OPERADOR, // un operador
-	T_NUMERO,   // un numero (secuencia de digitos)
-	T_IMPRIMIR, // 'imprimir'
-	T_EVALUAR,  // 'evaluar'
-	T_CARGAR,   // 'cargar'
-	T_SALIR,    // 'salir'
-	T_IGUAL,    // '='
-	T_FIN,      // el final del string
-	T_INVALIDO, // un error
-} TokenTag;
-
-typedef struct {
-	TokenTag tag;
-	char const* resto;
-
-	char const* inicio;
-	int valor;
-	EntradaTablaOps op;
-} Tokenizado;
-
 #define CANT_STRINGS_FIJOS 4
 static int const largo_strings_fijos[CANT_STRINGS_FIJOS] = { 5, 6, 7, 8 };
 static char const* const strings_fijos[CANT_STRINGS_FIJOS] = { "salir", "cargar", "evaluar", "imprimir" };
 static TokenTag const token_strings_fijos[CANT_STRINGS_FIJOS] = { T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
 
-static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
+Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 	// TODO: reconocer operadores
 
 	while (isspace(*str))
 		str += 1;
 
 	if (*str == '\0')
-		return (Tokenizado){T_FIN, str};
+		return (Tokenizado){str, (Token){T_FIN}};
 
 	// NICETOHAVE chequear si hay un operador que arranca con =
 	if (*str == '=')
-		return (Tokenizado){T_IGUAL, str+1};
+		return (Tokenizado){str+1, (Token){T_IGUAL}};
 
 	if (isalpha(str[0])) {
 		// reconozco un nombre
@@ -54,9 +32,9 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 		for (int i = 0; i < CANT_STRINGS_FIJOS; ++i)
 			if (largo_strings_fijos[i] == largo &&
 			    memcmp(str, strings_fijos[i], largo) == 0)
-				return (Tokenizado){token_strings_fijos[i], str+largo};
+				return (Tokenizado){str+largo, (Token){token_strings_fijos[i]}};
 
-		return (Tokenizado){T_NOMBRE, str+largo, str, largo};
+		return (Tokenizado){str+largo, (Token){T_NOMBRE, str, largo}};
 	}
 
 	if (isdigit(str[0])) {
@@ -68,7 +46,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 			largo += 1;
 		}
 
-		return (Tokenizado){T_NUMERO, str+largo, NULL, valor};
+		return (Tokenizado){str+largo, (Token){T_NUMERO, NULL, valor}};
 	}
 }
 
@@ -76,7 +54,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 Parseado parsear(char const* str, TablaOps* tabla_ops) {
 	Tokenizado tokenizado = tokenizar(str, tabla_ops);
 
-	switch (tokenizado.tag) {
+	switch (tokenizado.token.tag) {
 	case T_SALIR:
 		return (Parseado){S_SALIR};
 		break;
@@ -85,31 +63,31 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		break;
 		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
-		if (tokenizado.tag != T_NOMBRE)
+		if (tokenizado.token.tag != T_NOMBRE)
 			return (Parseado){S_INVALIDO, str};
-		return (Parseado){S_EVALUAR, tokenizado.resto, tokenizado.inicio, tokenizado.valor};
+		return (Parseado){S_EVALUAR, tokenizado.resto, tokenizado.token.inicio, tokenizado.token.valor};
 		break;
 
 	case T_IMPRIMIR:
 		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
-		if (tokenizado.tag != T_NOMBRE)
+		if (tokenizado.token.tag != T_NOMBRE)
 			return (Parseado){S_INVALIDO, str};
-		return (Parseado){S_IMPRIMIR, tokenizado.resto, tokenizado.inicio, tokenizado.valor};
+		return (Parseado){S_IMPRIMIR, tokenizado.resto, tokenizado.token.inicio, tokenizado.token.valor};
 		break;
 
 	case T_NOMBRE: {
-		char const* alias = tokenizado.inicio;
-		int alias_n = tokenizado.valor;
+		char const* alias = tokenizado.token.inicio;
+		int alias_n = tokenizado.token.valor;
 
 		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
-		if (tokenizado.tag != T_IGUAL)
+		if (tokenizado.token.tag != T_IGUAL)
 			return (Parseado){S_INVALIDO, str};
 
 		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
-		if (tokenizado.tag != T_CARGAR)
+		if (tokenizado.token.tag != T_CARGAR)
 			return (Parseado){S_INVALIDO, str};
 
 		void* expresion = NULL; // TODO parsear expresiones, cambiar por Expresion*
