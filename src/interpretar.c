@@ -23,7 +23,7 @@ typedef struct {
 
 	char const* inicio;
 	int valor;
-	FuncionEvaluacion eval;
+	EntradaTablaOps op;
 } Tokenizado;
 
 #define CANT_STRINGS_FIJOS 4
@@ -95,6 +95,47 @@ Parseado parsear(char const* str) {
 
 	// TODO: parsear
 	switch (tokenizado.tag) {
+	case T_SALIR:
+		return (Parseado){E_SALIR};
+		break;
+
+	case T_EVALUAR:
+		break;
+		str = tokenizado.resto;
+		tokenizado = tokenizar(str);
+		if (tokenizado.tag != T_NOMBRE)
+			return (Parseado){E_INVALIDO, str};
+		return (Parseado){E_EVALUAR, tokenizado.resto, tokenizado.inicio, tokenizado.valor};
+		break;
+
+	case T_IMPRIMIR:
+		str = tokenizado.resto;
+		tokenizado = tokenizar(str);
+		if (tokenizado.tag != T_NOMBRE)
+			return (Parseado){E_INVALIDO, str};
+		return (Parseado){E_IMPRIMIR, tokenizado.resto, tokenizado.inicio, tokenizado.valor};
+		break;
+
+	case T_NOMBRE: {
+		char const* alias = tokenizado.inicio;
+		int alias_n = tokenizado.valor;
+
+		str = tokenizado.resto;
+		tokenizado = tokenizar(str);
+		if (tokenizado.tag != T_IGUAL)
+			return (Parseado){E_INVALIDO, str};
+
+		str = tokenizado.resto;
+		tokenizado = tokenizar(str);
+		if (tokenizado.tag != T_CARGAR)
+			return (Parseado){E_INVALIDO, str};
+
+		void* expresion = NULL; // TODO parsear expresiones, cambiar por Expresion*
+		// return (Parseado){E_CARGA, tokenizado.resto, alias, alias_n, expresion};
+
+		return (Parseado){E_INVALIDO, str};
+		} break;
+
 	default:
 		return (Parseado){E_INVALIDO, str};
 	}
@@ -115,17 +156,19 @@ typedef struct {
 } TablaAlias;
 
 typedef struct {
-	// TODO: lista de alias y expresiones etc
+	TablaAlias aliases;
 	char* buffer_input;
 	int tamano_buffer_input;
 } Entorno;
 
 Entorno entorno_crear() {
-	return (Entorno){NULL, 0};
+	return (Entorno){};
 }
 
 char const* leer_input(Entorno* entorno) {
 	// TODO
+	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
+	// buffer que crece dinamicamente
 	entorno->buffer_input = NULL;
 	entorno->tamano_buffer_input = 0;
 	return entorno->buffer_input;
