@@ -71,7 +71,7 @@ Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 			largo += 1;
 		}
 
-		return (Tokenizado){T_NOMBRE, str+largo, NULL, valor};
+		return (Tokenizado){T_NUMERO, str+largo, NULL, valor};
 	}
 }
 
