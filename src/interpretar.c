@@ -1,5 +1,8 @@
 #include "interpretar.h"
 
+#include "expresion.h"
+
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -142,10 +145,17 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 }
 
 
+// Explicacion:
+// para simplificar el uso de memoria, en vez de guardar los aliases, cada uno
+// en su propia region de memoria, referenciamos su posicion original en la
+// linea que ingreso el usuario.
+// Esta linea se guarda en su entrada correspondiente en la tabla de aliases
+
 typedef struct EntradaTablaAlias EntradaTablaAlias;
 struct EntradaTablaAlias {
 	EntradaTablaAlias* sig;
 
+	char* input;
 	char const* alias;
 	int alias_n;
 	void* expresion; // TODO reemplazar por Expresion*
@@ -155,12 +165,47 @@ typedef struct {
 	EntradaTablaAlias* entradas;
 } TablaAlias;
 
-EntradaTablaAlias* encontrar(TablaAlias* tabla, char const* alias, int alias_n) {
+EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, int alias_n) {
 	for (EntradaTablaAlias* it = tabla->entradas; it; it = it->sig)
 		if (it->alias_n == alias_n && memcmp(it->alias, alias, alias_n) == 0)
 			return it;
 	return NULL;
 }
+
+// limpia 'input' y 'expresion'
+EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const* alias, int alias_n, void* expresion) {
+	EntradaTablaAlias* nuevo = malloc(sizeof(*nuevo));
+	*nuevo = (EntradaTablaAlias) {
+		.sig = tabla->entradas,
+		.alias = alias,
+		.alias_n = alias_n,
+		.input = input,
+		.expresion = expresion
+	};
+	tabla->entradas = nuevo;
+	return nuevo;
+}
+
+// limpia 'input' y 'expresion'
+EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char const* alias, int alias_n, void* expresion) {
+	EntradaTablaAlias* encontrado = ta_encontrar(tabla, alias, alias_n);
+
+	if (encontrado == NULL)
+		return ta_insertar(tabla, input, alias, alias_n, expresion);
+
+	free(encontrado->input);
+	expresion_limpiar(encontrado->expresion);
+
+	encontrado->input = input;
+	encontrado->expresion = expresion;
+	return encontrado;
+}
+
+void ta_limpiar(TablaAlias* tabla) {
+	// TODO
+}
+
+
 
 typedef struct {
 	TablaAlias aliases;
@@ -172,7 +217,7 @@ Entorno entorno_crear() {
 	return (Entorno){};
 }
 
-char const* leer_input(Entorno* entorno) {
+void leer_input(Entorno* entorno) {
 	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
 	// buffer que crece dinamicamente si hace falta
 	if (entorno->buffer_input == NULL) {
@@ -182,10 +227,26 @@ char const* leer_input(Entorno* entorno) {
 	// NICETOHAVE: esto no se porta muy bien si se pasa de input: deja todo lo q
 	// sobra en el buffer de entrada
 	fgets(entorno->buffer_input, 1023, stdin);
-	return entorno->buffer_input;
+}
+
+void descartar_input(Entorno* entorno) {
+	assert(entorno != NULL);
+	free(entorno->buffer_input);
+	entorno->buffer_input = NULL;
+	entorno->tamano_buffer_input = 0;
+}
+
+char* robar_input(Entorno* entorno) {
+	char* buffer = entorno->buffer_input;
+	entorno->buffer_input = NULL;
+	entorno->tamano_buffer_input = 0;
+	return buffer;
 }
 
 void entorno_limpiar(Entorno* entorno) {
+	if (entorno->buffer_input != NULL)
+		descartar_input(entorno);
+	ta_limpiar(&entorno->aliases);
 	// TODO
 	return;
 }
@@ -199,33 +260,21 @@ void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	// TODO
 }
 
-void cargar(Entorno* entorno, char const* alias, int alias_n, void* expresion) {
-	EntradaTablaAlias* encontrado = encontrar(&entorno->aliases, alias, alias_n);
-	if (encontrado != NULL) {
-		encontrado->expresion = expresion;
-		return;
-	}
-
-	EntradaTablaAlias* nuevo = malloc(sizeof(*nuevo));
-	*nuevo = (EntradaTablaAlias) {
-		.sig = entorno->aliases.entradas,
-		.alias = alias,
-		.alias_n = alias_n,
-		.expresion = expresion
-	};
-	entorno->aliases.entradas = nuevo;
+// limpia 'input' y 'expresion'
+void cargar(Entorno* entorno, char* input, char const* alias, int alias_n, void* expresion) {
+	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
 void interpretar(TablaOps* tabla_ops) {
 	Entorno entorno = entorno_crear();
 	while (1) {
 		printf("> ");
-		char const* input = leer_input(&entorno);
-		Parseado parseado = parsear(input, tabla_ops);
+		leer_input(&entorno);
+		Parseado parseado = parsear(entorno.buffer_input, tabla_ops);
 
 		switch (parseado.tag) {
 		case E_CARGA:
-			cargar(&entorno, parseado.alias, parseado.alias_n, parseado.expresion);
+			cargar(&entorno, robar_input(&entorno), parseado.alias, parseado.alias_n, parseado.expresion);
 			break;
 		case E_IMPRIMIR:
 			imprimir(&entorno, parseado.alias, parseado.alias_n);
