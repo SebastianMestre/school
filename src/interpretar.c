@@ -155,6 +155,13 @@ typedef struct {
 	EntradaTablaAlias* entradas;
 } TablaAlias;
 
+EntradaTablaAlias* encontrar(TablaAlias* tabla, char const* alias, int alias_n) {
+	for (EntradaTablaAlias* it = tabla->entradas; it; it = it->sig)
+		if (it->alias_n == alias_n && memcmp(it->alias, alias, alias_n) == 0)
+			return it;
+	return NULL;
+}
+
 typedef struct {
 	TablaAlias aliases;
 	char* buffer_input;
@@ -193,7 +200,20 @@ void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 }
 
 void cargar(Entorno* entorno, char const* alias, int alias_n, void* expresion) {
-	// TODO
+	EntradaTablaAlias* encontrado = encontrar(&entorno->aliases, alias, alias_n);
+	if (encontrado != NULL) {
+		encontrado->expresion = expresion;
+		return;
+	}
+
+	EntradaTablaAlias* nuevo = malloc(sizeof(*nuevo));
+	*nuevo = (EntradaTablaAlias) {
+		.sig = entorno->aliases.entradas,
+		.alias = alias,
+		.alias_n = alias_n,
+		.expresion = expresion
+	};
+	entorno->aliases.entradas = nuevo;
 }
 
 void interpretar(TablaOps* tabla_ops) {
