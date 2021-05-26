@@ -17,6 +17,6 @@ typedef struct {
 
 TablaOps tabla_ops_crear();
 
-void cargar_operador(TablaOps* tabla, char* simbolo, int aridad, FuncionEvaluacion eval);
+void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, FuncionEvaluacion eval);
 
 #endif // TABLA_OPS_H
