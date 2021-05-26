@@ -86,7 +86,7 @@ typedef struct {
 
 	char const* alias;
 	int alias_n;
-	void* expresion; // TODO
+	void* expresion; // TODO reemplazar por Expresion*
 } Parseado;
 
 // TODO: recibir tabla de operadores para reconocerlos
@@ -100,6 +100,18 @@ Parseado parsear(char const* str) {
 }
 
 
+typedef struct EntradaTablaAlias EntradaTablaAlias;
+struct EntradaTablaAlias {
+	EntradaTablaAlias* sig;
+
+	char const* alias;
+	int alias_n;
+	void* expresion; // TODO reemplazar por Expresion*
+};
+
+typedef struct {
+	EntradaTablaAlias* entradas;
+} TablaAlias;
 
 typedef struct {
 	// TODO: lista de alias y expresiones etc
