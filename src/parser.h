@@ -30,6 +30,12 @@ typedef struct Tokenizado {
 } Tokenizado;
 
 
+typedef struct ExpresionPostfija {
+	int tokens_n;
+	Token* tokens;
+} ExpresionPostfija;
+
+
 typedef enum {
 	S_CARGA,    // ALIAS = cargar EXPR
 	S_IMPRIMIR, // imprimir ALIAS
@@ -44,7 +50,7 @@ typedef struct {
 
 	char const* alias;
 	int alias_n;
-	void* expresion; // TODO reemplazar por Expresion*
+	ExpresionPostfija expresion;
 } Parseado;
 
 Tokenizado tokenizar(char const* str, TablaOps* tabla_ops);

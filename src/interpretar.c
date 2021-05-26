@@ -8,8 +8,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-
 // Explicacion:
 // para simplificar el uso de memoria, en vez de guardar los aliases, cada uno
 // en su propia region de memoria, referenciamos su posicion original en la
@@ -25,7 +23,7 @@ struct EntradaTablaAlias {
 	char* input;
 	char const* alias;
 	int alias_n;
-	void* expresion; // TODO reemplazar por Expresion*
+	ExpresionPostfija expresion;
 };
 
 typedef struct {
@@ -40,7 +38,7 @@ EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, int alias_
 }
 
 // limpia 'input' y 'expresion'
-EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const* alias, int alias_n, void* expresion) {
+EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const* alias, int alias_n, ExpresionPostfija expresion) {
 	EntradaTablaAlias* nuevo = malloc(sizeof(*nuevo));
 	*nuevo = (EntradaTablaAlias) {
 		.sig = tabla->entradas,
@@ -54,14 +52,14 @@ EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const* alias
 }
 
 // limpia 'input' y 'expresion'
-EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char const* alias, int alias_n, void* expresion) {
+EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char const* alias, int alias_n, ExpresionPostfija expresion) {
 	EntradaTablaAlias* encontrado = ta_encontrar(tabla, alias, alias_n);
 
 	if (encontrado == NULL)
 		return ta_insertar(tabla, input, alias, alias_n, expresion);
 
 	free(encontrado->input);
-	expresion_limpiar(encontrado->expresion);
+	// TODO expresion_postfija_limpiar(encontrado->expresion);
 
 	encontrado->input = input;
 	encontrado->expresion = expresion;
@@ -128,7 +126,7 @@ void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 }
 
 // limpia 'input' y 'expresion'
-void cargar(Entorno* entorno, char* input, char const* alias, int alias_n, void* expresion) {
+void cargar(Entorno* entorno, char* input, char const* alias, int alias_n, ExpresionPostfija expresion) {
 	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
