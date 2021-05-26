@@ -1,5 +1,5 @@
 
-interprete: build/main.o build/interpretar.o build/tabla_ops.o build/operadores.o
+interprete: build/main.o build/interpretar.o build/tabla_ops.o build/operadores.o build/expresion.o
 	gcc -o $@ $^
 
 clean:
