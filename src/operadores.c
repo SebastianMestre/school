@@ -16,7 +16,7 @@ int producto(int* args) {
 	return args[0] * args[1];
 }
 
-int divison(int* args) {
+int division(int* args) {
 	return args[0] / args[1];
 }
 
