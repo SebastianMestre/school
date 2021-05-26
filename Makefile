@@ -8,10 +8,10 @@ clean:
 .PHONY: clean
 
 build/main.o:        src/main.c src/interpretar.h src/tabla_ops.h src/funcion_evaluacion.h src/operadores.h
-build/interpretar.o: src/interpretar.c src/interpretar.h src/tabla_ops.h src/funcion_evaluacion.h
+build/interpretar.o: src/interpretar.c src/interpretar.h src/tabla_ops.h src/funcion_evaluacion.h src/expresion.h
 build/tabla_ops.o:   src/tabla_ops.c src/tabla_ops.h src/funcion_evaluacion.h
 build/operadores.o:  src/operadores.c src/operadores.h
-build/expresion.o:   src/expresion.c src/expresion.h
+build/expresion.o:   src/expresion.c src/expresion.h src/funcion_evaluacion.h
 
 build/%.o: src/%.c
 	mkdir -p build

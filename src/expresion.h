@@ -1,20 +1,27 @@
 #ifndef EXPRESION_H
 #define EXPRESION_H
 
+#include "funcion_evaluacion.h"
+
 typedef struct Expresion Expresion;
 
-// TODO: definir la estructura de datos
+// este enum, en el contexto de una expresion, nos permite distinguir si la
+// expresion es un alias, un numeros o una operacion
+typedef enum {
+	X_OPERACION,
+	X_NUMERO,
+	X_ALIAS,
+} ExpressionTag;
 
 struct Expresion {
-	// concerns:
-	// - distinguir entre aliases, numeros y operaciones
-	// como guardo las operaciones? directo el puntero a funcion? o pongo un
-	// int, representando un indice en una tabla?
-
-	// ExpressionTag tag; ??? (un enum, que puede ser numero, alias, u operacion)
-	// int valor; (para guardar los valores numericos)
-	// Expresion* sub[2]; (para guardar las sub-expresiones de una operacion)
-	// FuncionEvaluacion eval; ??? (para guardar la el tipo de operacion... puede ser que necesite tener la aridad?)
+	ExpressionTag tag;
+	char const* alias; // para guardar el texto de un alias
+	int valor; // para guardar los valores numericos, o la longitud de un alias, dependiendo del tag
+	Expresion* sub[2]; // para guardar las sub-expresiones de una operacion
+	FuncionEvaluacion eval; // para guardar el tipo de operacion
 };
+
+// no hace free de alias
+void expresion_limpiar(Expresion* expresion);
 
 #endif // EXPRESION_H
