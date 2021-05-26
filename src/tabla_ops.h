@@ -11,7 +11,7 @@ struct EntradaTablaOps {
 	int aridad;
 };
 
-typedef struct {
+typedef struct TablaOps {
 	EntradaTablaOps* entradas;
 } TablaOps;
 
