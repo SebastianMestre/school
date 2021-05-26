@@ -166,11 +166,15 @@ Entorno entorno_crear() {
 }
 
 char const* leer_input(Entorno* entorno) {
-	// TODO
 	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
-	// buffer que crece dinamicamente
-	entorno->buffer_input = NULL;
-	entorno->tamano_buffer_input = 0;
+	// buffer que crece dinamicamente si hace falta
+	if (entorno->buffer_input == NULL) {
+		entorno->buffer_input = malloc(1024);
+		entorno->tamano_buffer_input = 1024;
+	}
+	// NICETOHAVE: esto no se porta muy bien si se pasa de input: deja todo lo q
+	// sobra en el buffer de entrada
+	fgets(entorno->buffer_input, 1023, stdin);
 	return entorno->buffer_input;
 }
 
@@ -181,6 +185,7 @@ void entorno_limpiar(Entorno* entorno) {
 
 int evaluar(Entorno* entorno, char const* alias, int alias_n) {
 	// TODO
+	return 0;
 }
 
 void imprimir(Entorno* entorno, char const* alias, int alias_n) {
@@ -194,6 +199,7 @@ void cargar(Entorno* entorno, char const* alias, int alias_n, void* expresion) {
 void interpretar(TablaOps* tabla) {
 	Entorno entorno = entorno_crear();
 	while (1) {
+		printf("> ");
 		char const* input = leer_input(&entorno);
 		Parseado parseado = parsear(input);
 
