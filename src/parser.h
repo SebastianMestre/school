@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "expresion_postfija.h"
+
 typedef struct TablaOps TablaOps;
 typedef struct EntradaTablaOps EntradaTablaOps;
 
@@ -28,12 +30,6 @@ typedef struct Tokenizado {
 	char const* resto;
 	Token token;
 } Tokenizado;
-
-
-typedef struct ExpresionPostfija {
-	int tokens_n;
-	Token* tokens;
-} ExpresionPostfija;
 
 
 typedef enum {

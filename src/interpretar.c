@@ -59,7 +59,7 @@ EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char
 		return ta_insertar(tabla, input, alias, alias_n, expresion);
 
 	free(encontrado->input);
-	// TODO expresion_postfija_limpiar(encontrado->expresion);
+	expresion_postfija_limpiar(&encontrado->expresion);
 
 	encontrado->input = input;
 	encontrado->expresion = expresion;
@@ -67,7 +67,14 @@ EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char
 }
 
 void ta_limpiar(TablaAlias* tabla) {
-	// TODO
+	EntradaTablaAlias* it = tabla->entradas;
+	while (it) {
+		EntradaTablaAlias* sig = it->sig;
+		expresion_postfija_limpiar(&it->expresion);
+		free(it->input);
+		free(it);
+		it = sig;
+	}
 }
 
 
