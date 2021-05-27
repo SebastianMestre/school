@@ -37,7 +37,6 @@ EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, int alias_
 	return NULL;
 }
 
-// limpia 'input' y 'expresion'
 EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const* alias, int alias_n, ExpresionPostfija expresion) {
 	EntradaTablaAlias* nuevo = malloc(sizeof(*nuevo));
 	*nuevo = (EntradaTablaAlias) {
