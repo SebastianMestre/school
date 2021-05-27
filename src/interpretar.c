@@ -11,7 +11,7 @@
 // Explicacion:
 // para simplificar el uso de memoria, en vez de guardar los aliases, cada uno
 // en su propia region de memoria, referenciamos su posicion original en la
-// linea que ingreso el usuario.
+// linea que ingreso el usuario, mediante un puntero. (char const* alias)
 // Esta linea se guarda en su entrada correspondiente en la tabla de aliases
 // especificamente, el puntero al buffer de entrada va en el campo 'input' de
 // EntradaTablaAlias

@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define CANT_STRINGS_FIJOS 4
 static int const largo_strings_fijos[CANT_STRINGS_FIJOS] = { 5, 6, 7, 8 };
@@ -53,6 +54,7 @@ Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 
 Parseado parsear(char const* str, TablaOps* tabla_ops) {
 	Tokenizado tokenizado = tokenizar(str, tabla_ops);
+	str = tokenizado.resto;
 
 	switch (tokenizado.token.tag) {
 	case T_SALIR:
@@ -61,39 +63,73 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 	case T_EVALUAR:
 		break;
-		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
+		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
 			return (Parseado){S_INVALIDO, str};
-		return (Parseado){S_EVALUAR, tokenizado.resto, tokenizado.token.inicio, tokenizado.token.valor};
+		return (Parseado){S_EVALUAR, str, tokenizado.token.inicio, tokenizado.token.valor};
 		break;
 
 	case T_IMPRIMIR:
-		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
+		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
 			return (Parseado){S_INVALIDO, str};
-		return (Parseado){S_IMPRIMIR, tokenizado.resto, tokenizado.token.inicio, tokenizado.token.valor};
+		return (Parseado){S_IMPRIMIR, str, tokenizado.token.inicio, tokenizado.token.valor};
 		break;
 
 	case T_NOMBRE: {
 		char const* alias = tokenizado.token.inicio;
 		int alias_n = tokenizado.token.valor;
 
-		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
+		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_IGUAL)
 			return (Parseado){S_INVALIDO, str};
 
-		str = tokenizado.resto;
 		tokenizado = tokenizar(str, tabla_ops);
+		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
 			return (Parseado){S_INVALIDO, str};
 
-		void* expresion = NULL; // TODO parsear expresiones, cambiar por Expresion*
-		// return (Parseado){S_CARGA, tokenizado.resto, alias, alias_n, expresion};
+		// Ahora parseo la expresion infija dos veces:
+		// La primera vez para saber cuantos tokens hay, y asi poder reservar
+		// la memoria necesaria para guardarlos
+		// Y la segunda para guardarlos en la memoria que reserve
 
-		return (Parseado){S_INVALIDO, str};
+		char const* str_al_principio_de_la_expresion = str;
+		int tokens_en_la_expresion = 0;
+
+		// parseo y, mientras, voy validando
+		while (1) {
+			tokenizado = tokenizar(str, tabla_ops);
+			str = tokenizado.resto;
+			Token token = tokenizado.token;
+
+			if (token.tag == T_FIN)
+				break;
+
+			if (!(token.tag == T_NUMERO || token.tag == T_NOMBRE || token.tag == T_OPERADOR))
+				return (Parseado){S_INVALIDO, str};
+
+			tokens_en_la_expresion += 1;
+		}
+
+		ExpresionPostfija expresion = {
+			tokens_en_la_expresion,
+			malloc(tokens_en_la_expresion * sizeof(Token)),
+		};
+
+		// no necesito validar porque ya valide en el loop anterior
+		for (int i = 0; i < tokens_en_la_expresion; ++i) {
+			tokenizado = tokenizar(str, tabla_ops);
+			str = tokenizado.resto;
+			Token token = tokenizado.token;
+
+			expresion.tokens[i] = token;
+		}
+
+		return (Parseado){S_CARGA, tokenizado.resto, alias, alias_n, expresion};
 		} break;
 
 	default:
