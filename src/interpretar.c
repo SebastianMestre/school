@@ -59,10 +59,12 @@ EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char
 		return ta_insertar(tabla, input, alias, alias_n, expresion);
 
 	free(encontrado->input);
-	expresion_postfija_limpiar(&encontrado->expresion);
-
 	encontrado->input = input;
+	encontrado->alias = alias;
+
+	expresion_postfija_limpiar(&encontrado->expresion);
 	encontrado->expresion = expresion;
+
 	return encontrado;
 }
 
