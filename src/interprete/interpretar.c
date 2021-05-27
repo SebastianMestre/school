@@ -120,7 +120,7 @@ void entorno_limpiar(Entorno* entorno) {
 	if (entorno->buffer_input != NULL)
 		descartar_input(entorno);
 	ta_limpiar(&entorno->aliases);
-	// TODO
+	free(entorno);
 	return;
 }
 
