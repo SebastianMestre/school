@@ -51,6 +51,9 @@ Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 	}
 }
 
+static Parseado invalido(char const* str) {
+	return (Parseado){str, (Sentencia){S_INVALIDO}};
+}
 
 Parseado parsear(char const* str, TablaOps* tabla_ops) {
 	Tokenizado tokenizado = tokenizar(str, tabla_ops);
@@ -58,7 +61,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 	switch (tokenizado.token.tag) {
 	case T_SALIR:
-		return (Parseado){S_SALIR};
+		return (Parseado){str, (Sentencia){S_SALIR}};
 		break;
 
 	case T_EVALUAR:
@@ -66,16 +69,16 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
-			return (Parseado){S_INVALIDO, str};
-		return (Parseado){S_EVALUAR, str, tokenizado.token.inicio, tokenizado.token.valor};
+			return invalido(str);
+		return (Parseado){str, (Sentencia){S_EVALUAR, tokenizado.token.inicio, tokenizado.token.valor}};
 		break;
 
 	case T_IMPRIMIR:
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
-			return (Parseado){S_INVALIDO, str};
-		return (Parseado){S_IMPRIMIR, str, tokenizado.token.inicio, tokenizado.token.valor};
+			return invalido(str);
+		return (Parseado){str, (Sentencia){S_IMPRIMIR, tokenizado.token.inicio, tokenizado.token.valor}};
 		break;
 
 	case T_NOMBRE: {
@@ -85,12 +88,12 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_IGUAL)
-			return (Parseado){S_INVALIDO, str};
+			return invalido(str);
 
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
-			return (Parseado){S_INVALIDO, str};
+			return invalido(str);
 
 		// Ahora parseo la expresion infija dos veces:
 		// La primera vez para saber cuantos tokens hay, y asi poder reservar
@@ -110,7 +113,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 				break;
 
 			if (!(token.tag == T_NUMERO || token.tag == T_NOMBRE || token.tag == T_OPERADOR))
-				return (Parseado){S_INVALIDO, str};
+				return invalido(str);
 
 			tokens_en_la_expresion += 1;
 		}
@@ -129,10 +132,10 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 			expresion.tokens[i] = token;
 		}
 
-		return (Parseado){S_CARGA, tokenizado.resto, alias, alias_n, expresion};
+		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}};
 		} break;
 
 	default:
-		return (Parseado){S_INVALIDO, str};
+		return invalido(str);
 	}
 }

@@ -6,6 +6,7 @@
 typedef struct TablaOps TablaOps;
 typedef struct EntradaTablaOps EntradaTablaOps;
 
+// en el contexto de un token, sirve para interpretar la informacion que este guarda
 typedef enum {
 	T_NOMBRE,   // una cadena alfanumrica
 	T_OPERADOR, // un operador
@@ -19,6 +20,8 @@ typedef enum {
 	T_INVALIDO, // un error
 } TokenTag;
 
+// representa una secuencia de caracteres. Al consolidarlos en una sola entidad,
+// podemos expresar algunas partes del codigo de forma mas clara
 typedef struct Token {
 	TokenTag tag;
 	char const* inicio;
@@ -40,13 +43,16 @@ typedef enum {
 	S_INVALIDO, // (un error)
 } SentenciaTag;
 
-typedef struct {
+typedef struct Sentencia {
 	SentenciaTag tag;
-	char const* resto;
-
 	char const* alias;
 	int alias_n;
 	ExpresionPostfija expresion;
+} Sentencia;
+
+typedef struct {
+	char const* resto;
+	Sentencia sentencia;
 } Parseado;
 
 Tokenizado tokenizar(char const* str, TablaOps* tabla_ops);

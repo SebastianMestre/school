@@ -143,16 +143,17 @@ void interpretar(TablaOps* tabla_ops) {
 		printf("> ");
 		leer_input(&entorno);
 		Parseado parseado = parsear(entorno.buffer_input, tabla_ops);
+		Sentencia sentencia = parseado.sentencia;
 
-		switch (parseado.tag) {
+		switch (sentencia.tag) {
 		case S_CARGA:
-			cargar(&entorno, robar_input(&entorno), parseado.alias, parseado.alias_n, parseado.expresion);
+			cargar(&entorno, robar_input(&entorno), sentencia.alias, sentencia.alias_n, sentencia.expresion);
 			break;
 		case S_IMPRIMIR:
-			imprimir(&entorno, parseado.alias, parseado.alias_n);
+			imprimir(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
 		case S_EVALUAR: {
-			int resultado = evaluar(&entorno, parseado.alias, parseado.alias_n);
+			int resultado = evaluar(&entorno, sentencia.alias, sentencia.alias_n);
 			printf("%d\n", resultado);
 			} break;
 		case S_INVALIDO:
