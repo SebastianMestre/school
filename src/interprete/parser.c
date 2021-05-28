@@ -199,7 +199,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 					X_OPERACION,
 					0, NULL,
 					{arg1, arg2},
-					token.op->eval
+					token.op
 				};
 				pila_de_expresiones_push(&p, exp);
 				} break;

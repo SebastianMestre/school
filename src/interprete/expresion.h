@@ -2,6 +2,7 @@
 #define EXPRESION_H
 
 #include "../funcion_evaluacion.h"
+#include "../tabla_ops.h"
 
 typedef struct Expresion Expresion;
 
@@ -18,7 +19,7 @@ struct Expresion {
 	int valor; // para guardar los valores numericos, o la longitud de un alias, dependiendo del tag
 	char const* alias; // para guardar el texto de un alias
 	Expresion* sub[2]; // para guardar las sub-expresiones de una operacion
-	FuncionEvaluacion eval; // para guardar el tipo de operacion
+	EntradaTablaOps* op; // para guardar la informacion de la operacion (de haber una).
 };
 
 /**
