@@ -16,8 +16,7 @@ void tabla_ops_limpiar(TablaOps* tabla) {
 	}
 }
 
-
-void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, FuncionEvaluacion eval) {
+void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, FuncionEvaluacion eval, int precedencia) {
 	// NICETOHAVE: verificar que no exista el mismo simbolo
 	// NICETOHAVE: validar aridad
 	// NICETOHAVE: chequear nulls
@@ -28,6 +27,7 @@ void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, FuncionEv
 		.eval = eval,
 		.simbolo = simbolo,
 		.aridad = aridad,
+		.precedencia = precedencia,
 	};
 
 	tabla->entradas = nueva_entrada;
