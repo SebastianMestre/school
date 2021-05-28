@@ -164,10 +164,12 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		if (tokenizado.token.tag != T_CARGAR)
 			return invalido(str);
 
-		// Ahora parseo la expresion infija dos veces:
-		// La primera vez para saber cuantos tokens hay, y asi poder reservar
-		// la memoria necesaria para guardarlos
-		// Y la segunda para guardarlos en la memoria que reserve
+		// Convierto expresion postfija a infija, usando una pila:
+		// Los valores sueltos, como numeros y aliases, los inserto en la pila.
+		// Al encontrar un operador, extraigo tantas expresiones de la pila como
+		// sea la aridad del operador, y creo la expresion que representa la
+		// aplicacion del operador a sus operandos. Finalmente, inserto esa
+		// expresion en la pila
 
 		// {} inicializa con 0s, lo cual es el estado inicial correcto
 		PilaDeExpresiones p = {};
@@ -192,9 +194,18 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 				pila_de_expresiones_push(&p, exp);
 				} break;
 			case T_OPERADOR: {
-				Expresion* exp = malloc(sizeof(*exp));
 				Expresion* arg1 = pila_de_expresiones_pop(&p);
-				Expresion* arg2 = token.op->aridad == 2 ? pila_de_expresiones_pop(&p) : NULL;
+				if (arg1 == NULL)
+					goto fail_arg1;
+
+				Expresion* arg2 = NULL;
+				if (token.op->aridad == 2) {
+					arg2 = pila_de_expresiones_pop(&p);
+					if (arg2 == NULL)
+						goto fail_arg2;
+				}
+
+				Expresion* exp = malloc(sizeof(*exp));
 				*exp = (Expresion){
 					X_OPERACION,
 					0, NULL,
@@ -202,6 +213,15 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 					token.op
 				};
 				pila_de_expresiones_push(&p, exp);
+				break;
+
+				fail_arg2:
+				expresion_limpiar(arg1);
+
+				fail_arg1:
+				pila_de_expresiones_limpiar_datos(&p);
+				return invalido(str);
+
 				} break;
 			default:
 				pila_de_expresiones_limpiar_datos(&p);
