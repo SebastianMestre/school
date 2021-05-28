@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define BUFFER 1024
+
 // Explicacion:
 // para simplificar el uso de memoria, en vez de guardar los aliases, cada uno
 // en su propia region de memoria, referenciamos su posicion original en la
@@ -95,12 +97,12 @@ static void leer_input(Entorno* entorno) {
 	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
 	// buffer que crece dinamicamente si hace falta
 	if (entorno->buffer_input == NULL) {
-		entorno->buffer_input = malloc(1024);
-		entorno->tamano_buffer_input = 1024;
+		entorno->buffer_input = malloc(BUFFER);
+		entorno->tamano_buffer_input = BUFFER;
 	}
 	// NICETOHAVE: esto no se porta muy bien si se pasa de input: deja todo lo q
 	// sobra en el buffer de entrada
-	fgets(entorno->buffer_input, 1023, stdin);
+	fgets(entorno->buffer_input, BUFFER - 1, stdin);
 }
 
 static void descartar_input(Entorno* entorno) {
@@ -156,8 +158,25 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 	return 0;
 } 
 
-static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
+static char* expresion_infija(Expresion* expresion, Entorno* entorno) {
+	char* expresionInfija = malloc(sizeof(BUFFER));
 	// TODO
+	return expresion_infija;
+}
+static char* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
+	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	char* expresionInfija = NULL;
+	if (entradaAlias) expresionInfija = expresion_infija(entradaAlias->expresion, entorno);
+	return expresionInfija;
+}  
+
+static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
+	char* expresion = leer_alias(entorno, alias, alias_n);
+	if (expresion) {
+		printf("%s\n", expresion);
+		free(expresion);
+	}
+	else printf("Ese alias no existe...\n");
 }
 
 // limpia 'input' y 'expresion'
