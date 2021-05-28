@@ -124,10 +124,37 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 	return;
 }
 
-static int evaluar(Entorno* entorno, char const* alias, int alias_n) {
-	// TODO
-	return 0;
+// TODO: testear evaluar_alias (y evaluar_arbol).
+
+// encuentra la expresion correspondiente y llama a evaluar_arbol
+static int evaluar_alias(Entorno* entorno, char const* alias, int alias_n) {
+	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	Expresion* expresion = entradaAlias->expresion;
+	return evaluar_arbol(expresion, entorno);
 }
+
+// funcion auxliar a evaluar_alias; evalua el arbol de expresiones
+// necesitamos el entorno en caso de encontrar un alias que evaluar									
+static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
+	if (expresion) {
+		switch (expresion->tag) {
+		case X_OPERACION: {
+			// evaluamos los subarboles recursivamente y los usamos como args
+			int args[2] =
+				{evaluar_arbol(expresion->sub[0], entorno),
+				evaluar_arbol(expresion->sub[1], entorno)};
+			return expresion->op->eval(args);
+		} break;
+		case X_NUMERO:
+			return expresion->valor;
+			break;
+		case X_ALIAS:
+			return evaluar_alias(entorno, expresion->alias, expresion->valor);
+			break;
+		}
+	}
+	return 0;
+} 
 
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	// TODO
@@ -154,7 +181,7 @@ void interpretar(TablaOps* tabla_ops) {
 			imprimir(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
 		case S_EVALUAR: {
-			int resultado = evaluar(&entorno, sentencia.alias, sentencia.alias_n);
+			int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
 			printf("%d\n", resultado);
 			} break;
 		case S_INVALIDO:
