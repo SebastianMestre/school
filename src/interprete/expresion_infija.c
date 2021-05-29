@@ -128,3 +128,9 @@ static Termino* agrupar_en_terminos(Expresion* expresion) {
   }
   return termino;
 }
+
+void imprimir_expresion_infija(Expresion* expresion) {
+  Termino* expresion_infija = agrupar_en_terminos(expresion);
+  //TODO
+  limpiar_termino(expresion_infija);
+}
