@@ -159,23 +159,40 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 	return 0;
 } 
 
-static char* expresion_infija(Expresion* expresion, Entorno* entorno) {
-	char* expresionInfija = malloc(sizeof(BUFFER));
-	// TODO
-	return expresion_infija;
-}
-static char* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
+static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion);
+
+static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
 	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
-	char* expresionInfija = NULL;
-	if (entradaAlias) expresionInfija = expresion_infija(entradaAlias->expresion, entorno);
-	return expresionInfija;
-}  
+	Expresion* expresion = armar_expresion(entorno, entradaAlias->expresion);
+	return expresion;
+}
+
+static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
+	Expresion* expresionFinal = NULL;
+	if (expresion) {
+		if (expresion->tag == X_ALIAS)
+			expresionFinal = leer_alias(entorno, expresion->alias, expresion->valor);
+		else {
+			expresionFinal = malloc(sizeof(*expresionFinal));
+			*expresionFinal = (Expresion){
+				.tag = expresion->tag,
+				.valor = expresion->valor,
+				.sub = {
+					// paso recursivo
+					armar_expresion(entorno, expresion->sub[0]),
+					armar_expresion(entorno, expresion->sub[1])
+				},
+				.op = expresion->op
+			};
+		}
+	}
+	return expresionFinal;
+}
 
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
-	char* expresion = leer_alias(entorno, alias, alias_n);
+	Expresion* expresion = leer_alias(entorno, alias, alias_n);
 	if (expresion) {
-		printf("%s\n", expresion);
-		free(expresion);
+		// TODO
 	}
 	else printf("Ese alias no existe...\n");
 }
