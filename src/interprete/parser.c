@@ -96,7 +96,7 @@ typedef struct PilaDeExpresiones {
 	EntradaPilaDeExpresiones* entradas;
 } PilaDeExpresiones;
 
-void pila_de_expresiones_push(PilaDeExpresiones* pila, Expresion* expresion) {
+static void pila_de_expresiones_push(PilaDeExpresiones* pila, Expresion* expresion) {
 	EntradaPilaDeExpresiones* entrada = malloc(sizeof(*entrada));
 	*entrada = (EntradaPilaDeExpresiones){
 		.sig = pila->entradas,
@@ -105,7 +105,7 @@ void pila_de_expresiones_push(PilaDeExpresiones* pila, Expresion* expresion) {
 	pila->entradas = entrada;
 }
 
-Expresion* pila_de_expresiones_pop(PilaDeExpresiones* pila) {
+static Expresion* pila_de_expresiones_pop(PilaDeExpresiones* pila) {
 	if (pila->entradas == NULL) return NULL;
 	Expresion* result = pila->entradas->expresion;
 	EntradaPilaDeExpresiones* entrada = pila->entradas;
@@ -114,7 +114,13 @@ Expresion* pila_de_expresiones_pop(PilaDeExpresiones* pila) {
 	return result;
 }
 
-void pila_de_expresiones_limpiar_datos(PilaDeExpresiones* pila) {
+static Expresion* pila_de_expresiones_top(PilaDeExpresiones* pila) {
+	if (pila->entradas == NULL)
+		return NULL;
+	return pila->entradas->expresion;
+}
+
+static void pila_de_expresiones_limpiar_datos(PilaDeExpresiones* pila) {
 	EntradaPilaDeExpresiones* it = pila->entradas;
 	while (it) {
 		EntradaPilaDeExpresiones* sig = it->sig;
@@ -183,14 +189,10 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 			switch (token.tag) {
 			case T_NUMERO: {
-				Expresion* exp = malloc(sizeof(*exp));
-				*exp = (Expresion){X_NUMERO, token.valor};
-				pila_de_expresiones_push(&p, exp);
+				pila_de_expresiones_push(&p, expresion_numero(token.valor));
 				} break;
 			case T_NOMBRE: {
-				Expresion* exp = malloc(sizeof(*exp));
-				*exp = (Expresion){X_ALIAS, token.valor, token.inicio};
-				pila_de_expresiones_push(&p, exp);
+				pila_de_expresiones_push(&p, expresion_alias(token.inicio, token.valor));
 				} break;
 			case T_OPERADOR: {
 				Expresion* arg1 = pila_de_expresiones_pop(&p);
@@ -204,14 +206,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 						goto fail_arg2;
 				}
 
-				Expresion* exp = malloc(sizeof(*exp));
-				*exp = (Expresion){
-					X_OPERACION,
-					0, NULL,
-					{arg1, arg2},
-					token.op
-				};
-				pila_de_expresiones_push(&p, exp);
+				pila_de_expresiones_push(&p, expresion_operacion(token.op, arg1, arg2));
 				break;
 
 				fail_arg2:
@@ -230,14 +225,10 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 		Expresion* expresion = pila_de_expresiones_pop(&p);
 
-		{
-			Expresion* expresion_extra = pila_de_expresiones_pop(&p);
-			if (expresion_extra != NULL) {
-				expresion_limpiar(expresion);
-				expresion_limpiar(expresion_extra);
-				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str);
-			}
+		if (pila_de_expresiones_top(&p) != NULL) {
+			expresion_limpiar(expresion);
+			pila_de_expresiones_limpiar_datos(&p);
+			return invalido(str);
 		}
 
 		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}};
