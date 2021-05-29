@@ -2,6 +2,7 @@
 
 #include "expresion.h"
 #include "parser.h"
+#include "expresion_infija.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -192,8 +193,10 @@ static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	Expresion* expresion = leer_alias(entorno, alias, alias_n);
 	if (expresion) {
-		// TODO
+		char* expresionInfija = expresion_infija(expresion);
 		expresion_limpiar(expresion);
+		printf("%s\n", expresionInfija);
+		free(expresionInfija);
 	}
 	else printf("Ese alias no existe...\n");
 }
