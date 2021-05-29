@@ -196,10 +196,8 @@ static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	// interpreta el alias y obtiene la expresion literal
 	Expresion* expresion = leer_alias(entorno, alias, alias_n);
 	if (expresion) {
-		char* expresionInfija = expresion_infija(expresion);
+		// imprimir_expresion_infija(expresion);
 		expresion_limpiar(expresion);
-		printf("%s\n", expresionInfija);
-		free(expresionInfija);
 	}
 	else printf("Ese alias no existe...\n");
 }

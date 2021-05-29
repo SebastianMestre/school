@@ -3,6 +3,6 @@
 
 #include "expresion.h"
 
-char* expresion_infija(Expresion* expresion);
+void imprimir_expresion_infija(Expresion* expresion);
 
 #endif // EXPRESION_INFIJA_H
