@@ -50,7 +50,7 @@ static void limpiar_termino(Termino* termino) {
   }
 }
 
-static Termino* organizar_en_terminos(Expresion* expresion) {
+static Termino* agrupar_en_terminos(Expresion* expresion) {
   Termino* termino = NULL;
   if (expresion) {
     termino = malloc(sizeof(*termino));
