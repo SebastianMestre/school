@@ -193,6 +193,7 @@ static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	Expresion* expresion = leer_alias(entorno, alias, alias_n);
 	if (expresion) {
 		// TODO
+		expresion_limpiar(expresion);
 	}
 	else printf("Ese alias no existe...\n");
 }
