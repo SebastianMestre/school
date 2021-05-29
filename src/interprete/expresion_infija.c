@@ -35,6 +35,21 @@ struct Simbolo {
 };
 
 
+static void limpiar_termino(Termino* termino) {
+  if (termino) {
+    Simbolo* it = termino->inicial;
+    Simbolo* sig;
+    while (it) {
+      sig = it->sig;
+      // no limpia operador
+      limpiar_termino(it->termino);
+      free(it);
+      it = sig;
+    }
+    free(termino);
+  }
+}
+
 static Termino* organizar_en_terminos(Expresion* expresion) {
   Termino* termino = NULL;
   if (expresion) {
