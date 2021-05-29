@@ -162,12 +162,15 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 
 static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion);
 
+// devuelve la expresion asociada a un alias
 static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
 	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
 	Expresion* expresion = armar_expresion(entorno, entradaAlias->expresion);
 	return expresion;
 }
 
+// arma la expresion literal 
+// se asegura de que no haya alias en el arbol de expresion
 static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 	Expresion* expresionFinal = NULL;
 	if (expresion) {
@@ -181,8 +184,7 @@ static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 				.sub = {
 					// paso recursivo
 					armar_expresion(entorno, expresion->sub[0]),
-					armar_expresion(entorno, expresion->sub[1])
-				},
+					armar_expresion(entorno, expresion->sub[1])},
 				.op = expresion->op
 			};
 		}
@@ -191,6 +193,7 @@ static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 }
 
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
+	// interpreta el alias y obtiene la expresion literal
 	Expresion* expresion = leer_alias(entorno, alias, alias_n);
 	if (expresion) {
 		char* expresionInfija = expresion_infija(expresion);
