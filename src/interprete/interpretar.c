@@ -127,6 +127,32 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 	return;
 }
 
+static int chequear_expresion(Expresion* expresion, Entorno* entorno);
+
+static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
+	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	return entradaAlias ? chequear_expresion(entradaAlias->expresion, entorno) : 0;
+}
+
+static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
+	int es_valida;
+	switch (expresion->tag) {
+	case X_OPERACION:
+		if (expresion->op->aridad == 1)
+			es_valida =  chequear_expresion(expresion->sub[0], entorno);
+		else
+			es_valida =  chequear_expresion(expresion->sub[1], entorno) &&
+				chequear_expresion(expresion->sub[0], entorno);
+		break;
+	case X_NUMERO:
+		es_valida =  1;
+	case X_ALIAS:
+		es_valida =  chequear_alias(entorno, expresion->alias, expresion->valor);
+		break;
+	}
+	return es_valida;
+}
+
 // TODO: testear evaluar_alias (y evaluar_arbol).
 static int evaluar_arbol(Expresion* expresion, Entorno* entorno);
 
