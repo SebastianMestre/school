@@ -197,13 +197,15 @@ static void imprimir_expresion(Expresion* expresion, int precedencia, int izquie
 }
 
 static void imprimir_alias(Entorno* entorno, char const* alias, int alias_n) {
-	Expresion* expresion = leer_alias(entorno, alias, alias_n);
-	if (expresion) {
+	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	if (entradaAlias) {
+		Expresion* expresion = entradaAlias->expresion; 
 		// si la expresion es un numero, no podemos buscar la precedencia
-		if (expresion->tag == X_NUMERO) printf("%d\n", expresion->valor); 
-		else imprimir_expresion(expresion, expresion->op->precedencia, 1);
-		expresion_limpiar(expresion);
+		if (expresion->tag == X_NUMERO) printf("%d ", expresion->valor); 
+		else imprimir_expresion(expresion, expresion->op->precedencia, 1);		
 	}
+	// si el alias no esta definido, imprimimos su nombre.
+	else printf("%.*s ", alias_n, alias);
 }
 
 // limpia 'input' y 'expresion'
