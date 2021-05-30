@@ -164,8 +164,12 @@ static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion);
 
 // devuelve la expresion asociada a un alias
 static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
+	Expresion* expresion = NULL;
 	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
-	Expresion* expresion = armar_expresion(entorno, entradaAlias->expresion);
+	if (entradaAlias) 
+		expresion = armar_expresion(entorno, entradaAlias->expresion);
+	// si el alias no existe, avisamos al usuario y devolvemos NULL
+	else printf("El alias \'%.*s\' no esta definido.\n", alias_n, alias);
 	return expresion;
 }
 
@@ -174,19 +178,35 @@ static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
 static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 	Expresion* expresionFinal = NULL;
 	if (expresion) {
-		if (expresion->tag == X_ALIAS)
-			expresionFinal = leer_alias(entorno, expresion->alias, expresion->valor);
-		else {
+		switch (expresion->tag) {
+		case X_OPERACION: {
+			// paso recursivo
+			Expresion* sub[2] = {
+				armar_expresion(entorno, expresion->sub[0]),
+				armar_expresion(entorno, expresion->sub[1])};
+			// chequeamos la validez de los operandos
+			// en caso de no ser validos, expresionFinal queda en NULL
+			// si la operacion es unaria, alcanza con tener un unico operando
+			if (expresion->op->aridad == 1 && sub[1] || sub[0] && sub[1]) {
+				expresionFinal = malloc(sizeof(*expresionFinal));
+				*expresionFinal = (Expresion){
+					.tag = expresion->tag,
+					.valor = expresion->valor,
+					.sub = {sub[0], sub[1]},
+					.op = expresion->op
+				};
+			}
+		} break;
+		case X_NUMERO:
 			expresionFinal = malloc(sizeof(*expresionFinal));
 			*expresionFinal = (Expresion){
 				.tag = expresion->tag,
-				.valor = expresion->valor,
-				.sub = {
-					// paso recursivo
-					armar_expresion(entorno, expresion->sub[0]),
-					armar_expresion(entorno, expresion->sub[1])},
-				.op = expresion->op
-			};
+				.valor = expresion->valor};
+			break;
+		case X_ALIAS:
+			// llamamos a leer_alias
+			expresionFinal = leer_alias(entorno, expresion->alias, expresion->valor);
+			break;
 		}
 	}
 	return expresionFinal;
