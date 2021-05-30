@@ -198,6 +198,10 @@ static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 					.op = expresion->op
 				};
 			}
+			else {
+				expresion_limpiar(sub[0]);
+				expresion_limpiar(sub[1]);
+			}
 		} break;
 		case X_NUMERO:
 			expresionFinal = malloc(sizeof(*expresionFinal));
@@ -224,6 +228,7 @@ static void imprimir_alias(Entorno* entorno, char const* alias, int alias_n) {
 		// si la expresion es un numero, no podemos buscar la precedencia
 		if (expresion->tag == X_NUMERO) printf("%d\n", expresion->valor); 
 		else imprimir_expresion(expresion, expresion->op->precedencia, 1);
+		expresion_limpiar(expresion);
 	}
 }
 
