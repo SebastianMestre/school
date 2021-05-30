@@ -160,64 +160,6 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 	return 0;
 } 
 
-static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion);
-
-// devuelve la expresion asociada a un alias
-// en caso de no reconocer un alias, avisa al usuario y devuelve NULL
-static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
-	Expresion* expresion = NULL;
-	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
-	if (entradaAlias) 
-		expresion = armar_expresion(entorno, entradaAlias->expresion);
-	// si el alias no existe, avisamos al usuario
-	else printf("El alias \'%.*s\' no esta definido.\n", alias_n, alias);
-	return expresion;
-}
-
-// arma la expresion literal
-// devuelve una expresion sin alias,
-// o NULL si encuentra alias no definidos en la expresion 
-static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
-	Expresion* expresionFinal = NULL;
-	if (expresion) {
-		switch (expresion->tag) {
-		case X_OPERACION: {
-			// paso recursivo
-			Expresion* sub[2] = {
-				armar_expresion(entorno, expresion->sub[0]),
-				armar_expresion(entorno, expresion->sub[1])};
-			// chequeamos la validez de los operandos
-			// en caso de no ser validos, expresionFinal queda en NULL
-			// si la operacion es unaria, alcanza con tener un unico operando
-			if (expresion->op->aridad == 1 && sub[1] || sub[0] && sub[1]) {
-				expresionFinal = malloc(sizeof(*expresionFinal));
-				*expresionFinal = (Expresion){
-					.tag = expresion->tag,
-					.valor = expresion->valor,
-					.sub = {sub[0], sub[1]},
-					.op = expresion->op
-				};
-			}
-			else {
-				expresion_limpiar(sub[0]);
-				expresion_limpiar(sub[1]);
-			}
-		} break;
-		case X_NUMERO:
-			expresionFinal = malloc(sizeof(*expresionFinal));
-			*expresionFinal = (Expresion){
-				.tag = expresion->tag,
-				.valor = expresion->valor};
-			break;
-		case X_ALIAS:
-			// llamamos a leer_alias
-			expresionFinal = leer_alias(entorno, expresion->alias, expresion->valor);
-			break;
-		}
-	}
-	return expresionFinal;
-}
-
 static void imprimir_expresion(Expresion* expresion, int precedencia, int izquierda) {
 	// TODO
 }
