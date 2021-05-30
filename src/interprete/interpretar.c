@@ -212,14 +212,17 @@ static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 	return expresionFinal;
 }
 
-static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
-	// interpreta el alias y obtiene la expresion literal
+static void imprimir_expresion(Expresion* expresion, int precedencia, int izquierda) {
+	// TODO
+}
+
+static void imprimir_alias(Entorno* entorno, char const* alias, int alias_n) {
 	Expresion* expresion = leer_alias(entorno, alias, alias_n);
 	if (expresion) {
-		// imprimir_expresion_infija(expresion);
-		expresion_limpiar(expresion);
+		// si la expresion es un numero, no podemos buscar la precedencia
+		if (expresion->tag == X_NUMERO) printf("%d\n", expresion->valor); 
+		else imprimir_expresion(expresion, expresion->op->precedencia, 1);
 	}
-	else printf("Ese alias no existe...\n");
 }
 
 // limpia 'input' y 'expresion'
@@ -240,7 +243,7 @@ void interpretar(TablaOps* tabla_ops) {
 			cargar(&entorno, robar_input(&entorno), sentencia.alias, sentencia.alias_n, sentencia.expresion);
 			break;
 		case S_IMPRIMIR:
-			imprimir(&entorno, sentencia.alias, sentencia.alias_n);
+			imprimir_alias(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
 		case S_EVALUAR: {
 			int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
