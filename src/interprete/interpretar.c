@@ -131,7 +131,13 @@ static int chequear_expresion(Expresion* expresion, Entorno* entorno);
 
 static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
-	return entradaAlias ? chequear_expresion(entradaAlias->expresion, entorno) : 0;
+	if (entradaAlias)
+		return chequear_expresion(entradaAlias->expresion, entorno);
+	else {
+		// avisamos al usuario y devolvemos false.
+		printf("El alias %.*s no esta definido.", alias_n, alias);
+		return 0;
+	}
 }
 
 static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
