@@ -135,7 +135,7 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 		return chequear_expresion(entradaAlias->expresion, entorno);
 	else {
 		// avisamos al usuario y devolvemos false.
-		printf("El alias %.*s no esta definido.", alias_n, alias);
+		printf("El alias %.*s no esta definido.\n", alias_n, alias);
 		return 0;
 	}
 }
@@ -145,15 +145,15 @@ static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
 	switch (expresion->tag) {
 	case X_OPERACION:
 		if (expresion->op->aridad == 1)
-			es_valida =  chequear_expresion(expresion->sub[0], entorno);
+			es_valida = chequear_expresion(expresion->sub[0], entorno);
 		else
-			es_valida =  chequear_expresion(expresion->sub[1], entorno) &&
+			es_valida = chequear_expresion(expresion->sub[1], entorno) &&
 				chequear_expresion(expresion->sub[0], entorno);
 		break;
 	case X_NUMERO:
 		es_valida =  1;
 	case X_ALIAS:
-		es_valida =  chequear_alias(entorno, expresion->alias, expresion->valor);
+		es_valida = chequear_alias(entorno, expresion->alias, expresion->valor);
 		break;
 	}
 	return es_valida;
@@ -226,10 +226,12 @@ void interpretar(TablaOps* tabla_ops) {
 		case S_IMPRIMIR:
 			imprimir_alias(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
-		case S_EVALUAR: {
-			int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
-			printf("%d\n", resultado);
-			} break;
+		case S_EVALUAR:
+			if (chequear_alias(&entorno, sentencia.alias, sentencia.alias_n)) {
+				int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
+				printf("%d\n", resultado);
+			}
+			break;
 		case S_INVALIDO:
 			puts("Error, saliendo."); // NICETOHAVE mejor error
 		// fallthrough
