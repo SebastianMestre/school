@@ -163,18 +163,20 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion);
 
 // devuelve la expresion asociada a un alias
+// en caso de no reconocer un alias, avisa al usuario y devuelve NULL
 static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
 	Expresion* expresion = NULL;
 	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
 	if (entradaAlias) 
 		expresion = armar_expresion(entorno, entradaAlias->expresion);
-	// si el alias no existe, avisamos al usuario y devolvemos NULL
+	// si el alias no existe, avisamos al usuario
 	else printf("El alias \'%.*s\' no esta definido.\n", alias_n, alias);
 	return expresion;
 }
 
-// arma la expresion literal 
-// se asegura de que no haya alias en el arbol de expresion
+// arma la expresion literal
+// devuelve una expresion sin alias,
+// o NULL si encuentra alias no definidos en la expresion 
 static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
 	Expresion* expresionFinal = NULL;
 	if (expresion) {
