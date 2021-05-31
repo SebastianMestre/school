@@ -2,7 +2,6 @@
 
 #include "expresion.h"
 #include "parser.h"
-#include "expresion_infija.h"
 
 #include <assert.h>
 #include <stdio.h>
