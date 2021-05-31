@@ -1,4 +1,6 @@
 #include "expresion.h"
+	
+#include <stdlib.h>
 
 void expresion_limpiar(Expresion* expresion) {
 	if (expresion) {
