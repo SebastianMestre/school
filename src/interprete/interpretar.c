@@ -152,6 +152,7 @@ static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
 		break;
 	case X_NUMERO:
 		es_valida =  1;
+    break;
 	case X_ALIAS:
 		es_valida = chequear_alias(entorno, expresion->alias, expresion->valor);
 		break;
@@ -172,7 +173,8 @@ static int evaluar_alias(Entorno* entorno, char const* alias, int alias_n) {
 // funcion auxliar a evaluar_alias; evalua el arbol de expresiones
 // necesitamos el entorno en caso de encontrar un alias que evaluar									
 static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
-	switch (expresion->tag) {
+	if (!expresion) return 0;
+  switch (expresion->tag) {
 	case X_OPERACION: {
 		// evaluamos los subarboles recursivamente y los usamos como args
 		int args[2] =
