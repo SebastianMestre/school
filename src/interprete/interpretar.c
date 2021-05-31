@@ -2,7 +2,6 @@
 
 #include "expresion.h"
 #include "parser.h"
-#include "expresion_infija.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -127,6 +126,39 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 	return;
 }
 
+static int chequear_expresion(Expresion* expresion, Entorno* entorno);
+
+static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
+	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	if (entradaAlias)
+		return chequear_expresion(entradaAlias->expresion, entorno);
+	else {
+		// avisamos al usuario y devolvemos false.
+		printf("El alias \'%.*s\' no esta definido.\n", alias_n, alias);
+		return 0;
+	}
+}
+
+static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
+	int es_valida;
+	switch (expresion->tag) {
+	case X_OPERACION:
+		if (expresion->op->aridad == 1)
+			es_valida = chequear_expresion(expresion->sub[0], entorno);
+		else
+			es_valida = chequear_expresion(expresion->sub[1], entorno) &&
+				chequear_expresion(expresion->sub[0], entorno);
+		break;
+	case X_NUMERO:
+		es_valida =  1;
+    break;
+	case X_ALIAS:
+		es_valida = chequear_alias(entorno, expresion->alias, expresion->valor);
+		break;
+	}
+	return es_valida;
+}
+
 // TODO: testear evaluar_alias (y evaluar_arbol).
 static int evaluar_arbol(Expresion* expresion, Entorno* entorno);
 
@@ -140,66 +172,74 @@ static int evaluar_alias(Entorno* entorno, char const* alias, int alias_n) {
 // funcion auxliar a evaluar_alias; evalua el arbol de expresiones
 // necesitamos el entorno en caso de encontrar un alias que evaluar									
 static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
-	if (expresion) {
-		switch (expresion->tag) {
-		case X_OPERACION: {
-			// evaluamos los subarboles recursivamente y los usamos como args
-			int args[2] =
-				{evaluar_arbol(expresion->sub[0], entorno),
-				evaluar_arbol(expresion->sub[1], entorno)};
-			return expresion->op->eval(args);
-		} break;
-		case X_NUMERO:
-			return expresion->valor;
-			break;
-		case X_ALIAS:
-			return evaluar_alias(entorno, expresion->alias, expresion->valor);
-			break;
-		}
+	if (!expresion) return 0;
+  switch (expresion->tag) {
+	case X_OPERACION: {
+		// evaluamos los subarboles recursivamente y los usamos como args
+		int args[2] =
+			{evaluar_arbol(expresion->sub[0], entorno),
+			evaluar_arbol(expresion->sub[1], entorno)};
+		return expresion->op->eval(args);
+	} break;
+	case X_NUMERO:
+		return expresion->valor;
+		break;
+	case X_ALIAS:
+		return evaluar_alias(entorno, expresion->alias, expresion->valor);
+		break;
 	}
-	return 0;
 } 
 
-static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion);
-
-// devuelve la expresion asociada a un alias
-static Expresion* leer_alias(Entorno* entorno, char const* alias, int alias_n) {
-	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
-	Expresion* expresion = armar_expresion(entorno, entradaAlias->expresion);
-	return expresion;
-}
-
-// arma la expresion literal 
-// se asegura de que no haya alias en el arbol de expresion
-static Expresion* armar_expresion(Entorno* entorno, Expresion* expresion) {
-	Expresion* expresionFinal = NULL;
-	if (expresion) {
-		if (expresion->tag == X_ALIAS)
-			expresionFinal = leer_alias(entorno, expresion->alias, expresion->valor);
-		else {
-			expresionFinal = malloc(sizeof(*expresionFinal));
-			*expresionFinal = (Expresion){
-				.tag = expresion->tag,
-				.valor = expresion->valor,
-				.sub = {
-					// paso recursivo
-					armar_expresion(entorno, expresion->sub[0]),
-					armar_expresion(entorno, expresion->sub[1])},
-				.op = expresion->op
-			};
+static void imprimir_expresion(Expresion* expresion, int precedencia, int izquierda, Entorno* entorno) {
+	switch (expresion->tag) {
+	case X_OPERACION: 
+		if (expresion->op->aridad == 1) {
+			if (!izquierda) printf("(");
+			printf("%s", expresion->op->simbolo);
+			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 0, entorno);
+			if (!izquierda) printf(")");
 		}
+		else {
+			if (expresion->op->precedencia < precedencia) {
+				printf("(");
+				izquierda = 1;
+			}
+			imprimir_expresion(expresion->sub[1], expresion->op->precedencia, izquierda, entorno);
+			printf(" %s ", expresion->op->simbolo);
+			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 0, entorno);
+			if (expresion->op->precedencia < precedencia) printf(")");
+		}
+		break;
+	case X_NUMERO:
+		printf("%d", expresion->valor);
+		break;
+	case X_ALIAS: {
+		EntradaTablaAlias* entradaAlias = 
+			ta_encontrar(&entorno->aliases, expresion->alias, expresion->valor);
+		if (entradaAlias) {
+			expresion = entradaAlias->expresion;
+			// imprimo la expresion asociada al alias
+			imprimir_expresion(expresion, precedencia, izquierda, entorno);		
+		}
+		else {
+			if (!izquierda) printf(" ");
+			printf("%.*s", expresion->valor, expresion->alias);
+		}
+	}	break;
 	}
-	return expresionFinal;
 }
 
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
-	// interpreta el alias y obtiene la expresion literal
-	Expresion* expresion = leer_alias(entorno, alias, alias_n);
-	if (expresion) {
-		// imprimir_expresion_infija(expresion);
-		expresion_limpiar(expresion);
+	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	if (entradaAlias) {
+		Expresion* expresion = entradaAlias->expresion; 
+		int precedencia = 0;
+		if (expresion->tag == X_OPERACION) precedencia = expresion->op->precedencia;
+		imprimir_expresion(expresion, precedencia, 1, entorno);		
 	}
-	else printf("Ese alias no existe...\n");
+	// si el alias no esta definido, imprimimos su nombre.
+	else printf("%.*s ", alias_n, alias);
+	puts("");
 }
 
 // limpia 'input' y 'expresion'
@@ -222,10 +262,12 @@ void interpretar(TablaOps* tabla_ops) {
 		case S_IMPRIMIR:
 			imprimir(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
-		case S_EVALUAR: {
-			int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
-			printf("%d\n", resultado);
-			} break;
+		case S_EVALUAR:
+			if (chequear_alias(&entorno, sentencia.alias, sentencia.alias_n)) {
+				int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
+				printf("%d\n", resultado);
+			}
+			break;
 		case S_INVALIDO:
 			puts("Error, saliendo."); // NICETOHAVE mejor error
 		// fallthrough

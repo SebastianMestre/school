@@ -1,4 +1,6 @@
 #include "expresion.h"
+	
+#include <stdlib.h>
 
 #include <stdlib.h>
 
