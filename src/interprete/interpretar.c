@@ -195,25 +195,23 @@ static void imprimir_expresion(Expresion* expresion, int precedencia, int izquie
 	switch (expresion->tag) {
 	case X_OPERACION: 
 		if (expresion->op->aridad == 1) {
-			if (!izquierda) printf(" (");
+			if (!izquierda) printf("(");
 			printf("%s", expresion->op->simbolo);
-			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 1, entorno);
+			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 0, entorno);
 			if (!izquierda) printf(")");
 		}
 		else {
-			if (!izquierda) printf(" ");
 			if (expresion->op->precedencia < precedencia) {
 				printf("(");
 				izquierda = 1;
 			}
 			imprimir_expresion(expresion->sub[1], expresion->op->precedencia, izquierda, entorno);
-			printf(" %s", expresion->op->simbolo);
+			printf(" %s ", expresion->op->simbolo);
 			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 0, entorno);
 			if (expresion->op->precedencia < precedencia) printf(")");
 		}
 		break;
 	case X_NUMERO:
-		if (!izquierda) printf(" ");
 		printf("%d", expresion->valor);
 		break;
 	case X_ALIAS: {
