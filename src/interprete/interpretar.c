@@ -135,7 +135,7 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 		return chequear_expresion(entradaAlias->expresion, entorno);
 	else {
 		// avisamos al usuario y devolvemos false.
-		printf("El alias %.*s no esta definido.\n", alias_n, alias);
+		printf("El alias \'%.*s\' no esta definido.\n", alias_n, alias);
 		return 0;
 	}
 }
@@ -226,7 +226,7 @@ static void imprimir_expresion(Expresion* expresion, int precedencia, int izquie
 		}
 		else {
 			if (!izquierda) printf(" ");
-			printf(" %.*s", expresion->valor, expresion->alias);
+			printf("%.*s", expresion->valor, expresion->alias);
 		}
 	}	break;
 	}
