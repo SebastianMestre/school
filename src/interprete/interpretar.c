@@ -240,6 +240,7 @@ static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	}
 	// si el alias no esta definido, imprimimos su nombre.
 	else printf("%.*s ", alias_n, alias);
+	puts("");
 }
 
 // limpia 'input' y 'expresion'
