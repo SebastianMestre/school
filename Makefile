@@ -1,5 +1,7 @@
 INTDIR = src/interprete
 
+CFLAGS = -Wall -Wextra -Werror -std=c99 -g -fno-omit-frame-pointer 
+
 interprete: build/main.o build/interpretar.o build/tabla_ops.o build/operadores.o build/expresion.o build/parser.o
 	gcc -o $@ $^
 
@@ -17,8 +19,8 @@ build/parser.o:      $(INTDIR)/parser.c $(INTDIR)/parser.h src/tabla_ops.h src/f
 
 build/%.o: src/%.c
 	mkdir -p build
-	gcc -fno-omit-frame-pointer -g -c -o $@ $<
+	gcc $(CFLAGS) -c -o $@ $<
 
 build/%.o: $(INTDIR)/%.c
 	mkdir -p build
-	gcc -fno-omit-frame-pointer -g -c -o $@ $<
+	gcc $(CFLAGS) -c -o $@ $<
