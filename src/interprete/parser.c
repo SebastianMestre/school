@@ -118,8 +118,8 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 	return (Tokenizado){str, (Token){T_INVALIDO}};
 }
 
-static Parseado invalido(char const* str) {
-	return (Parseado){str, (Sentencia){S_INVALIDO}};
+static Parseado invalido(char const* str, ErrorTag error) {
+	return (Parseado){str, (Sentencia){.tag = S_INVALIDO, .error = error}};
 }
 
 typedef struct EntradaPilaDeExpresiones EntradaPilaDeExpresiones;
@@ -179,7 +179,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
-			return invalido(str);
+			return invalido(str, E_ALIAS);
 		return (Parseado){str, (Sentencia){S_EVALUAR, tokenizado.token.inicio, tokenizado.token.valor}};
 		break;
 
@@ -187,7 +187,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
-			return invalido(str);
+			return invalido(str, E_ALIAS);
 		return (Parseado){str, (Sentencia){S_IMPRIMIR, tokenizado.token.inicio, tokenizado.token.valor}};
 		break;
 
@@ -198,12 +198,12 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_IGUAL)
-			return invalido(str);
+			return invalido(str, E_CARGA);
 
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
-			return invalido(str);
+			return invalido(str, E_CARGA);
 
 		// Convierto expresion postfija a infija, usando una pila:
 		// Los valores sueltos, como numeros y aliases, los inserto en la pila.
@@ -250,12 +250,12 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 				fail_arg1:
 				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str);
+				return invalido(str, E_EXPRESION);
 
 				} break;
 			default:
 				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str);
+				return invalido(str, E_EXPRESION);
 			}
 		}
 
@@ -264,13 +264,13 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		if (pila_de_expresiones_top(&p) != NULL) {
 			expresion_limpiar(expresion);
 			pila_de_expresiones_limpiar_datos(&p);
-			return invalido(str);
+			return invalido(str, E_EXPRESION);
 		}
 
 		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}};
 		} break;
 
 	default:
-		return invalido(str);
+		return invalido(str, E_OPERACION);
 	}
 }
