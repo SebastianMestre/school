@@ -247,6 +247,29 @@ static void cargar(Entorno* entorno, char* input, char const* alias, int alias_n
 	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
+static void manejar_error(ErrorTag error) {
+	printf("ERROR: ");
+	switch (error) {
+		case E_ALIAS: 
+			puts("debe especificarse un alias valido.");
+			break;
+		case E_CARGA: 
+			puts("error en la sintaxis de carga.");
+			break;
+		case E_EXPRESION:
+			puts("expresion invalida.");
+			break;
+		case E_OPERACION:
+			puts("no se reconocio niguna operacion valida.");
+			break;
+		case E_VACIA:
+			puts("no se permite una expresion vacia.");
+			break;
+		default:
+			fflush(stdout); assert(0);
+	}
+}
+
 void interpretar(TablaOps* tabla_ops) {
 	Entorno entorno = entorno_crear();
 	while (1) {
@@ -269,8 +292,8 @@ void interpretar(TablaOps* tabla_ops) {
 			}
 			break;
 		case S_INVALIDO:
-			puts("Error, saliendo."); // NICETOHAVE mejor error
-		// fallthrough
+			manejar_error(sentencia.error);
+			break;
 		case S_SALIR:
 			entorno_limpiar_datos(&entorno);
 			return;

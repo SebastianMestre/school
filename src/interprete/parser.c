@@ -198,7 +198,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_IGUAL)
-			return invalido(str, E_CARGA);
+			return invalido(str, E_OPERACION);
 
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
