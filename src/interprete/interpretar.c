@@ -260,7 +260,8 @@ static void manejar_error(ErrorTag error) {
 			puts("expresion invalida.");
 			break;
 		case E_OPERACION:
-			puts("no se reconocio niguna operacion valida.");
+			puts("no se reconocio niguna operacion valida. " 
+				"Ingrese \'salir\' para terminar el programa.");
 			break;
 		case E_VACIA:
 			puts("no se permite una expresion vacia.");
