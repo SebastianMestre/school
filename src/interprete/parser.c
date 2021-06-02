@@ -37,9 +37,12 @@ typedef struct Tokenizado {
 } Tokenizado;
 
 #define CANT_STRINGS_FIJOS 4
-static int const largo_strings_fijos[CANT_STRINGS_FIJOS] = { 5, 6, 7, 8 };
-static char const* const strings_fijos[CANT_STRINGS_FIJOS] = { "salir", "cargar", "evaluar", "imprimir" };
-static TokenTag const token_strings_fijos[CANT_STRINGS_FIJOS] = { T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
+static int const largo_strings_fijos[CANT_STRINGS_FIJOS] = 
+	{ 5, 6, 7, 8 };
+static char const* const strings_fijos[CANT_STRINGS_FIJOS] = 
+	{ "salir", "cargar", "evaluar", "imprimir" };
+static TokenTag const token_strings_fijos[CANT_STRINGS_FIJOS] = 
+	{ T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
 
 // Analiza el pricipio del string, y extrae una pieza, dandole sentido.
 // Luego, devuelve una representacion de esa pieza, y un puntero a donde esa
@@ -112,7 +115,9 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 		}
 
 		if (op_que_matchea != NULL)
-			return (Tokenizado){str+largo_de_op_que_matchea, (Token){T_OPERADOR, NULL, 0, op_que_matchea}};
+			return (Tokenizado){
+				str + largo_de_op_que_matchea,
+				(Token){T_OPERADOR, NULL, 0, op_que_matchea}};
 	}
 
 	return (Tokenizado){str, (Token){T_INVALIDO}};
@@ -132,7 +137,8 @@ typedef struct PilaDeExpresiones {
 	EntradaPilaDeExpresiones* entradas;
 } PilaDeExpresiones;
 
-static void pila_de_expresiones_push(PilaDeExpresiones* pila, Expresion* expresion) {
+static void pila_de_expresiones_push(PilaDeExpresiones* pila, 
+	Expresion* expresion) {
 	EntradaPilaDeExpresiones* entrada = malloc(sizeof(*entrada));
 	*entrada = (EntradaPilaDeExpresiones){
 		.sig = pila->entradas,
@@ -180,7 +186,10 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
 			return invalido(str, E_PARSER_ALIAS);
-		return (Parseado){str, (Sentencia){S_EVALUAR, tokenizado.token.inicio, tokenizado.token.valor}};
+		return (Parseado){str, (Sentencia){
+				S_EVALUAR,
+				tokenizado.token.inicio,
+				tokenizado.token.valor}};
 		break;
 
 	case T_IMPRIMIR:
@@ -188,7 +197,10 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
 			return invalido(str, E_PARSER_ALIAS);
-		return (Parseado){str, (Sentencia){S_IMPRIMIR, tokenizado.token.inicio, tokenizado.token.valor}};
+		return (Parseado){str, (Sentencia){
+				S_IMPRIMIR, 
+				tokenizado.token.inicio, 
+				tokenizado.token.valor}};
 		break;
 
 	case T_NOMBRE: {

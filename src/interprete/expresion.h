@@ -16,15 +16,23 @@ typedef enum {
 
 struct Expresion {
 	ExpressionTag tag;
-	int valor; // para guardar los valores numericos, o la longitud de un alias, dependiendo del tag
-	char const* alias; // para guardar el texto de un alias
-	Expresion* sub[2]; // para guardar las sub-expresiones de una operacion
-	EntradaTablaOps* op; // para guardar la informacion de la operacion (de haber una).
+	// para guardar los valores numericos, o la longitud de un alias, 
+	// dependiendo del tag.
+	int valor;
+	// para guardar el texto de un alias.  
+	char const* alias;
+	// para guardar las sub-expresiones de una operacion.
+	Expresion* sub[2];
+	// para guardar la informacion de la operacion (de haber una).
+	EntradaTablaOps* op; 
 };
 
 Expresion* expresion_numero(int valor);
 Expresion* expresion_alias(char const* alias, int alias_n);
-Expresion* expresion_operacion(EntradaTablaOps* op, Expresion* sub0, Expresion* sub1);
+Expresion* expresion_operacion(
+	EntradaTablaOps* op, 
+	Expresion* sub0, 
+	Expresion* sub1);
 
 /**
  * Libera recursivamente el espacio de memoria ocupado por el arbol de

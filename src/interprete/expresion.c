@@ -25,7 +25,8 @@ Expresion* expresion_alias(char const* alias, int alias_n) {
 	});
 }
 
-Expresion* expresion_operacion(EntradaTablaOps* op, Expresion* sub0, Expresion* sub1) {
+Expresion* expresion_operacion(EntradaTablaOps* op, Expresion* sub0, 
+	Expresion* sub1) {
 	return expresion_reservar((Expresion){
 		.tag = X_OPERACION,
 		.op = op,

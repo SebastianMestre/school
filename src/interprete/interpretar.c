@@ -33,7 +33,8 @@ typedef struct {
 	EntradaTablaAlias* entradas;
 } TablaAlias;
 
-static EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, int alias_n) {
+static EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, 
+	int alias_n) {
 	for (EntradaTablaAlias* it = tabla->entradas; it; it = it->sig)
 		if (it->alias_n == alias_n && memcmp(it->alias, alias, alias_n) == 0)
 			return it;
@@ -41,7 +42,12 @@ static EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, int
 }
 
 // limpia 'input' y 'expresion'
-static EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const* alias, int alias_n, Expresion* expresion) {
+static EntradaTablaAlias* ta_insertar(
+	TablaAlias* tabla, 
+	char* input, 
+	char const* alias, 
+	int alias_n, 
+	Expresion* expresion) {
 	EntradaTablaAlias* nuevo = malloc(sizeof(*nuevo));
 	*nuevo = (EntradaTablaAlias) {
 		.sig = tabla->entradas,
@@ -55,12 +61,16 @@ static EntradaTablaAlias* ta_insertar(TablaAlias* tabla, char* input, char const
 }
 
 // limpia 'input' y 'expresion'
-static EntradaTablaAlias* ta_insertar_o_reemplazar(TablaAlias* tabla, char* input, char const* alias, int alias_n, Expresion* expresion) {
+static EntradaTablaAlias* ta_insertar_o_reemplazar(
+	TablaAlias* tabla, 
+	char* input, 
+	char const* alias, 
+	int alias_n, 
+	Expresion* expresion) {
 	EntradaTablaAlias* encontrado = ta_encontrar(tabla, alias, alias_n);
 
 	if (encontrado == NULL)
 		return ta_insertar(tabla, input, alias, alias_n, expresion);
-
 	free(encontrado->input);
 	encontrado->input = input;
 	encontrado->alias = alias;
@@ -157,7 +167,8 @@ static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 static int chequear_expresion(Expresion* expresion, Entorno* entorno);
 
 static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
-	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	EntradaTablaAlias* entradaAlias = 
+		ta_encontrar(&entorno->aliases, alias, alias_n);
 	if (entradaAlias)
 		return chequear_expresion(entradaAlias->expresion, entorno);
 	else {
@@ -191,7 +202,8 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno);
 
 // encuentra la expresion correspondiente y llama a evaluar_arbol
 static int evaluar_alias(Entorno* entorno, char const* alias, int alias_n) {
-	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	EntradaTablaAlias* entradaAlias = 
+		ta_encontrar(&entorno->aliases, alias, alias_n);
 	Expresion* expresion = entradaAlias->expresion;
 	return evaluar_arbol(expresion, entorno);
 }
@@ -217,26 +229,28 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 	}
 } 
 
-static void imprimir_expresion(Expresion* expresion, int precedencia, int izquierda, Entorno* entorno) {
+static void imprimir_expresion(Expresion* expresion, int precedencia, 
+	int izquierda, Entorno* entorno) {
 	switch (expresion->tag) {
-	case X_OPERACION: 
+	case X_OPERACION: {
+		int precedencia_op = expresion->op->precedencia;
 		if (expresion->op->aridad == 1) {
 			if (!izquierda) printf("(");
 			printf("%s", expresion->op->simbolo);
-			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 0, entorno);
+			imprimir_expresion(expresion->sub[0], precedencia_op, 0, entorno);
 			if (!izquierda) printf(")");
 		}
 		else {
-			if (expresion->op->precedencia < precedencia) {
+			if (precedencia_op < precedencia) {
 				printf("(");
 				izquierda = 1;
 			}
-			imprimir_expresion(expresion->sub[1], expresion->op->precedencia, izquierda, entorno);
+			imprimir_expresion(expresion->sub[1], precedencia_op, izquierda, entorno);
 			printf(" %s ", expresion->op->simbolo);
-			imprimir_expresion(expresion->sub[0], expresion->op->precedencia, 0, entorno);
+			imprimir_expresion(expresion->sub[0], precedencia_op, 0, entorno);
 			if (expresion->op->precedencia < precedencia) printf(")");
 		}
-		break;
+	}	break;
 	case X_NUMERO:
 		printf("%d", expresion->valor);
 		break;
@@ -257,7 +271,8 @@ static void imprimir_expresion(Expresion* expresion, int precedencia, int izquie
 }
 
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
-	EntradaTablaAlias* entradaAlias = ta_encontrar(&entorno->aliases, alias, alias_n);
+	EntradaTablaAlias* entradaAlias = 
+		ta_encontrar(&entorno->aliases, alias, alias_n);
 	if (entradaAlias) {
 		Expresion* expresion = entradaAlias->expresion; 
 		int precedencia = 0;
@@ -270,7 +285,8 @@ static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 }
 
 // limpia 'input' y 'expresion'
-static void cargar(Entorno* entorno, char* input, char const* alias, int alias_n, Expresion* expresion) {
+static void cargar(Entorno* entorno, char* input, char const* alias, int alias_n, 
+	Expresion* expresion) {
 	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
@@ -284,14 +300,16 @@ void interpretar(TablaOps* tabla_ops) {
 
 		switch (sentencia.tag) {
 		case S_CARGA:
-			cargar(&entorno, robar_input(&entorno), sentencia.alias, sentencia.alias_n, sentencia.expresion);
+			cargar(&entorno, robar_input(&entorno),
+				sentencia.alias, sentencia.alias_n, sentencia.expresion);
 			break;
 		case S_IMPRIMIR:
 			imprimir(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
 		case S_EVALUAR:
 			if (chequear_alias(&entorno, sentencia.alias, sentencia.alias_n)) {
-				int resultado = evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
+				int resultado = 
+					evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
 				printf("%d\n", resultado);
 			}
 			break;
