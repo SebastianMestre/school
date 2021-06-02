@@ -2,6 +2,7 @@
 
 #include "expresion.h"
 #include "parser.h"
+#include "error.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -126,6 +127,30 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 	return;
 }
 
+static void manejar_error(ErrorTag error) {
+	printf("ERROR: ");
+	switch (error) {
+		case E_ALIAS: 
+			puts("debe especificarse un alias valido.");
+			break;
+		case E_CARGA: 
+			puts("error en la sintaxis de carga.");
+			break;
+		case E_EXPRESION:
+			puts("expresion invalida.");
+			break;
+		case E_OPERACION:
+			puts("no se reconocio niguna operacion valida. " 
+				"Ingrese \'salir\' para terminar el programa.");
+			break;
+		case E_VACIA:
+			puts("no se permite una expresion vacia.");
+			break;
+		default:
+			fflush(stdout); assert(0);
+	}
+}
+
 static int chequear_expresion(Expresion* expresion, Entorno* entorno);
 
 static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
@@ -133,8 +158,7 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 	if (entradaAlias)
 		return chequear_expresion(entradaAlias->expresion, entorno);
 	else {
-		// avisamos al usuario y devolvemos false.
-		printf("El alias \'%.*s\' no esta definido.\n", alias_n, alias);
+		manejar_error(E_EVAL);
 		return 0;
 	}
 }
@@ -247,30 +271,6 @@ static void cargar(Entorno* entorno, char* input, char const* alias, int alias_n
 	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
-static void manejar_error(ErrorTag error) {
-	printf("ERROR: ");
-	switch (error) {
-		case E_ALIAS: 
-			puts("debe especificarse un alias valido.");
-			break;
-		case E_CARGA: 
-			puts("error en la sintaxis de carga.");
-			break;
-		case E_EXPRESION:
-			puts("expresion invalida.");
-			break;
-		case E_OPERACION:
-			puts("no se reconocio niguna operacion valida. " 
-				"Ingrese \'salir\' para terminar el programa.");
-			break;
-		case E_VACIA:
-			puts("no se permite una expresion vacia.");
-			break;
-		default:
-			fflush(stdout); assert(0);
-	}
-}
-
 void interpretar(TablaOps* tabla_ops) {
 	Entorno entorno = entorno_crear();
 	while (1) {
@@ -293,7 +293,7 @@ void interpretar(TablaOps* tabla_ops) {
 			}
 			break;
 		case S_INVALIDO:
-			manejar_error(sentencia.error);
+			manejar_error(parseado.error);
 			break;
 		case S_SALIR:
 			entorno_limpiar_datos(&entorno);

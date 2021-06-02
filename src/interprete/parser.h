@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "error.h"
+
 typedef struct TablaOps TablaOps;
 typedef struct Expresion Expresion;
 
@@ -13,14 +15,6 @@ typedef enum {
 	S_INVALIDO, // (un error)
 } SentenciaTag;
 
-// En el contexto de una sentencia, identifica un error encontrado en el parseo.
-typedef enum {
-	E_ALIAS, 			// debe especificarse un alias para esta operacion
-	E_CARGA, 			// sintaxis en la carga
-	E_EXPRESION,	// expresion malformada
-	E_OPERACION, 	// error en el grammar  
-	E_VACIA, 			// expresion vacia
-} ErrorTag;
 
 // Representa una accion que debe tomar el programa
 typedef struct Sentencia {
@@ -28,12 +22,12 @@ typedef struct Sentencia {
 	char const* alias;
 	int alias_n;
 	Expresion* expresion;
-	ErrorTag error;
 } Sentencia;
 
 typedef struct {
 	char const* resto;
 	Sentencia sentencia;
+	ErrorTag error;
 } Parseado;
 
 // Analiza el principio del string, y reconoce la primera accion que debe tomar

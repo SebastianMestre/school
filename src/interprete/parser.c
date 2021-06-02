@@ -119,7 +119,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 }
 
 static Parseado invalido(char const* str, ErrorTag error) {
-	return (Parseado){str, (Sentencia){.tag = S_INVALIDO, .error = error}};
+	return (Parseado){str, (Sentencia){.tag = S_INVALIDO}, error};
 }
 
 typedef struct EntradaPilaDeExpresiones EntradaPilaDeExpresiones;
