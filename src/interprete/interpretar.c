@@ -127,7 +127,7 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 	return;
 }
 
-static void manejar_error(ErrorTag error) {
+static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 	printf("ERROR: ");
 	switch (error) {
 		case E_ALIAS: 
@@ -146,6 +146,9 @@ static void manejar_error(ErrorTag error) {
 		case E_VACIA:
 			puts("no se permite una expresion vacia.");
 			break;
+		case E_EVAL:
+			printf("El alias \'%.*s\' no esta definido.\n", val_n[0], val[0]);
+			break;
 		default:
 			fflush(stdout); assert(0);
 	}
@@ -158,7 +161,7 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 	if (entradaAlias)
 		return chequear_expresion(entradaAlias->expresion, entorno);
 	else {
-		manejar_error(E_EVAL);
+		manejar_error(E_EVAL, &alias, &alias_n);
 		return 0;
 	}
 }
@@ -293,7 +296,7 @@ void interpretar(TablaOps* tabla_ops) {
 			}
 			break;
 		case S_INVALIDO:
-			manejar_error(parseado.error);
+			manejar_error(parseado.error, NULL, NULL);
 			break;
 		case S_SALIR:
 			entorno_limpiar_datos(&entorno);
