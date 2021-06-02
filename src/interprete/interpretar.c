@@ -96,8 +96,8 @@ static void ta_limpiar(TablaAlias* tabla) {
 
 typedef struct {
 	TablaAlias aliases;
-	char* buffer_input;
-	int tamano_buffer_input;
+	char* bufferInput;
+	int tamanoBufferInput;
 } Entorno;
 
 static Entorno entorno_crear() {
@@ -107,31 +107,31 @@ static Entorno entorno_crear() {
 static void leer_input(Entorno* entorno) {
 	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
 	// buffer que crece dinamicamente si hace falta
-	if (entorno->buffer_input == NULL) {
-		entorno->buffer_input = malloc(BUFFER);
-		entorno->tamano_buffer_input = BUFFER;
+	if (entorno->bufferInput == NULL) {
+		entorno->bufferInput = malloc(BUFFER);
+		entorno->tamanoBufferInput = BUFFER;
 	}
 	// NICETOHAVE: esto no se porta muy bien si se pasa de input: deja todo lo q
 	// sobra en el buffer de entrada
-	fgets(entorno->buffer_input, BUFFER - 1, stdin);
+	fgets(entorno->bufferInput, BUFFER - 1, stdin);
 }
 
 static void descartar_input(Entorno* entorno) {
 	assert(entorno != NULL);
-	free(entorno->buffer_input);
-	entorno->buffer_input = NULL;
-	entorno->tamano_buffer_input = 0;
+	free(entorno->bufferInput);
+	entorno->bufferInput = NULL;
+	entorno->tamanoBufferInput = 0;
 }
 
 static char* robar_input(Entorno* entorno) {
-	char* buffer = entorno->buffer_input;
-	entorno->buffer_input = NULL;
-	entorno->tamano_buffer_input = 0;
+	char* buffer = entorno->bufferInput;
+	entorno->bufferInput = NULL;
+	entorno->tamanoBufferInput = 0;
 	return buffer;
 }
 
 static void entorno_limpiar_datos(Entorno* entorno) {
-	if (entorno->buffer_input != NULL)
+	if (entorno->bufferInput != NULL)
 		descartar_input(entorno);
 	ta_limpiar(&entorno->aliases);
 	return;
@@ -178,23 +178,23 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 }
 
 static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
-	int es_valida;
+	int esValida;
 	switch (expresion->tag) {
 	case X_OPERACION:
 		if (expresion->op->aridad == 1)
-			es_valida = chequear_expresion(expresion->sub[0], entorno);
+			esValida = chequear_expresion(expresion->sub[0], entorno);
 		else
-			es_valida = chequear_expresion(expresion->sub[1], entorno) &&
+			esValida = chequear_expresion(expresion->sub[1], entorno) &&
 				chequear_expresion(expresion->sub[0], entorno);
 		break;
 	case X_NUMERO:
-		es_valida =  1;
+		esValida =  1;
     break;
 	case X_ALIAS:
-		es_valida = chequear_alias(entorno, expresion->alias, expresion->valor);
+		esValida = chequear_alias(entorno, expresion->alias, expresion->valor);
 		break;
 	}
-	return es_valida;
+	return esValida;
 }
 
 // TODO: testear evaluar_alias (y evaluar_arbol).
@@ -233,21 +233,21 @@ static void imprimir_expresion(Expresion* expresion, int precedencia,
 	int izquierda, Entorno* entorno) {
 	switch (expresion->tag) {
 	case X_OPERACION: {
-		int precedencia_op = expresion->op->precedencia;
+		int precedenciaOp = expresion->op->precedencia;
 		if (expresion->op->aridad == 1) {
 			if (!izquierda) printf("(");
 			printf("%s", expresion->op->simbolo);
-			imprimir_expresion(expresion->sub[0], precedencia_op, 0, entorno);
+			imprimir_expresion(expresion->sub[0], precedenciaOp, 0, entorno);
 			if (!izquierda) printf(")");
 		}
 		else {
-			if (precedencia_op < precedencia) {
+			if (precedenciaOp < precedencia) {
 				printf("(");
 				izquierda = 1;
 			}
-			imprimir_expresion(expresion->sub[1], precedencia_op, izquierda, entorno);
+			imprimir_expresion(expresion->sub[1], precedenciaOp, izquierda, entorno);
 			printf(" %s ", expresion->op->simbolo);
-			imprimir_expresion(expresion->sub[0], precedencia_op, 0, entorno);
+			imprimir_expresion(expresion->sub[0], precedenciaOp, 0, entorno);
 			if (expresion->op->precedencia < precedencia) printf(")");
 		}
 	}	break;
@@ -290,12 +290,12 @@ static void cargar(Entorno* entorno, char* input, char const* alias, int alias_n
 	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
-void interpretar(TablaOps* tabla_ops) {
+void interpretar(TablaOps* tablaOps) {
 	Entorno entorno = entorno_crear();
 	while (1) {
 		printf("> ");
 		leer_input(&entorno);
-		Parseado parseado = parsear(entorno.buffer_input, tabla_ops);
+		Parseado parseado = parsear(entorno.bufferInput, tablaOps);
 		Sentencia sentencia = parseado.sentencia;
 
 		switch (sentencia.tag) {

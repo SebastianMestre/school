@@ -22,8 +22,8 @@ void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad,
 	// NICETOHAVE: validar aridad
 	// NICETOHAVE: chequear nulls
 
-	EntradaTablaOps* nueva_entrada = malloc(sizeof(*nueva_entrada));
-	*nueva_entrada = (EntradaTablaOps){
+	EntradaTablaOps* nuevaEntrada = malloc(sizeof(*nuevaEntrada));
+	*nuevaEntrada = (EntradaTablaOps){
 		.sig = tabla->entradas,
 		.eval = eval,
 		.simbolo = simbolo,
@@ -31,7 +31,7 @@ void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad,
 		.precedencia = precedencia,
 	};
 
-	tabla->entradas = nueva_entrada;
+	tabla->entradas = nuevaEntrada;
 
 	return;
 }

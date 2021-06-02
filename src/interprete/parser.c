@@ -37,11 +37,11 @@ typedef struct Tokenizado {
 } Tokenizado;
 
 #define CANT_STRINGS_FIJOS 4
-static int const largo_strings_fijos[CANT_STRINGS_FIJOS] = 
+static int const largoStringsFijos[CANT_STRINGS_FIJOS] = 
 	{ 5, 6, 7, 8 };
-static char const* const strings_fijos[CANT_STRINGS_FIJOS] = 
+static char const* const stringsFijos[CANT_STRINGS_FIJOS] = 
 	{ "salir", "cargar", "evaluar", "imprimir" };
-static TokenTag const token_strings_fijos[CANT_STRINGS_FIJOS] = 
+static TokenTag const tokenStringsFijos[CANT_STRINGS_FIJOS] = 
 	{ T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
 
 // Analiza el pricipio del string, y extrae una pieza, dandole sentido.
@@ -51,7 +51,7 @@ static TokenTag const token_strings_fijos[CANT_STRINGS_FIJOS] =
 // # uso de memoria
 // argumentos: No limpia nada
 // resultado: Nada se debe limpiar
-static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
+static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 	// NICETOHAVE soportar operadores alfanumericos
 
 	while (isspace(*str))
@@ -71,9 +71,9 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 			largo += 1;
 
 		for (int i = 0; i < CANT_STRINGS_FIJOS; ++i)
-			if (largo_strings_fijos[i] == largo &&
-			    memcmp(str, strings_fijos[i], largo) == 0)
-				return (Tokenizado){str+largo, (Token){token_strings_fijos[i]}};
+			if (largoStringsFijos[i] == largo &&
+			    memcmp(str, stringsFijos[i], largo) == 0)
+				return (Tokenizado){str+largo, (Token){tokenStringsFijos[i]}};
 
 		return (Tokenizado){str+largo, (Token){T_NOMBRE, str, largo}};
 	}
@@ -92,16 +92,16 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 
 	{
 		// reconozco un operador (el mas largo que matchee)
-		EntradaTablaOps* op_que_matchea = NULL;
-		int largo_de_op_que_matchea = 0;
-		for (EntradaTablaOps* it = tabla_ops->entradas; it; it = it->sig) {
-			int largo_de_op = strlen(it->simbolo);
+		EntradaTablaOps* opQueMatchea = NULL;
+		int largoOpQueMatchea = 0;
+		for (EntradaTablaOps* it = tablaOps->entradas; it; it = it->sig) {
+			int largoOp = strlen(it->simbolo);
 
-			if (largo_de_op < largo_de_op_que_matchea)
+			if (largoOp < largoOpQueMatchea)
 				continue;
 
 			int matchea = 1;
-			for (int i = 0; i < largo_de_op; ++i) {
+			for (int i = 0; i < largoOp; ++i) {
 				if (str[i] != it->simbolo[i]) {
 					matchea = 0;
 					break;
@@ -109,15 +109,15 @@ static Tokenizado tokenizar(char const* str, TablaOps* tabla_ops) {
 			}
 
 			if (matchea) {
-				op_que_matchea = it;
-				largo_de_op_que_matchea = largo_de_op;
+				opQueMatchea = it;
+				largoOpQueMatchea = largoOp;
 			}
 		}
 
-		if (op_que_matchea != NULL)
+		if (opQueMatchea != NULL)
 			return (Tokenizado){
-				str + largo_de_op_que_matchea,
-				(Token){T_OPERADOR, NULL, 0, op_que_matchea}};
+				str + largoOpQueMatchea,
+				(Token){T_OPERADOR, NULL, 0, opQueMatchea}};
 	}
 
 	return (Tokenizado){str, (Token){T_INVALIDO}};
@@ -172,8 +172,8 @@ static void pila_de_expresiones_limpiar_datos(PilaDeExpresiones* pila) {
 	}
 }
 
-Parseado parsear(char const* str, TablaOps* tabla_ops) {
-	Tokenizado tokenizado = tokenizar(str, tabla_ops);
+Parseado parsear(char const* str, TablaOps* tablaOps) {
+	Tokenizado tokenizado = tokenizar(str, tablaOps);
 	str = tokenizado.resto;
 
 	switch (tokenizado.token.tag) {
@@ -182,7 +182,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		break;
 
 	case T_EVALUAR:
-		tokenizado = tokenizar(str, tabla_ops);
+		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
 			return invalido(str, E_PARSER_ALIAS);
@@ -193,7 +193,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		break;
 
 	case T_IMPRIMIR:
-		tokenizado = tokenizar(str, tabla_ops);
+		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
 			return invalido(str, E_PARSER_ALIAS);
@@ -207,12 +207,12 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		char const* alias = tokenizado.token.inicio;
 		int alias_n = tokenizado.token.valor;
 
-		tokenizado = tokenizar(str, tabla_ops);
+		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_IGUAL)
 			return invalido(str, E_PARSER_OPERACION);
 
-		tokenizado = tokenizar(str, tabla_ops);
+		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
 			return invalido(str, E_PARSER_CARGA);
@@ -228,7 +228,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		PilaDeExpresiones p = {};
 		// parseo y, mientras, voy validando
 		while (1) {
-			tokenizado = tokenizar(str, tabla_ops);
+			tokenizado = tokenizar(str, tablaOps);
 			str = tokenizado.resto;
 			Token token = tokenizado.token;
 
