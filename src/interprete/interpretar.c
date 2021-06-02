@@ -19,20 +19,23 @@
 // especificamente, el puntero al buffer de entrada va en el campo 'input' de
 // EntradaTablaAlias
 
+// Almacena los datos de un alias definido por el usuario.
+// Tiene una referencia al siguiente alias en la tabla.
 typedef struct EntradaTablaAlias EntradaTablaAlias;
 struct EntradaTablaAlias {
 	EntradaTablaAlias* sig;
-
 	char* input;
 	char const* alias;
 	int alias_n;
 	Expresion* expresion;
 };
 
+// Almacena la lista de alias definidos por el usuario.
 typedef struct {
 	EntradaTablaAlias* entradas;
 } TablaAlias;
 
+// Busca un alias en la tabla de alias. De no encontrarlo devuelve NULL.
 static EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias, 
 	int alias_n) {
 	for (EntradaTablaAlias* it = tabla->entradas; it; it = it->sig)
@@ -41,7 +44,7 @@ static EntradaTablaAlias* ta_encontrar(TablaAlias* tabla, char const* alias,
 	return NULL;
 }
 
-// limpia 'input' y 'expresion'
+// Inserta un alias nuevo en la tabla de alias.
 static EntradaTablaAlias* ta_insertar(
 	TablaAlias* tabla, 
 	char* input, 
@@ -60,7 +63,9 @@ static EntradaTablaAlias* ta_insertar(
 	return nuevo;
 }
 
-// limpia 'input' y 'expresion'
+// Busca el alias en la tabla de alias. En caso de encontrarlo, lo reemplaza y
+// limpia el input y la expresion anteriores.
+// En caso de no existir aun, llama a 'ta_insertar'.
 static EntradaTablaAlias* ta_insertar_o_reemplazar(
 	TablaAlias* tabla, 
 	char* input, 
@@ -69,8 +74,10 @@ static EntradaTablaAlias* ta_insertar_o_reemplazar(
 	Expresion* expresion) {
 	EntradaTablaAlias* encontrado = ta_encontrar(tabla, alias, alias_n);
 
+	// Si no lo encontramos simplemente insertamos.
 	if (encontrado == NULL)
 		return ta_insertar(tabla, input, alias, alias_n, expresion);
+	// Si ya existe, borramos los datos anteriores y lo reemplazamos.
 	free(encontrado->input);
 	encontrado->input = input;
 	encontrado->alias = alias;
@@ -81,6 +88,7 @@ static EntradaTablaAlias* ta_insertar_o_reemplazar(
 	return encontrado;
 }
 
+// Libera el espacio de memoria utilizado por la tabla de alias.
 static void ta_limpiar(TablaAlias* tabla) {
 	EntradaTablaAlias* it = tabla->entradas;
 	while (it) {
@@ -93,17 +101,20 @@ static void ta_limpiar(TablaAlias* tabla) {
 }
 
 
-
+// Estructura que representa el estado de la sesion con el usuario.
+// Guarda una tabla con los alias definidos y el buffer del input.   
 typedef struct {
 	TablaAlias aliases;
 	char* bufferInput;
 	int tamanoBufferInput;
 } Entorno;
 
+// Devuelve un entorno vacio.
 static Entorno entorno_crear() {
 	return (Entorno){};
 }
 
+// Lee por stdin y almacena en el buffer.
 static void leer_input(Entorno* entorno) {
 	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
 	// buffer que crece dinamicamente si hace falta
@@ -116,6 +127,7 @@ static void leer_input(Entorno* entorno) {
 	fgets(entorno->bufferInput, BUFFER - 1, stdin);
 }
 
+// Libera el buffer.
 static void descartar_input(Entorno* entorno) {
 	assert(entorno != NULL);
 	free(entorno->bufferInput);
@@ -123,6 +135,7 @@ static void descartar_input(Entorno* entorno) {
 	entorno->tamanoBufferInput = 0;
 }
 
+// Se roba el buffer del entorno y lo deja nulo.
 static char* robar_input(Entorno* entorno) {
 	char* buffer = entorno->bufferInput;
 	entorno->bufferInput = NULL;
@@ -130,6 +143,7 @@ static char* robar_input(Entorno* entorno) {
 	return buffer;
 }
 
+// Libera el espacio de memoria ocupado por el entorno.
 static void entorno_limpiar_datos(Entorno* entorno) {
 	if (entorno->bufferInput != NULL)
 		descartar_input(entorno);
@@ -137,6 +151,10 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 	return;
 }
 
+
+// Maneja e imprime en pantalla el error dado.
+// En caso de precisarlo, toma valores para imprimir el mensaje de error
+// y su respectivo largo. 
 static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 	printf("ERROR: ");
 	switch (error) {
@@ -164,23 +182,32 @@ static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 	}
 }
 
+
+// Chequea que la expresion no tenga alias no definidos. 
 static int chequear_expresion(Expresion* expresion, Entorno* entorno);
 
+// Chequea que el alias exista, y que su expresion asociada no tenga alias no
+// definidos. En caso de no ser valido, el alias no podra evaluarse.
 static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
+	// Buscamos el alias.
 	EntradaTablaAlias* entradaAlias = 
 		ta_encontrar(&entorno->aliases, alias, alias_n);
 	if (entradaAlias)
 		return chequear_expresion(entradaAlias->expresion, entorno);
+	// No lo encontramos:
 	else {
+		// Manejamos el error correspondiente.
 		manejar_error(E_INTERPRETE_EVAL, &alias, &alias_n);
 		return 0;
 	}
 }
 
+// 'chequear_expresion' y 'chequear_alias' son mutuamente dependientes.
 static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
 	int esValida;
 	switch (expresion->tag) {
 	case X_OPERACION:
+		// Si la operacion es unaria solo chequeamos un argumento.
 		if (expresion->op->aridad == 1)
 			esValida = chequear_expresion(expresion->sub[0], entorno);
 		else
@@ -191,30 +218,34 @@ static int chequear_expresion(Expresion* expresion, Entorno* entorno) {
 		esValida =  1;
     break;
 	case X_ALIAS:
+		// Llamamos a 'chequear_alias'
 		esValida = chequear_alias(entorno, expresion->alias, expresion->valor);
 		break;
 	}
 	return esValida;
 }
 
-// TODO: testear evaluar_alias (y evaluar_arbol).
+
+// Evalua un arbol de expresion.
 static int evaluar_arbol(Expresion* expresion, Entorno* entorno);
 
-// encuentra la expresion correspondiente y llama a evaluar_arbol
+// Encuentra la expresion asociada al alias y llama a evaluar_arbol.
 static int evaluar_alias(Entorno* entorno, char const* alias, int alias_n) {
+	// Buscamos el alias.
 	EntradaTablaAlias* entradaAlias = 
 		ta_encontrar(&entorno->aliases, alias, alias_n);
 	Expresion* expresion = entradaAlias->expresion;
+	// Evaluamos la expresion asociada.
 	return evaluar_arbol(expresion, entorno);
 }
 
-// funcion auxliar a evaluar_alias; evalua el arbol de expresiones
-// necesitamos el entorno en caso de encontrar un alias que evaluar									
+// 'evaluar_arbol' y 'evaluar_alias' son mutuamente dependientes.								
 static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
+	// Si no hay expresion, devolvemos 0. Este valor NO DEBE SER UTILIZADO.
 	if (!expresion) return 0;
   switch (expresion->tag) {
 	case X_OPERACION: {
-		// evaluamos los subarboles recursivamente y los usamos como args
+		// Evaluamos los subarboles recursivamente y los usamos como argumentos.
 		int args[2] =
 			{evaluar_arbol(expresion->sub[0], entorno),
 			evaluar_arbol(expresion->sub[1], entorno)};
@@ -224,25 +255,37 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 		return expresion->valor;
 		break;
 	case X_ALIAS:
+		// Llamamos a 'evaluar_alias'.
 		return evaluar_alias(entorno, expresion->alias, expresion->valor);
 		break;
 	}
 } 
 
+// Imprime una expresion en pantalla de forma infija.
+// En caso de la expresion contener un alias no definido, imprime el nombre del 
+// alias.
+// LLamamos a la funcion con: 
+// la precedencia de la expresion padre, para determinar si necesitamos usar 
+// parentesis;
+// un valor que determine si nos encontramos a la izquierda de la operacion. 
 static void imprimir_expresion(Expresion* expresion, int precedencia, 
 	int izquierda, Entorno* entorno) {
 	switch (expresion->tag) {
 	case X_OPERACION: {
 		int precedenciaOp = expresion->op->precedencia;
+		// Manejamos operaciones unarias.
 		if (expresion->op->aridad == 1) {
+			// Si no estamos a la izquierda de un termino usamos parentesis.
 			if (!izquierda) printf("(");
 			printf("%s", expresion->op->simbolo);
 			imprimir_expresion(expresion->sub[0], precedenciaOp, 0, entorno);
 			if (!izquierda) printf(")");
 		}
 		else {
+			// Si tenemos menor precedencia usamos parentesis.
 			if (precedenciaOp < precedencia) {
 				printf("(");
+				// Comenzamos un termino nuevo, por lo tanto estamos a la izquierda.
 				izquierda = 1;
 			}
 			imprimir_expresion(expresion->sub[1], precedenciaOp, izquierda, entorno);
@@ -252,6 +295,7 @@ static void imprimir_expresion(Expresion* expresion, int precedencia,
 		}
 	}	break;
 	case X_NUMERO:
+		// Imprimimos el numero.
 		printf("%d", expresion->valor);
 		break;
 	case X_ALIAS: {
@@ -262,6 +306,7 @@ static void imprimir_expresion(Expresion* expresion, int precedencia,
 			// imprimo la expresion asociada al alias
 			imprimir_expresion(expresion, precedencia, izquierda, entorno);		
 		}
+		// Si no lo reconocemos, imprimimos el nombre del alias.
 		else {
 			if (!izquierda) printf(" ");
 			printf("%.*s", expresion->valor, expresion->alias);
@@ -270,6 +315,9 @@ static void imprimir_expresion(Expresion* expresion, int precedencia,
 	}
 }
 
+// Imprime en pantalla la expresion asociada al alias.
+// Busca la expresion asociada y llama a 'imprimir_expresion'.
+// En caso de que esta no exista, imprime el nombre del alias.
 static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	EntradaTablaAlias* entradaAlias = 
 		ta_encontrar(&entorno->aliases, alias, alias_n);
@@ -284,29 +332,35 @@ static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 	puts("");
 }
 
-// limpia 'input' y 'expresion'
+// Carga el alias en la tabla de alias. Si ya esta definido, lo reemplaza.
 static void cargar(Entorno* entorno, char* input, char const* alias, int alias_n, 
 	Expresion* expresion) {
 	ta_insertar_o_reemplazar(&entorno->aliases, input, alias, alias_n, expresion);
 }
 
+// Parsea el input y procede de acuerdo al tipo de sentencia ingresada.
 void interpretar(TablaOps* tablaOps) {
-	Entorno entorno = entorno_crear();
+	Entorno entorno = entorno_crear(); // creamos el entorno de la sesion.
+	// Solo nos detenemos cuando el usuario ingrese la palabra clave 'salir'.
 	while (1) {
-		printf("> ");
-		leer_input(&entorno);
-		Parseado parseado = parsear(entorno.bufferInput, tablaOps);
-		Sentencia sentencia = parseado.sentencia;
+		printf("> "); // inicio de linea
+		leer_input(&entorno); // leemos el input
+		Parseado parseado = parsear(entorno.bufferInput, tablaOps); // parseamos
+		Sentencia sentencia = parseado.sentencia; // obtenemos la sentencia
 
+		// Determinamos el tipo de sentencia.
 		switch (sentencia.tag) {
 		case S_CARGA:
+			// Cargamos el alias.
 			cargar(&entorno, robar_input(&entorno),
 				sentencia.alias, sentencia.alias_n, sentencia.expresion);
 			break;
 		case S_IMPRIMIR:
+			// Imprimimos el alias.
 			imprimir(&entorno, sentencia.alias, sentencia.alias_n);
 			break;
 		case S_EVALUAR:
+			// Si es valido, evaluamos el alias e imprimimos el resultado.
 			if (chequear_alias(&entorno, sentencia.alias, sentencia.alias_n)) {
 				int resultado = 
 					evaluar_alias(&entorno, sentencia.alias, sentencia.alias_n);
@@ -314,9 +368,11 @@ void interpretar(TablaOps* tablaOps) {
 			}
 			break;
 		case S_INVALIDO:
+			// Manejamos el error.
 			manejar_error(parseado.error, NULL, NULL);
 			break;
 		case S_SALIR:
+			// Limpiamos el entorno y terminamos el programa.
 			entorno_limpiar_datos(&entorno);
 			return;
 		}
