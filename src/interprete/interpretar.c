@@ -153,8 +153,8 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 
 
 // Maneja e imprime en pantalla el error dado.
-// En caso de precisarlo, toma valores para imprimir el mensaje de error
-// y su respectivo largo. 
+// En caso de precisarlo, toma valores (y su respectivos largos) para imprimir 
+// el mensaje de error. 
 static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 	printf("ERROR: ");
 	switch (error) {
