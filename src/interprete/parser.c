@@ -179,7 +179,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
-			return invalido(str, E_ALIAS);
+			return invalido(str, E_PARSER_ALIAS);
 		return (Parseado){str, (Sentencia){S_EVALUAR, tokenizado.token.inicio, tokenizado.token.valor}};
 		break;
 
@@ -187,7 +187,7 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_NOMBRE)
-			return invalido(str, E_ALIAS);
+			return invalido(str, E_PARSER_ALIAS);
 		return (Parseado){str, (Sentencia){S_IMPRIMIR, tokenizado.token.inicio, tokenizado.token.valor}};
 		break;
 
@@ -198,12 +198,12 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_IGUAL)
-			return invalido(str, E_OPERACION);
+			return invalido(str, E_PARSER_OPERACION);
 
 		tokenizado = tokenizar(str, tabla_ops);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
-			return invalido(str, E_CARGA);
+			return invalido(str, E_PARSER_CARGA);
 
 		// Convierto expresion postfija a infija, usando una pila:
 		// Los valores sueltos, como numeros y aliases, los inserto en la pila.
@@ -250,30 +250,30 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 				fail_arg1:
 				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str, E_EXPRESION);
+				return invalido(str, E_PARSER_EXPRESION);
 
 				} break;
 			default:
 				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str, E_EXPRESION);
+				return invalido(str, E_PARSER_EXPRESION);
 			}
 		}
 
 		Expresion* expresion = pila_de_expresiones_pop(&p);
 
 		// si no se ingreso ninguna expresion informamos el error
-		if (expresion == NULL) return invalido(str, E_VACIA);
+		if (expresion == NULL) return invalido(str, E_PARSER_VACIA);
 
 		if (pila_de_expresiones_top(&p) != NULL) {
 			expresion_limpiar(expresion);
 			pila_de_expresiones_limpiar_datos(&p);
-			return invalido(str, E_EXPRESION);
+			return invalido(str, E_PARSER_EXPRESION);
 		}
 
 		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}};
 		} break;
 
 	default:
-		return invalido(str, E_OPERACION);
+		return invalido(str, E_PARSER_OPERACION);
 	}
 }

@@ -130,23 +130,23 @@ static void entorno_limpiar_datos(Entorno* entorno) {
 static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 	printf("ERROR: ");
 	switch (error) {
-		case E_ALIAS: 
+		case E_PARSER_ALIAS: 
 			puts("debe especificarse un alias valido.");
 			break;
-		case E_CARGA: 
+		case E_PARSER_CARGA: 
 			puts("error en la sintaxis de carga.");
 			break;
-		case E_EXPRESION:
+		case E_PARSER_EXPRESION:
 			puts("expresion invalida.");
 			break;
-		case E_OPERACION:
+		case E_PARSER_OPERACION:
 			puts("no se reconocio niguna operacion valida. " 
 				"Ingrese \'salir\' para terminar el programa.");
 			break;
-		case E_VACIA:
+		case E_PARSER_VACIA:
 			puts("no se permite una expresion vacia.");
 			break;
-		case E_EVAL:
+		case E_INTERPRETE_EVAL:
 			printf("El alias \'%.*s\' no esta definido.\n", val_n[0], val[0]);
 			break;
 		default:
@@ -161,7 +161,7 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 	if (entradaAlias)
 		return chequear_expresion(entradaAlias->expresion, entorno);
 	else {
-		manejar_error(E_EVAL, &alias, &alias_n);
+		manejar_error(E_INTERPRETE_EVAL, &alias, &alias_n);
 		return 0;
 	}
 }
