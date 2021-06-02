@@ -140,7 +140,7 @@ static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 			puts("expresion invalida.");
 			break;
 		case E_PARSER_OPERACION:
-			puts("no se reconocio niguna operacion valida. " 
+			puts("no se reconocio niguna operacion valida.\n" 
 				"Ingrese \'salir\' para terminar el programa.");
 			break;
 		case E_PARSER_VACIA:
