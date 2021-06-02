@@ -261,6 +261,9 @@ Parseado parsear(char const* str, TablaOps* tabla_ops) {
 
 		Expresion* expresion = pila_de_expresiones_pop(&p);
 
+		// si no se ingreso ninguna expresion informamos el error
+		if (expresion == NULL) return invalido(str, E_VACIA);
+
 		if (pila_de_expresiones_top(&p) != NULL) {
 			expresion_limpiar(expresion);
 			pila_de_expresiones_limpiar_datos(&p);
