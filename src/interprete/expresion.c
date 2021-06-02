@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 
+// Guarda la expresion en el heap y devuelve una referencia al bloque de memoria.
 static Expresion* expresion_reservar(Expresion datos) {
 	Expresion* resultado = malloc(sizeof(Expresion));
 	*resultado = datos;

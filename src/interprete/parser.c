@@ -32,10 +32,11 @@ typedef struct Token {
 } Token;
 
 typedef struct Tokenizado {
-	char const* resto;
-	Token token;
+	char const* resto; // resto del input
+	Token token;       // token interpretado
 } Tokenizado;
 
+// Contantes asociadas a las keywords del programa.
 #define CANT_STRINGS_FIJOS 4
 static int const largoStringsFijos[CANT_STRINGS_FIJOS] = 
 	{ 5, 6, 7, 8 };
@@ -48,37 +49,42 @@ static TokenTag const tokenStringsFijos[CANT_STRINGS_FIJOS] =
 // Luego, devuelve una representacion de esa pieza, y un puntero a donde esa
 // pieza termina, y empieza el resto del string.
 //
-// # uso de memoria
-// argumentos: No limpia nada
-// resultado: Nada se debe limpiar
+// # uso de memoria:
+//  -argumentos: No limpia nada.
+//  -resultado: Nada se debe limpiar.
 static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 	// NICETOHAVE soportar operadores alfanumericos
 
+	// Descartamos espacio en blanco.
 	while (isspace(*str))
 		str += 1;
 
+	// LLegamos al fin de la linea.
 	if (*str == '\0')
 		return (Tokenizado){str, (Token){T_FIN}};
 
+	// Identificamos un simbolo '='. 
 	// NICETOHAVE soportar operadores que empiezan con =
 	if (*str == '=')
 		return (Tokenizado){str+1, (Token){T_IGUAL}};
 
-	// reconozco un nombre
+	// Reconocemos un nombre.
 	if (isalpha(str[0])) {
 		int largo = 1;
 		while (isalnum(str[largo]))
 			largo += 1;
-
+		
+		// Chequeamos si la palabra es una keyword (cargar, salir, etc.). 
 		for (int i = 0; i < CANT_STRINGS_FIJOS; ++i)
 			if (largoStringsFijos[i] == largo &&
 			    memcmp(str, stringsFijos[i], largo) == 0)
 				return (Tokenizado){str+largo, (Token){tokenStringsFijos[i]}};
-
+		
+		// Si no lo es, debe ser un alias. 
 		return (Tokenizado){str+largo, (Token){T_NOMBRE, str, largo}};
 	}
 
-	// reconozco un numero
+	// Reconocemos un numero.
 	if (isdigit(str[0])) {
 		int valor = str[0] - '0';
 		int largo = 1;
@@ -91,9 +97,10 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 	}
 
 	{
-		// reconozco un operador (el mas largo que matchee)
+		// Reconocemos un operador (el mas largo que matchee).
 		EntradaTablaOps* opQueMatchea = NULL;
 		int largoOpQueMatchea = 0;
+		// Buscamos el operador en la tabla de operaciones.
 		for (EntradaTablaOps* it = tablaOps->entradas; it; it = it->sig) {
 			int largoOp = strlen(it->simbolo);
 
@@ -120,13 +127,17 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 				(Token){T_OPERADOR, NULL, 0, opQueMatchea}};
 	}
 
+	// Si no lo econtramos, el token es invalido.
 	return (Tokenizado){str, (Token){T_INVALIDO}};
 }
 
+// Si el input es invalido, informamos el error correspondiente.
 static Parseado invalido(char const* str, ErrorTag error) {
 	return (Parseado){str, (Sentencia){.tag = S_INVALIDO}, error};
 }
 
+// Usamos esta pila para armar un arbol de expresiones a partir de la expresion
+// postifja.
 typedef struct EntradaPilaDeExpresiones EntradaPilaDeExpresiones;
 struct EntradaPilaDeExpresiones {
 	EntradaPilaDeExpresiones* sig;
@@ -137,6 +148,7 @@ typedef struct PilaDeExpresiones {
 	EntradaPilaDeExpresiones* entradas;
 } PilaDeExpresiones;
 
+// Inserta una expresion en el tope de la pila.
 static void pila_de_expresiones_push(PilaDeExpresiones* pila, 
 	Expresion* expresion) {
 	EntradaPilaDeExpresiones* entrada = malloc(sizeof(*entrada));
@@ -147,6 +159,7 @@ static void pila_de_expresiones_push(PilaDeExpresiones* pila,
 	pila->entradas = entrada;
 }
 
+// Remueve un elemento del tope de la pila y lo devuelve.
 static Expresion* pila_de_expresiones_pop(PilaDeExpresiones* pila) {
 	if (pila->entradas == NULL) return NULL;
 	Expresion* result = pila->entradas->expresion;
@@ -156,12 +169,14 @@ static Expresion* pila_de_expresiones_pop(PilaDeExpresiones* pila) {
 	return result;
 }
 
+// Devuelve el elemento tope de la pila.
 static Expresion* pila_de_expresiones_top(PilaDeExpresiones* pila) {
 	if (pila->entradas == NULL)
 		return NULL;
 	return pila->entradas->expresion;
 }
 
+// Libera el espacio de memoria ocupado por la pila.
 static void pila_de_expresiones_limpiar_datos(PilaDeExpresiones* pila) {
 	EntradaPilaDeExpresiones* it = pila->entradas;
 	while (it) {
@@ -173,17 +188,21 @@ static void pila_de_expresiones_limpiar_datos(PilaDeExpresiones* pila) {
 }
 
 Parseado parsear(char const* str, TablaOps* tablaOps) {
+	// Obtenemos el primer token del input.
 	Tokenizado tokenizado = tokenizar(str, tablaOps);
 	str = tokenizado.resto;
 
+	// Procedemos acorde al tipo de token:
 	switch (tokenizado.token.tag) {
 	case T_SALIR:
 		return (Parseado){str, (Sentencia){S_SALIR}};
 		break;
-
+	
+	// evaluar
 	case T_EVALUAR:
 		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
+		// Si no se ingreso un alias, el input es invalido.
 		if (tokenizado.token.tag != T_NOMBRE)
 			return invalido(str, E_PARSER_ALIAS);
 		return (Parseado){str, (Sentencia){
@@ -192,9 +211,11 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 				tokenizado.token.valor}};
 		break;
 
+	// imprimir
 	case T_IMPRIMIR:
 		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
+		// Si no se ingreso un alias, el input es invalido.
 		if (tokenizado.token.tag != T_NOMBRE)
 			return invalido(str, E_PARSER_ALIAS);
 		return (Parseado){str, (Sentencia){
@@ -203,15 +224,19 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 				tokenizado.token.valor}};
 		break;
 
+	// alias
 	case T_NOMBRE: {
 		char const* alias = tokenizado.token.inicio;
 		int alias_n = tokenizado.token.valor;
 
 		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
+		
+		// Si no se ingreso un '=', el input es invalido.
 		if (tokenizado.token.tag != T_IGUAL)
 			return invalido(str, E_PARSER_OPERACION);
 
+		// Chequeamos que se haya ingresado la keyword 'cargar'.
 		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
@@ -222,7 +247,7 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		// Al encontrar un operador, extraigo tantas expresiones de la pila como
 		// sea la aridad del operador, y creo la expresion que representa la
 		// aplicacion del operador a sus operandos. Finalmente, inserto esa
-		// expresion en la pila
+		// expresion en la pila.
 
 		// {} inicializa con 0s, lo cual es el estado inicial correcto
 		PilaDeExpresiones p = {};
@@ -257,6 +282,7 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 				pila_de_expresiones_push(&p, expresion_operacion(token.op, arg1, arg2));
 				break;
 
+				// Si el arg2 es invalido, debemos limpiar el arg1 primero.
 				fail_arg2:
 				expresion_limpiar(arg1);
 
@@ -265,26 +291,30 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 				return invalido(str, E_PARSER_EXPRESION);
 
 				} break;
+
+			// No reconocimos numero, operacion o alias.
 			default:
 				pila_de_expresiones_limpiar_datos(&p);
 				return invalido(str, E_PARSER_EXPRESION);
 			}
 		}
 
+		// Obtenemos la expresion final de la pila.
 		Expresion* expresion = pila_de_expresiones_pop(&p);
 
-		// si no se ingreso ninguna expresion informamos el error
+		// Si no se ingreso ninguna expresion, informamos el error.
 		if (expresion == NULL) return invalido(str, E_PARSER_VACIA);
-
+		// Si hay elementos de mas en la pila, la expresion es invalida.
 		if (pila_de_expresiones_top(&p) != NULL) {
 			expresion_limpiar(expresion);
 			pila_de_expresiones_limpiar_datos(&p);
 			return invalido(str, E_PARSER_EXPRESION);
 		}
-
+		// En caso de estar todo ok, devolvemos la sentencia apropiada.
 		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}};
 		} break;
 
+	// Si ninuna operacion (cargar, salir, etc.) matchea, el input es invalido.
 	default:
 		return invalido(str, E_PARSER_OPERACION);
 	}

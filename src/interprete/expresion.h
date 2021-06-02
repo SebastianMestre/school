@@ -27,8 +27,19 @@ struct Expresion {
 	EntradaTablaOps* op; 
 };
 
+/**
+ * Devuelve una expresion de numero asociada al valor dado.
+ */
 Expresion* expresion_numero(int valor);
+
+/**
+ * Devuelve una expresion de alias asociada al alias dado. 
+ */
 Expresion* expresion_alias(char const* alias, int alias_n);
+
+/**
+ * Devuelve una expresion de operacion asociada a la operacion dada.
+ */
 Expresion* expresion_operacion(
 	EntradaTablaOps* op, 
 	Expresion* sub0, 

@@ -16,9 +16,19 @@ typedef struct TablaOps {
 	EntradaTablaOps* entradas;
 } TablaOps;
 
+/**
+ * Devuelve una tabla de operaciones vacia.
+ */ 
 TablaOps tabla_ops_crear();
+
+/**
+ * Libera el espacio de memoria ocupado por la tabla.
+ */
 void tabla_ops_limpiar(TablaOps* tabla);
 
+/**
+ * Inserta un operador nuevo en la tabla.
+ */
 void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, 
 	FuncionEvaluacion eval, int precedencia);
 
