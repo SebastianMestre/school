@@ -2,7 +2,7 @@
 #include "operadores.h"
 #include "interprete/interpretar.h"
 
-int main (int argc, char** argv) {
+int main () {
 	// Creamos una tabla de operadores.
 	TablaOps tabla = tabla_ops_crear();
 	
