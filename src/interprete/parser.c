@@ -61,12 +61,12 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 
 	// LLegamos al fin de la linea.
 	if (*str == '\0')
-		return (Tokenizado){str, (Token){T_FIN}};
+		return (Tokenizado){str, (Token){T_FIN, 0, 0, 0}};
 
 	// Identificamos un simbolo '='. 
 	// NICETOHAVE soportar operadores que empiezan con =
 	if (*str == '=')
-		return (Tokenizado){str+1, (Token){T_IGUAL}};
+		return (Tokenizado){str+1, (Token){T_IGUAL, 0, 0, 0}};
 
 	// Reconocemos un nombre.
 	if (isalpha(str[0])) {
@@ -78,10 +78,10 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 		for (int i = 0; i < CANT_STRINGS_FIJOS; ++i)
 			if (largoStringsFijos[i] == largo &&
 			    memcmp(str, stringsFijos[i], largo) == 0)
-				return (Tokenizado){str+largo, (Token){tokenStringsFijos[i]}};
+				return (Tokenizado){str+largo, (Token){tokenStringsFijos[i], 0, 0, 0}};
 		
 		// Si no lo es, debe ser un alias. 
-		return (Tokenizado){str+largo, (Token){T_NOMBRE, str, largo}};
+		return (Tokenizado){str+largo, (Token){T_NOMBRE, str, largo, 0}};
 	}
 
 	// Reconocemos un numero.
@@ -93,7 +93,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 			largo += 1;
 		}
 
-		return (Tokenizado){str+largo, (Token){T_NUMERO, NULL, valor}};
+		return (Tokenizado){str+largo, (Token){T_NUMERO, NULL, valor, 0}};
 	}
 
 	{
@@ -128,7 +128,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 	}
 
 	// Si no lo econtramos, el token es invalido.
-	return (Tokenizado){str, (Token){T_INVALIDO}};
+	return (Tokenizado){str, (Token){T_INVALIDO, 0, 0, 0}};
 }
 
 // Si el input es invalido, informamos el error correspondiente.
@@ -195,7 +195,7 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 	// Procedemos acorde al tipo de token:
 	switch (tokenizado.token.tag) {
 	case T_SALIR:
-		return (Parseado){str, (Sentencia){S_SALIR}};
+		return (Parseado){str, (Sentencia){S_SALIR, 0, 0, 0}, 0};
 		break;
 	
 	// evaluar
@@ -208,7 +208,8 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		return (Parseado){str, (Sentencia){
 				S_EVALUAR,
 				tokenizado.token.inicio,
-				tokenizado.token.valor}};
+				tokenizado.token.valor,
+				0}, 0};
 		break;
 
 	// imprimir
@@ -221,7 +222,8 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		return (Parseado){str, (Sentencia){
 				S_IMPRIMIR, 
 				tokenizado.token.inicio, 
-				tokenizado.token.valor}};
+				tokenizado.token.valor, 
+				0}, 0};
 		break;
 
 	// alias
@@ -311,7 +313,7 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 			return invalido(str, E_PARSER_EXPRESION);
 		}
 		// En caso de estar todo ok, devolvemos la sentencia apropiada.
-		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}};
+		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}, 0};
 		} break;
 
 	// Si ninuna operacion (cargar, salir, etc.) matchea, el input es invalido.
