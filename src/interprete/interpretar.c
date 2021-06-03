@@ -259,6 +259,8 @@ static int evaluar_arbol(Expresion* expresion, Entorno* entorno) {
 		return evaluar_alias(entorno, expresion->alias, expresion->valor);
 		break;
 	}
+	// No deberiamos llegar hasta aca.
+	assert(0);
 } 
 
 // Imprime una expresion en pantalla de forma infija.
