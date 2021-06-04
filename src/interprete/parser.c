@@ -117,9 +117,9 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 		return tokenizado_igual(str + 1);
 
 	// Reconocemos un nombre.
-	if (isalpha(str[0])) {
+	if (isalpha(str[0]) || (str[0] == '_')) {
 		int largo = 1;
-		while (isalnum(str[largo]))
+		while (isalnum(str[largo]) || (str[largo] == '_'))
 			largo += 1;
 		
 		// Chequeamos si la palabra es una keyword (cargar, salir, etc.). 
