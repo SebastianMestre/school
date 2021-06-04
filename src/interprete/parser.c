@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 // En el contexto de un Token, sirve para interpretar la informacion de este
 typedef enum {
@@ -45,6 +46,25 @@ static char const* const stringsFijos[CANT_STRINGS_FIJOS] =
 static TokenTag const tokenStringsFijos[CANT_STRINGS_FIJOS] = 
 	{ T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
 
+// Funciones axuliriares para construir una estructura 'Tokenizado'.
+Tokenizado tokenizado_fin(const char* str) {
+	// Rellenamos con 0 los campos no usados.
+	return (Tokenizado) {str, (Token){T_FIN, 0, 0, 0}};
+}
+Tokenizado tokenizado_igual(const char* str) {
+	return (Tokenizado) {str, (Token) {T_IGUAL, 0, 0, 0}};
+}
+Tokenizado tokenizado_str_fijo(const char* str, size_t i) {
+	assert(i <= CANT_STRINGS_FIJOS);
+	return (Tokenizado) {str, (Token){tokenStringsFijos[i], 0, 0, 0}};
+}
+Tokenizado tokenizado_nombre(const char* str, char const *token_str, int largo) {
+	return (Tokenizado) {str, (Token) {T_NOMBRE, token_str, largo, 0}};
+}
+Tokenizado tokenizado_numero(const char* str, int valor) {
+	return (Tokenizado) {str, (Token) {T_NUMERO, 0, valor, 0}};
+}
+
 // Analiza el pricipio del string, y extrae una pieza, dandole sentido.
 // Luego, devuelve una representacion de esa pieza, y un puntero a donde esa
 // pieza termina, y empieza el resto del string.
@@ -61,12 +81,12 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 
 	// LLegamos al fin de la linea.
 	if (*str == '\0')
-		return (Tokenizado){str, (Token){T_FIN, 0, 0, 0}};
+		return tokenizado_fin(str);
 
 	// Identificamos un simbolo '='. 
 	// NICETOHAVE soportar operadores que empiezan con =
 	if (*str == '=')
-		return (Tokenizado){str+1, (Token){T_IGUAL, 0, 0, 0}};
+		return tokenizado_igual(str + 1);
 
 	// Reconocemos un nombre.
 	if (isalpha(str[0])) {
@@ -75,13 +95,13 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 			largo += 1;
 		
 		// Chequeamos si la palabra es una keyword (cargar, salir, etc.). 
-		for (int i = 0; i < CANT_STRINGS_FIJOS; ++i)
+		for (size_t i = 0; i < CANT_STRINGS_FIJOS; ++i)
 			if (largoStringsFijos[i] == largo &&
-			    memcmp(str, stringsFijos[i], largo) == 0)
-				return (Tokenizado){str+largo, (Token){tokenStringsFijos[i], 0, 0, 0}};
+			    memcmp(str, stringsFijos[i], largo) == 0) {
+				return tokenizado_str_fijo(str + largo, i);}
 		
 		// Si no lo es, debe ser un alias. 
-		return (Tokenizado){str+largo, (Token){T_NOMBRE, str, largo, 0}};
+		return tokenizado_nombre(str + largo, str, largo);
 	}
 
 	// Reconocemos un numero.
@@ -93,7 +113,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 			largo += 1;
 		}
 
-		return (Tokenizado){str+largo, (Token){T_NUMERO, NULL, valor, 0}};
+		return tokenizado_numero(str + largo, valor);
 	}
 
 	{
