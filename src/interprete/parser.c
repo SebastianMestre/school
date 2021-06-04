@@ -47,21 +47,21 @@ static TokenTag const tokenStringsFijos[CANT_STRINGS_FIJOS] =
 	{ T_SALIR, T_CARGAR, T_EVALUAR, T_IMPRIMIR };
 
 // Funciones axuliriares para construir una estructura 'Tokenizado'.
-Tokenizado tokenizado_fin(const char* str) {
+static Tokenizado tokenizado_fin(const char* str) {
 	// Rellenamos con 0 los campos no usados.
-	return (Tokenizado) {str, (Token){T_FIN, 0, 0, 0}};
+	return (Tokenizado) {str, (Token){.tag = T_FIN}};
 }
-Tokenizado tokenizado_igual(const char* str) {
-	return (Tokenizado) {str, (Token) {T_IGUAL, 0, 0, 0}};
+static Tokenizado tokenizado_igual(const char* str) {
+	return (Tokenizado) {str, (Token) {.tag = T_IGUAL}};
 }
-Tokenizado tokenizado_str_fijo(const char* str, size_t i) {
+static Tokenizado tokenizado_str_fijo(const char* str, size_t i) {
 	assert(i <= CANT_STRINGS_FIJOS);
-	return (Tokenizado) {str, (Token){tokenStringsFijos[i], 0, 0, 0}};
+	return (Tokenizado) {str, (Token){.tag = tokenStringsFijos[i]}};
 }
-Tokenizado tokenizado_nombre(const char* str, char const *token_str, int largo) {
+static Tokenizado tokenizado_nombre(const char* str, char const *token_str, int largo) {
 	return (Tokenizado) {str, (Token) {T_NOMBRE, token_str, largo, 0}};
 }
-Tokenizado tokenizado_numero(const char* str, int valor) {
+static Tokenizado tokenizado_numero(const char* str, int valor) {
 	return (Tokenizado) {str, (Token) {T_NUMERO, 0, valor, 0}};
 }
 
@@ -151,10 +151,6 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 	return (Tokenizado){str, (Token){T_INVALIDO, 0, 0, 0}};
 }
 
-// Si el input es invalido, informamos el error correspondiente.
-static Parseado invalido(char const* str, ErrorTag error) {
-	return (Parseado){str, (Sentencia){.tag = S_INVALIDO}, error};
-}
 
 // Usamos esta pila para armar un arbol de expresiones a partir de la expresion
 // postifja.
@@ -207,6 +203,30 @@ static void pila_de_expresiones_limpiar_datos(PilaDeExpresiones* pila) {
 	}
 }
 
+// Funciones auxiliares para construir una estructura 'Parseado'.
+static Parseado parseado_invalido(char const* str, ErrorTag error) {
+	return (Parseado){str, (Sentencia){.tag = S_INVALIDO}, error};
+}
+static Parseado parseado_salir(const char* str) {
+	return (Parseado){str, (Sentencia){.tag = S_SALIR}, 0};
+}
+static Parseado parseado_evaluar(const char* str, const char* alias,
+	int alias_n) {
+	return (Parseado) {str, (Sentencia) {S_EVALUAR, alias, alias_n, 0}, 0};
+	}
+static Parseado parseado_imprimir(const char* str, const char* alias, 
+	int alias_n) {
+	return (Parseado) {str, (Sentencia) {S_IMPRIMIR, alias, alias_n, 0}, 0}; 
+}
+static Parseado parseado_cargar(
+	const char* str,
+	const char* alias,
+	int alias_n,
+	Expresion* expresion) {
+	return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}, 0};
+	}
+
+
 Parseado parsear(char const* str, TablaOps* tablaOps) {
 	// Obtenemos el primer token del input.
 	Tokenizado tokenizado = tokenizar(str, tablaOps);
@@ -215,7 +235,7 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 	// Procedemos acorde al tipo de token:
 	switch (tokenizado.token.tag) {
 	case T_SALIR:
-		return (Parseado){str, (Sentencia){S_SALIR, 0, 0, 0}, 0};
+		return parseado_salir(str);
 		break;
 	
 	// evaluar
@@ -224,12 +244,9 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		str = tokenizado.resto;
 		// Si no se ingreso un alias, el input es invalido.
 		if (tokenizado.token.tag != T_NOMBRE)
-			return invalido(str, E_PARSER_ALIAS);
-		return (Parseado){str, (Sentencia){
-				S_EVALUAR,
-				tokenizado.token.inicio,
-				tokenizado.token.valor,
-				0}, 0};
+			return parseado_invalido(str, E_PARSER_ALIAS);
+		return
+			parseado_evaluar(str, tokenizado.token.inicio, tokenizado.token.valor);
 		break;
 
 	// imprimir
@@ -238,12 +255,9 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		str = tokenizado.resto;
 		// Si no se ingreso un alias, el input es invalido.
 		if (tokenizado.token.tag != T_NOMBRE)
-			return invalido(str, E_PARSER_ALIAS);
-		return (Parseado){str, (Sentencia){
-				S_IMPRIMIR, 
-				tokenizado.token.inicio, 
-				tokenizado.token.valor, 
-				0}, 0};
+			return parseado_invalido(str, E_PARSER_ALIAS);
+		return 
+			parseado_imprimir(str, tokenizado.token.inicio, tokenizado.token.valor);
 		break;
 
 	// alias
@@ -256,13 +270,13 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		
 		// Si no se ingreso un '=', el input es invalido.
 		if (tokenizado.token.tag != T_IGUAL)
-			return invalido(str, E_PARSER_OPERACION);
+			return parseado_invalido(str, E_PARSER_OPERACION);
 
 		// Chequeamos que se haya ingresado la keyword 'cargar'.
 		tokenizado = tokenizar(str, tablaOps);
 		str = tokenizado.resto;
 		if (tokenizado.token.tag != T_CARGAR)
-			return invalido(str, E_PARSER_CARGA);
+			return parseado_invalido(str, E_PARSER_CARGA);
 
 		// Convierto expresion postfija a infija, usando una pila:
 		// Los valores sueltos, como numeros y aliases, los inserto en la pila.
@@ -310,14 +324,14 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 
 				fail_arg1:
 				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str, E_PARSER_EXPRESION);
+				return parseado_invalido(str, E_PARSER_EXPRESION);
 
 				} break;
 
 			// No reconocimos numero, operacion o alias.
 			default:
 				pila_de_expresiones_limpiar_datos(&p);
-				return invalido(str, E_PARSER_EXPRESION);
+				return parseado_invalido(str, E_PARSER_EXPRESION);
 			}
 		}
 
@@ -325,19 +339,19 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		Expresion* expresion = pila_de_expresiones_pop(&p);
 
 		// Si no se ingreso ninguna expresion, informamos el error.
-		if (expresion == NULL) return invalido(str, E_PARSER_VACIA);
+		if (expresion == NULL) return parseado_invalido(str, E_PARSER_VACIA);
 		// Si hay elementos de mas en la pila, la expresion es invalida.
 		if (pila_de_expresiones_top(&p) != NULL) {
 			expresion_limpiar(expresion);
 			pila_de_expresiones_limpiar_datos(&p);
-			return invalido(str, E_PARSER_EXPRESION);
+			return parseado_invalido(str, E_PARSER_EXPRESION);
 		}
 		// En caso de estar todo ok, devolvemos la sentencia apropiada.
-		return (Parseado){str, (Sentencia){S_CARGA, alias, alias_n, expresion}, 0};
+		return parseado_cargar(str, alias, alias_n, expresion);
 		} break;
 
 	// Si ninuna operacion (cargar, salir, etc.) matchea, el input es invalido.
 	default:
-		return invalido(str, E_PARSER_OPERACION);
+		return parseado_invalido(str, E_PARSER_OPERACION);
 	}
 }
