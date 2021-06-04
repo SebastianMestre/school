@@ -174,6 +174,9 @@ static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 		case E_PARSER_VACIA:
 			puts("no se permite una expresion vacia.");
 			break;
+		case E_PARSER_OPERADOR:
+			printf("\'%s\' es un operador y no puede utilizarse como alias.\n", val[0]);
+			break;
 		case E_INTERPRETE_EVAL:
 			printf("El alias \'%.*s\' no esta definido.\n", val_n[0], val[0]);
 			break;
@@ -371,7 +374,7 @@ void interpretar(TablaOps* tablaOps) {
 			break;
 		case S_INVALIDO:
 			// Manejamos el error.
-			manejar_error(parseado.error, NULL, NULL);
+			manejar_error(parseado.error, &parseado.resto, NULL);
 			break;
 		case S_SALIR:
 			// Limpiamos el entorno y terminamos el programa.

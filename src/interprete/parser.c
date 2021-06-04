@@ -73,7 +73,6 @@ static Tokenizado tokenizado_numero(const char* str, int valor) {
 //  -argumentos: No limpia nada.
 //  -resultado: Nada se debe limpiar.
 static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
-	// NICETOHAVE soportar operadores alfanumericos
 
 	// Descartamos espacio en blanco.
 	while (isspace(*str))
@@ -82,6 +81,35 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 	// LLegamos al fin de la linea.
 	if (*str == '\0')
 		return tokenizado_fin(str);
+	
+	// Reconocemos un operador (el mas largo que matchee).
+	EntradaTablaOps* opQueMatchea = NULL;
+	int largoOpQueMatchea = 0;
+	// Buscamos el operador en la tabla de operaciones.
+	for (EntradaTablaOps* it = tablaOps->entradas; it; it = it->sig) {
+		int largoOp = strlen(it->simbolo);
+
+		if (largoOp < largoOpQueMatchea)
+			continue;
+
+		int matchea = 1;
+		for (int i = 0; i < largoOp; ++i) {
+			if (str[i] != it->simbolo[i]) {
+				matchea = 0;
+				break;
+			}
+		}
+
+		if (matchea) {
+			opQueMatchea = it;
+			largoOpQueMatchea = largoOp;
+		}
+	}
+
+	if (opQueMatchea != NULL)
+		return (Tokenizado){
+			str + largoOpQueMatchea,
+			(Token){T_OPERADOR, NULL, 0, opQueMatchea}};
 
 	// Identificamos un simbolo '='. 
 	// NICETOHAVE soportar operadores que empiezan con =
@@ -116,38 +144,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 		return tokenizado_numero(str + largo, valor);
 	}
 
-	{
-		// Reconocemos un operador (el mas largo que matchee).
-		EntradaTablaOps* opQueMatchea = NULL;
-		int largoOpQueMatchea = 0;
-		// Buscamos el operador en la tabla de operaciones.
-		for (EntradaTablaOps* it = tablaOps->entradas; it; it = it->sig) {
-			int largoOp = strlen(it->simbolo);
-
-			if (largoOp < largoOpQueMatchea)
-				continue;
-
-			int matchea = 1;
-			for (int i = 0; i < largoOp; ++i) {
-				if (str[i] != it->simbolo[i]) {
-					matchea = 0;
-					break;
-				}
-			}
-
-			if (matchea) {
-				opQueMatchea = it;
-				largoOpQueMatchea = largoOp;
-			}
-		}
-
-		if (opQueMatchea != NULL)
-			return (Tokenizado){
-				str + largoOpQueMatchea,
-				(Token){T_OPERADOR, NULL, 0, opQueMatchea}};
-	}
-
-	// Si no lo econtramos, el token es invalido.
+	// No hay coincidencias: el token es invalido.
 	return (Tokenizado){str, (Token){T_INVALIDO, 0, 0, 0}};
 }
 
@@ -349,7 +346,11 @@ Parseado parsear(char const* str, TablaOps* tablaOps) {
 		// En caso de estar todo ok, devolvemos la sentencia apropiada.
 		return parseado_cargar(str, alias, alias_n, expresion);
 		} break;
-
+	
+	case T_OPERADOR:
+		// Una sentencia valida no comienza con un operador.
+		// Elevamos error y pasamos el simbolo del operador para alertar al usuario.
+		return parseado_invalido(tokenizado.token.op->simbolo, E_PARSER_OPERADOR);
 	// Si ninuna operacion (cargar, salir, etc.) matchea, el input es invalido.
 	default:
 		return parseado_invalido(str, E_PARSER_OPERACION);
