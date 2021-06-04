@@ -28,6 +28,9 @@ void tabla_ops_limpiar(TablaOps* tabla);
 
 /**
  * Inserta un operador nuevo en la tabla.
+ * La precedencia es un valor comparativo unicamente. Intuitivamente, no tiene
+ * minimo o maximo; siempre la operacion de mayor precedencia sera evaluada
+ * primero.
  */
 void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, 
 	FuncionEvaluacion eval, int precedencia);
