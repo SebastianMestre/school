@@ -35,7 +35,7 @@ Esto dara como output un subdirectorio `build/`, con archivos intermediarios
 para el compilado, y un ejecutable `interpretar`. Para limpiar el output basta
 correr `make clean`. 
 
-### Ejemplo de ejecucion
+### Ejemplo de ejecucion.
 
 ```shell
 $ make
@@ -62,7 +62,7 @@ Para correr esos tests, se puede usar el script `run_memory_tests.sh`.
 Notar que se debe tener instalado valgrind y un shell UNIX-compatible.
 
 - - - -
-# Informe de dificultades
+# Informe de dificultades.
 Nuestra principal dificultad fue lograr organizarnos bien como grupo. Los primeros
 dias no tuvimos una dinamica muy fluida y nos falto tiempo dedicado a discutir y 
 planear mejor el proyecyo. Decididamente, una mayor coordinacion entre nosotros 
