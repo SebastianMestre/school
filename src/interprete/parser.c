@@ -112,7 +112,6 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 			(Token){T_OPERADOR, NULL, 0, opQueMatchea}};
 
 	// Identificamos un simbolo '='. 
-	// NICETOHAVE soportar operadores que empiezan con =
 	if (*str == '=')
 		return tokenizado_igual(str + 1);
 
