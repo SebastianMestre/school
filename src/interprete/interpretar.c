@@ -116,15 +116,22 @@ static Entorno entorno_crear() {
 
 // Lee por stdin y almacena en el buffer.
 static void leer_input(Entorno* entorno) {
-	// NICETOHAVE que se banque renglones arbitrariamente grandes, usando un
-	// buffer que crece dinamicamente si hace falta
 	if (entorno->bufferInput == NULL) {
 		entorno->bufferInput = malloc(BUFFER);
+		assert(entorno->bufferInput);
 		entorno->tamanoBufferInput = BUFFER;
 	}
-	// NICETOHAVE: esto no se porta muy bien si se pasa de input: deja todo lo q
-	// sobra en el buffer de entrada
-	fgets(entorno->bufferInput, BUFFER - 1, stdin);
+	char c;
+	size_t size = BUFFER - 1, i = 0;
+	while ((c = getchar()) != '\n') {
+		if (size == i) {
+			entorno->bufferInput = realloc(entorno->bufferInput, size + BUFFER);
+			assert(entorno->bufferInput);
+			size += BUFFER;
+		}
+		entorno->bufferInput[i++] = c;
+	}
+	entorno->bufferInput[i] = '\0';
 }
 
 // Libera el buffer.
