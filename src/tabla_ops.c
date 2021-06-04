@@ -36,6 +36,10 @@ void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad,
 		puts("ERROR: no se ha ingresado un simbolo para la operacion");
 		fflush(stdout); assert(0);
 	}
+	if (strcmp(simbolo, "=") == 0) {
+		puts("El simbolo \'=\' no puede ser utilizado para una operacion.");
+		fflush(stdout); assert(0);
+	}
 	if (eval == NULL) {
 		puts("ERROR: no se ha ingresado una funcion evaluacion para la operacion");
 		fflush(stdout); assert(0);
