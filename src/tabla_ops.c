@@ -27,9 +27,19 @@ static int existe_simbolo(TablaOps* tabla, char const* simbolo) {
 
 void cargar_operador(TablaOps* tabla, char const* simbolo, int aridad, 
 	FuncionEvaluacion eval, int precedencia) {
-	// NICETOHAVE: chequear nulls
-
-	// Chequeamos que la nueva operacion sea valida.
+	// Chequeamos que la insercion sea valida.
+	if (tabla == NULL) {
+		puts("No se ha ingresado una tabla de operaciones.");
+		fflush(stdout); assert(0);
+	}
+	if (simbolo == NULL) {
+		puts("ERROR: no se ha ingresado un simbolo para la operacion");
+		fflush(stdout); assert(0);
+	}
+	if (eval == NULL) {
+		puts("ERROR: no se ha ingresado una funcion evaluacion para la operacion");
+		fflush(stdout); assert(0);
+	}
 	if (aridad != 1 && aridad != 2) {
 		puts("ERROR: las operaciones deben tener aridad 1 o 2.");
 		printf("En operacion \'%s\'; ", simbolo);
