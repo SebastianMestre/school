@@ -9,7 +9,7 @@ typedef enum {
 	E_PARSER_OPERACION, 	// operacion invalida  
 	E_PARSER_VACIA, 			// expresion vacia
   E_PARSER_OPERADOR,
-	E_INTERPRETE_EVAL,    // error en la evaluacion del alias
+	E_INTERPRETE_ALIAS,    // error en la evaluacion del alias
 } ErrorTag;
 
 #endif // ERROR_H

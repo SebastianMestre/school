@@ -184,7 +184,7 @@ static void manejar_error(ErrorTag error, const char** val, int* val_n) {
 		case E_PARSER_OPERADOR:
 			printf("\'%s\' es un operador y no puede utilizarse como alias.\n", val[0]);
 			break;
-		case E_INTERPRETE_EVAL:
+		case E_INTERPRETE_ALIAS:
 			printf("El alias \'%.*s\' no esta definido.\n", val_n[0], val[0]);
 			break;
 		default:
@@ -207,7 +207,7 @@ static int chequear_alias(Entorno* entorno, char const* alias, int alias_n) {
 	// No lo encontramos:
 	else {
 		// Manejamos el error correspondiente.
-		manejar_error(E_INTERPRETE_EVAL, &alias, &alias_n);
+		manejar_error(E_INTERPRETE_ALIAS, &alias, &alias_n);
 		return 0;
 	}
 }
@@ -338,10 +338,10 @@ static void imprimir(Entorno* entorno, char const* alias, int alias_n) {
 		int precedencia = 0;
 		if (expresion->tag == X_OPERACION) precedencia = expresion->op->precedencia;
 		imprimir_expresion(expresion, precedencia, 1, entorno);		
+		puts("");
 	}
-	// si el alias no esta definido, imprimimos su nombre.
-	else printf("%.*s ", alias_n, alias);
-	puts("");
+	// Si el alias no esta definido, elevamos error.
+	else manejar_error(E_INTERPRETE_ALIAS, &alias, &alias_n);
 }
 
 // Carga el alias en la tabla de alias. Si ya esta definido, lo reemplaza.
