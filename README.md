@@ -63,4 +63,8 @@ Notar que se debe tener instalado valgrind y un shell UNIX-compatible.
 
 - - - -
 # Informe de dificultades
-// TODO 
+Nuestra principal dificultad fue lograr organizarnos bien como grupo. Los primeros
+dias no tuvimos una dinamica muy fluida y nos falto tiempo dedicado a discutir y 
+planear mejor el proyecyo. Decididamente, una mayor coordinacion entre nosotros 
+y un acuerdo mutuo en la direccion en la que ibamos a llevar el trabajo habrian 
+resultado en menores dificultades para completar la tarea. 
