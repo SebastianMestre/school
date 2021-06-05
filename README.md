@@ -32,7 +32,7 @@
 # Compilado y ejecucion.
 Para compilar el programa basta correr `make` sobre el directorio raiz.
 Esto dara como output un subdirectorio `build/`, con archivos intermediarios
-para el compilado, y un ejecutable `interpretar`. Para limpiar el output basta
+para el compilado, y un ejecutable `interprete`. Para limpiar el output basta
 correr `make clean`. 
 
 ### Ejemplo de ejecucion.
