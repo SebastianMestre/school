@@ -106,8 +106,7 @@ static Tokenizado tokenizar(char const* str, TablaOps* tablaOps) {
 		}
 	}
 
-	if (opQueMatchea != NULL && (
-		(str[largoOpQueMatchea] == ' ') || (str[largoOpQueMatchea] == '\0')))
+	if (opQueMatchea != NULL && !isalpha(str[largoOpQueMatchea]))
 		return (Tokenizado){
 			str + largoOpQueMatchea,
 			(Token){T_OPERADOR, NULL, 0, opQueMatchea}};
