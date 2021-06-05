@@ -4,7 +4,7 @@
 ### Estructura del proyecto.
 - Dentro del directorio raiz encontramos un archivo **Makefile**
     encargado de compilar el proyecto, 
-    archivos referentes al **[testeo de manejo de memoria](#memtest)**,
+    archivos referentes al **[testeo](#tests)** del programa,
     y este mismo **README**.
 - Dentro del subdirectorio **src** encontramos al **main** junto a archivos
     fuente destinados a manejar el nivel mas superficial del programa, donde 
@@ -50,7 +50,7 @@ $ make clean
 ```
 
 
-# Tests de manejo de memoria. <a name = memtest></a>
+# Tests. <a name = tests></a>
 
 En la carpeta `tests/` hay algunos archivos llamados `test*` y `memory_test*`.
 Estos son inputs que se pueden dar el interprete por stdin.
@@ -62,13 +62,13 @@ Los llamados `memory_test*` no tienen una salida asociada, existen unicamente
 para verificar el manejo de memoria. Para esto, se puede utilizar Valgrind.
 
 Para correr los tests, y verificar que producen la salida correcta, se puede usar
-el script `run_tests.sh`/
+el script `run_tests.sh`/.
 
 Para correr los tests de memoria en valgrind, se puede usar
 `run_memory_tests.sh`. Esto tambien corre los otros tests bajo Valgrind.
 
 > Notar que se debe tener instalado Valgrind y un shell UNIX-compatible.
-> Aparte, se debe compilar el programa previamente para poder correr los tests
+> Aparte, se debe compilar el programa previamente para poder correr los tests.
 
 - - - -
 # Informe de dificultades.
