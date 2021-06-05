@@ -67,7 +67,8 @@ el script `run_tests.sh`/
 Para correr los tests de memoria en valgrind, se puede usar
 `run_memory_tests.sh`. Esto tambien corre los otros tests bajo Valgrind.
 
-Notar que se debe tener instalado Valgrind y un shell UNIX-compatible.
+> Notar que se debe tener instalado Valgrind y un shell UNIX-compatible.
+> Aparte, se debe compilar el programa previamente para poder correr los tests
 
 - - - -
 # Informe de dificultades.
