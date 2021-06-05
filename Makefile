@@ -8,6 +8,7 @@ interprete: build/main.o build/interpretar.o build/tabla_ops.o build/operadores.
 clean:
 	rm -rf build/
 	rm -f interprete
+	rm -rf tmp/
 .PHONY: clean
 
 build/main.o:        src/main.c $(INTDIR)/interpretar.h src/tabla_ops.h src/funcion_evaluacion.h src/operadores.h
