@@ -1,0 +1,5 @@
+a = cargar b 5 +
+imprimir a
+b = cargar 3
+imprimir a
+salir

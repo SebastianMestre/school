@@ -1,0 +1,4 @@
+a = cargar 2 2 + 2 * 2 +
+imprimir a
+evaluar a
+salir
