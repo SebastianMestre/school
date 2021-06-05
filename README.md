@@ -52,14 +52,22 @@ $ make clean
 
 # Tests de manejo de memoria. <a name = memtest></a>
 
-En la carpeta `tests/` hay algunos archivos llamados `memory_test*`. Estos son
-inputs que se pueden dar el interprete por stdin. Al ejecutar el interprete en
-Valgrind, y pasarle cada uno de estos archivos, verificando que ninguno exponga
-un error, se logra testear el manejo de memoria en el programa.
+En la carpeta `tests/` hay algunos archivos llamados `test*` y `memory_test*`.
+Estos son inputs que se pueden dar el interprete por stdin.
 
-Para correr esos tests, se puede usar el script `run_memory_tests.sh`.
+Los llamados `test*` van acompannados de su correspondiente archivo `salida*`.
+Este contiene la respuesta que debe dar el interprete al interpretar el test.
 
-Notar que se debe tener instalado valgrind y un shell UNIX-compatible.
+Los llamados `memory_test*` no tienen una salida asociada, existen unicamente
+para verificar el manejo de memoria. Para esto, se puede utilizar Valgrind.
+
+Para correr los tests, y verificar que producen la salida correcta, se puede usar
+el script `run_tests.sh`/
+
+Para correr los tests de memoria en valgrind, se puede usar
+`run_memory_tests.sh`. Esto tambien corre los otros tests bajo Valgrind.
+
+Notar que se debe tener instalado Valgrind y un shell UNIX-compatible.
 
 - - - -
 # Informe de dificultades.
