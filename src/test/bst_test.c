@@ -113,7 +113,7 @@ void test_all(int value) {
 	test_find_different_values(value);
 }
 
-void bst_tests() {
+void bst_test() {
 	LT_ITERATE(test_all);
 
 	int tests_ran = 0;

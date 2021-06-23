@@ -1,3 +1,3 @@
 #pragma once
 
-void bst_tests();
+void bst_test();
