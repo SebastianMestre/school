@@ -1,6 +1,5 @@
 
-CXXFLAGS := -Wall
-
+CFLAGS := -Wall
 INCLUDE := -include src/types.h
 
 all:
@@ -26,6 +25,6 @@ build/test/byte_span_test.o: src/test/byte_span_test.c src/test/byte_span_test.h
 build/test/bst_test.o: src/test/bst_test.c src/test/bst_test.h src/bst.h
 build/test/main.o: src/test/main.c src/test/bst_test.h
 
-build/%.o: src/%.c
+build/%.o: src/%.c src/types.h
 	mkdir -p $(dir $@)
-	$(CC) -o $@ -c $< $(CXXFLAGS) $(INCLUDE)
+	$(CC) -o $@ -c $< $(CFLAGS) $(CPPFLAGS) $(INCLUDE)
