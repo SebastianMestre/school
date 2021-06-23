@@ -78,10 +78,13 @@ rot_right(Node** node) {
 static void
 rebalance(Node** node, int cmp_result) {
 
-	assert(cmp_result != 0);
+	assert(node != nullptr);
+	assert(*node != nullptr);
 
 	assert(-3 < balance_factor(*node));
 	assert(balance_factor(*node) <  3);
+
+	assert(cmp_result != 0);
 
 	Node* old_root = *node;
 	if (cmp_result < 0) {

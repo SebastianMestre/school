@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-typedef int (*Comparator)(void const*, void const*);
+typedef bool (*Comparator)(void const*, void const*);
 
 struct _BstNode {
 	struct _BstNode* lhs;
@@ -10,7 +10,7 @@ struct _BstNode {
 	void const* datum;
 	int height;
 };
-
+typedef struct _BstNode BstNode;
 
 struct _Bst {
 	struct _BstNode* root;
@@ -29,4 +29,5 @@ typedef struct _BstInsertResult BstInsertResult;
 Bst bst_create(Comparator comparator);
 
 BstInsertResult bst_insert(Bst* tree, void* datum);
+struct _BstNode* bst_find(Bst tree, void const* datum);
 
