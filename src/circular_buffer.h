@@ -27,12 +27,6 @@ CircularBuffer
 circular_buffer_create_trival(size_t element_width, size_t capacity);
 
 
-static void
-advance_and_wrap(void** ptr, size_t stride, ByteSpan range);
-
-static void
-retreat_and_wrap(void** ptr, size_t stride, ByteSpan range);
-
 void
 circular_buffer_pop_front(CircularBuffer* buffer);
 
