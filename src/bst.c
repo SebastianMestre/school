@@ -5,13 +5,6 @@
 
 typedef struct _BstNode Node;
 
-struct _InsertResult {
-	Node* root;
-	Node* position;
-	bool success;
-};
-typedef struct _InsertResult InsertResult;
-
 static int height(Node* node);
 
 static int
@@ -54,83 +47,91 @@ create(Node* lhs, Node* rhs, void* datum) {
 	return result;
 }
 
-static Node*
-rebalance(Node* node) {
+static void
+rot_left(Node** node) {
+	Node* old_root = *node;
+	Node* new_root = old_root->rhs;
 
-	// TODO: implement double rotations.
+	old_root->rhs = new_root->lhs;
+	new_root->lhs = old_root;
 
-	int bf = balance_factor(node);
-
-	// assert(bf > -3);
-	// assert(bf < 3);
-
-	Node* new_root = node;
-
-	if (bf > 1) {
-		Node* new_root = node->rhs;
-
-		Node* t1 = node->lhs;
-		Node* t2 = new_root->lhs;
-		Node* t3 = new_root->rhs;
-
-		new_root->lhs = node;
-		new_root->rhs = t3;
-		node->lhs = t1;
-		node->rhs = t2;
-
-	} else if (bf < -1) {
-		Node* new_root = node->lhs;
-
-		Node* t1 = new_root->lhs;
-		Node* t2 = new_root->rhs;
-		Node* t3 = node->rhs;
-
-		new_root->lhs = t1;
-		new_root->rhs = node;
-		node->lhs = t2;
-		node->rhs = t3;
-	}
-
-	recompute_height_shallow(node);
+	recompute_height_shallow(old_root);
 	recompute_height_shallow(new_root);
 
-	return new_root;
+	*node = new_root;
 }
 
-static InsertResult
-insert(Node* node, void* datum, Comparator cmp) {
-	if (node == nullptr) {
-		return (InsertResult) {
+static void
+rot_right(Node** node) {
+	Node* old_root = *node;
+	Node* new_root = old_root->lhs;
+
+	old_root->lhs = new_root->rhs;
+	new_root->rhs = old_root;
+
+	recompute_height_shallow(old_root);
+	recompute_height_shallow(new_root);
+
+	*node = new_root;
+}
+
+static void
+rebalance(Node** node, int cmp_result) {
+
+	assert(cmp_result != 0);
+
+	assert(-3 < balance_factor(*node));
+	assert(balance_factor(*node) <  3);
+
+	Node* old_root = *node;
+	if (cmp_result < 0) {
+		if (balance_factor(old_root) == -2) {
+			if (balance_factor(old_root->lhs) == 1) {
+				rot_left(&old_root->lhs);
+			}
+			rot_right(node);
+		}
+	} else {
+		if (balance_factor(old_root) == 2) {
+			if (balance_factor(old_root->rhs) == -1) {
+				rot_right(&old_root->rhs);
+			}
+			rot_left(node);
+		}
+	}
+}
+
+static BstInsertResult
+insert(Node** node, void* datum, Comparator cmp) {
+	assert(node);
+
+	if (*node == nullptr) {
+		*node = create(nullptr, nullptr, datum);
+		return (BstInsertResult) {
 			.success = true,
-			.position = create(nullptr, nullptr, datum),
-			.root = node,
+			.position = *node,
 		};
 	}
 
-	int const cmp_result = cmp(datum, node->datum);
+	int const cmp_result = cmp(datum, (*node)->datum);
 
 	if (cmp_result == 0) {
-		return (InsertResult) {
+		return (BstInsertResult) {
 			.success = false,
-			.position = node,
-			.root = node,
+			.position = *node,
 		};
 	}
 
-	bool const go_left = cmp_result < 0;
-	Node** next = go_left ? &node->lhs : &node->rhs;
-	InsertResult result = insert(*next, datum, cmp);
-	*next = result.root;
+	Node** next = cmp_result < 0 ? &(*node)->lhs : &(*node)->rhs;
 
-	result.root = node;
+	BstInsertResult result = insert(next, datum, cmp);
 
 	if (!result.success) {
 		return result;
 	}
 
-	recompute_height_shallow(node);
-
-	result.root = rebalance(node);
+	recompute_height_shallow(*node);
+	rebalance(node, cmp_result);
 
 	return result;
 }
@@ -165,12 +166,7 @@ bst_create(Comparator comparator) {
 BstInsertResult
 bst_insert(Bst* bst, void* datum) {
 	assert(bst != nullptr);
-	InsertResult result = insert(bst->root, datum, bst->comparator);
-	bst->root = result.root;
-	return (BstInsertResult) {
-		.success = result.success,
-		.position = result.position,
-	};
+	return insert(&bst->root, datum, bst->comparator);
 }
 
 Node*

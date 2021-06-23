@@ -10,7 +10,7 @@ test: \
 build/test/main.o \
 build/test/bst_test.o \
 build/bst.o
-	$(CC) $^ $(LIBS)
+	$(CC) -o $@ $^ $(LIBS)
 
 build/%.o: src/%.c
 	mkdir -p $(dir $@)
