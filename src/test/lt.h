@@ -8,16 +8,17 @@
 
 #define LT_TEST                                                                \
 	static int lt_test_id = -1;                                                \
-	if (lt_test_id == -1) {                                                    \
+	if (lt_test_id == -1)                                                      \
 		lt_test_id = lt_test_count++;                                          \
-	}
+	lt_ran[lt_test_id] = true;                                                 \
 
-#define LT_ONCE                                                                \
-	{                                                                          \
-		if (lt_ran[lt_test_id])                                                \
-			return;                                                            \
-		lt_ran[lt_test_id] = true;                                             \
-	}
+#define LT_TEST_ONCE                                                           \
+	static int lt_test_id = -1;                                                \
+	if (lt_test_id == -1)                                                      \
+		lt_test_id = lt_test_count++;                                          \
+	if (lt_ran[lt_test_id])                                                    \
+		return;                                                                \
+	lt_ran[lt_test_id] = true;                                                 \
 
 #define LT_ASSERT(expr) (lt_assertions_ran += 1, assert(expr))
 

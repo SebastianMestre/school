@@ -16,8 +16,7 @@ static void test_find_empty(int data) {
 }
 
 static void test_insert_empty(int data) {
-	LT_TEST
-	LT_ONCE
+	LT_TEST_ONCE
 
 	Bst bst = bst_create((Comparator)int_cmp);
 
@@ -30,8 +29,7 @@ static void test_insert_empty(int data) {
 }
 
 static void test_insert_find(int data) {
-	LT_TEST
-	LT_ONCE
+	LT_TEST_ONCE
 
 	test_insert_empty(data);
 
@@ -44,8 +42,7 @@ static void test_insert_find(int data) {
 }
 
 static void test_double_insert(int data) {
-	LT_TEST
-	LT_ONCE
+	LT_TEST_ONCE
 
 	test_insert_empty(data);
 
@@ -58,8 +55,7 @@ static void test_double_insert(int data) {
 }
 
 static void test_insert_different_values(int data) {
-	LT_TEST
-	LT_ONCE
+	LT_TEST_ONCE
 
 	test_insert_empty(data);
 
@@ -79,8 +75,7 @@ static void test_insert_different_values(int data) {
 }
 
 static void test_find_different_values(int data) {
-	LT_TEST
-	LT_ONCE
+	LT_TEST_ONCE
 
 	test_insert_different_values(data);
 	test_insert_find(data);
