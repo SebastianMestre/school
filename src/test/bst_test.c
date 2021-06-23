@@ -4,7 +4,7 @@
 
 #include "lt.h"
 
-static bool int_cmp(int const* lhs, int const* rhs) {
+static int int_cmp(int const* lhs, int const* rhs) {
 	return lhs - rhs;
 }
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-
-typedef bool (*Comparator)(void const*, void const*);
-
 struct _BstNode {
 	struct _BstNode* lhs;
 	struct _BstNode* rhs;
