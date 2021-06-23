@@ -1,10 +1,10 @@
 #pragma once
 
 #include <assert.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
 
 #define LT_TEST                                                                \
 	static int lt_test_id = -1;                                                \
@@ -30,7 +30,16 @@ static bool lt_ran[LT_MAX_TEST_COUNT];
 static int lt_test_count = 0;
 static int lt_assertions_ran = 0;
 
-void lt_reset() {
+static void lt_reset() {
 	memset(lt_ran, 0, sizeof(lt_ran));
 	lt_assertions_ran = 0;
+}
+
+static void lt_report(char const* module_name) {
+	int tests_ran = 0;
+	for (int i = 0; i < lt_test_count; ++i)
+		tests_ran += lt_ran[i];
+	printf(
+		"%s tests passed -- %d tests ran with %d assertions \n",
+		module_name, tests_ran, lt_assertions_ran);
 }

@@ -1,7 +1,5 @@
 #include "../bst.h"
 
-#include <stdio.h>
-
 #include "lt.h"
 
 static int int_cmp(int const* lhs, int const* rhs) {
@@ -115,10 +113,6 @@ void test_all(int value) {
 
 void bst_test() {
 	LT_ITERATE(test_all);
-
-	int tests_ran = 0;
-	for (int i = 0; i < lt_test_count; ++i)
-		tests_ran += lt_ran[i];
-	printf("Bst tests passed -- %d tests ran with %d assertions \n", tests_ran, lt_assertions_ran);
+	lt_report("Bst");
 }
 
