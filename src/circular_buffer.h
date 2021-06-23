@@ -17,17 +17,11 @@ struct _CircularBuffer {
 	size_t size;
 
 	Destructor dtor;
-	void* dtor_metadata;
 };
 typedef struct _CircularBuffer CircularBuffer;
 
 CircularBuffer
-circular_buffer_create(
-	size_t element_width,
-	size_t capacity,
-	Destructor dtor,
-	void* dtor_metadata
-);
+circular_buffer_create(size_t element_width, size_t capacity, Destructor dtor);
 
 CircularBuffer
 circular_buffer_create_trival(size_t element_width, size_t capacity);

@@ -7,12 +7,10 @@ CircularBuffer
 circular_buffer_create(
 	size_t element_width,
 	size_t capacity,
-	Destructor dtor,
-	void* dtor_metadata
+	Destructor dtor
 ) {
 	CircularBuffer result = circular_buffer_create_trival(element_width, capacity);
 	result.dtor = dtor;
-	result.dtor_metadata = dtor_metadata;
 	return result;
 }
 
@@ -56,7 +54,7 @@ void
 circular_buffer_pop_front(CircularBuffer* buffer) {
 	assert(buffer->size != 0);
 
-	buffer->dtor(buffer->begin, buffer->dtor_metadata);
+	call_dtor(buffer->dtor, buffer->begin);
 	advance_and_wrap(&buffer->begin, buffer->element_width, buffer->data);
 
 	buffer->size -= 1;
@@ -67,7 +65,7 @@ circular_buffer_pop_back(CircularBuffer* buffer) {
 	assert(buffer->size != 0);
 
 	retreat_and_wrap(&buffer->end, buffer->element_width, buffer->data);
-	buffer->dtor(buffer->end, buffer->dtor_metadata);
+	call_dtor(buffer->dtor, buffer->end);
 
 	buffer->size -= 1;
 }
