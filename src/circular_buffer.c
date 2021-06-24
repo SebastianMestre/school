@@ -9,13 +9,6 @@ circular_buffer_create(
 	size_t capacity,
 	Destructor dtor
 ) {
-	CircularBuffer result = circular_buffer_create_trival(element_width, capacity);
-	result.dtor = dtor;
-	return result;
-}
-
-CircularBuffer
-circular_buffer_create_trival(size_t element_width, size_t capacity) {
 	assert(element_width != 0);
 	assert(capacity != 0);
 
@@ -32,9 +25,10 @@ circular_buffer_create_trival(size_t element_width, size_t capacity) {
 		.element_width = element_width,
 		.capacity = capacity,
 		.size = 0,
+
+		.dtor = dtor,
 	};
 }
-
 
 static void
 advance_and_wrap(void** ptr, size_t stride, ByteSpan range) {
@@ -83,4 +77,12 @@ circular_buffer_push_back(CircularBuffer* buffer, ByteSpan data) {
 	advance_and_wrap(&buffer->end, buffer->element_width, buffer->data);
 
 	buffer->size += 1;
+}
+
+void
+circular_buffer_release(CircularBuffer* buffer) {
+	free(buffer->data.begin);
+	buffer->data = (ByteSpan){};
+	buffer->begin = nullptr;
+	buffer->end = nullptr;
 }

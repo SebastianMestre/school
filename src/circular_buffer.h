@@ -23,10 +23,6 @@ typedef struct _CircularBuffer CircularBuffer;
 CircularBuffer
 circular_buffer_create(size_t element_width, size_t capacity, Destructor dtor);
 
-CircularBuffer
-circular_buffer_create_trival(size_t element_width, size_t capacity);
-
-
 void
 circular_buffer_pop_front(CircularBuffer* buffer);
 
@@ -35,3 +31,6 @@ circular_buffer_pop_back(CircularBuffer* buffer);
 
 void
 circular_buffer_push_back(CircularBuffer* buffer, ByteSpan data);
+
+void
+circular_buffer_release(CircularBuffer* buffer);
