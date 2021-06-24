@@ -4,7 +4,11 @@
 
 #define nullptr ((void*)0)
 
-typedef int (*Comparator)(void const*, void const*);
+typedef int (*ComparatorFunction)(void const*, void const*, void*);
+typedef struct { ComparatorFunction call; void* metadata; } Comparator;
+inline static int call_cmp(Comparator cmp, void const* lhs, void const* rhs) {
+	return cmp.call(lhs, rhs, cmp.metadata);
+}
 
 typedef void (*DestructorFunction)(void* object, void* metadata);
 typedef struct { DestructorFunction call; void* metadata; } Destructor;

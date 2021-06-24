@@ -2,14 +2,15 @@
 
 #include "lt.h"
 
-static int int_cmp(int const* lhs, int const* rhs) {
+static int int_cmp_impl(int const* lhs, int const* rhs, void* metadata) {
 	return lhs - rhs;
 }
+static ComparatorFunction int_cmp = (ComparatorFunction)int_cmp_impl;
 
 static void test_find_empty(int data) {
 	LT_TEST
 
-	Bst bst = bst_create((Comparator)int_cmp);
+	Bst bst = bst_create((Comparator){int_cmp});
 
 	// searching in an empty bst return nullptr
 	LT_ASSERT(bst_find(bst, &data) == nullptr);
@@ -18,7 +19,7 @@ static void test_find_empty(int data) {
 static void test_insert_empty(int data) {
 	LT_TEST_ONCE
 
-	Bst bst = bst_create((Comparator)int_cmp);
+	Bst bst = bst_create((Comparator){int_cmp});
 
 	BstInsertResult insert_result = bst_insert(&bst, &data);
 
@@ -33,7 +34,7 @@ static void test_insert_find(int data) {
 
 	test_insert_empty(data);
 
-	Bst bst = bst_create((Comparator)int_cmp);
+	Bst bst = bst_create((Comparator){int_cmp});
 
 	bst_insert(&bst, &data);
 
@@ -46,7 +47,7 @@ static void test_double_insert(int data) {
 
 	test_insert_empty(data);
 
-	Bst bst = bst_create((Comparator)int_cmp);
+	Bst bst = bst_create((Comparator){int_cmp});
 
 	bst_insert(&bst, &data);
 
@@ -62,7 +63,7 @@ static void test_insert_different_values(int data) {
 	int other = data * 19;
 	if (data == other) return;
 
-	Bst bst = bst_create((Comparator)int_cmp);
+	Bst bst = bst_create((Comparator){int_cmp});
 
 	bst_insert(&bst, &data);
 
@@ -83,7 +84,7 @@ static void test_find_different_values(int data) {
 	int other = data * 19;
 	if (data == other) return;
 
-	Bst bst = bst_create((Comparator)int_cmp);
+	Bst bst = bst_create((Comparator){int_cmp});
 
 	bst_insert(&bst, &data);
 	bst_insert(&bst, &other);

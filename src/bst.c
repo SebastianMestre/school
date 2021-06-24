@@ -116,7 +116,7 @@ insert(Node** node, void* datum, Comparator cmp) {
 		};
 	}
 
-	int const cmp_result = cmp(datum, (*node)->datum);
+	int const cmp_result = call_cmp(cmp, datum, (*node)->datum);
 
 	if (cmp_result == 0) {
 		return (BstInsertResult) {
@@ -145,7 +145,7 @@ find(Node* node, void const* datum, Comparator cmp) {
 		return nullptr;
 	}
 
-	int cmp_result = cmp(datum, node->datum);
+	int cmp_result = call_cmp(cmp, datum, node->datum);
 
 	if (cmp_result == 0) {
 		return node;
@@ -159,7 +159,7 @@ find(Node* node, void const* datum, Comparator cmp) {
 
 Bst
 bst_create(Comparator comparator) {
-	assert(comparator != nullptr);
+	assert(comparator.call != nullptr);
 	return (Bst) {
 		.root = nullptr,
 		.comparator = comparator

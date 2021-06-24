@@ -1,5 +1,5 @@
 
-CFLAGS := -Wall
+CFLAGS := -Wall -Werror
 INCLUDE := -include src/types.h
 
 all:
