@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 struct _Contact {
 	char* name;
 	char* surname;
@@ -7,3 +9,5 @@ struct _Contact {
 	char* phone_number;
 };
 typedef struct _Contact Contact;
+
+typedef size_t ContactId;

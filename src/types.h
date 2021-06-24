@@ -15,6 +15,7 @@ typedef struct { DestructorFunction call; void* metadata; } Destructor;
 inline static void call_dtor(Destructor dtor, void* arg) {
 	dtor.call(arg, dtor.metadata);
 }
+extern Destructor const nop_dtor;
 
 typedef void (*CallbackFunction)(void* argument, void* metadata);
 typedef struct { CallbackFunction call; void* metadata; } Callback;
