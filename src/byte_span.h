@@ -22,3 +22,5 @@ byte_span_width(ByteSpan span);
 void
 byte_span_write(void* destination, ByteSpan source);
 
+#define SPANOF(x) byte_span_create(&(x), sizeof(x))
+

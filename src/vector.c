@@ -20,14 +20,14 @@ vector_create(size_t element_width) {
 }
 
 static void*
-vector_at_unsafe(Vector v, size_t i) {
+vector_at_ptr(Vector v, size_t i) {
 	return v.data.begin + v.element_width * i;
 }
 
 ByteSpan
 vector_at(Vector v, size_t i) {
 	assert(i < v.size);
-	return byte_span_create(vector_at_unsafe(v, i), v.element_width);
+	return byte_span_slice(v.data, v.element_width * i, v.element_width);
 }
 
 void
@@ -50,7 +50,7 @@ vector_push(Vector* v, ByteSpan data) {
 		vector_resize_storage(v, v->capacity * 2);
 	}
 
-	void* location = vector_at_unsafe(*v, v->size);
+	void* location = vector_at_ptr(*v, v->size);
 	byte_span_write(location, data);
 	v->size += 1;
 }
