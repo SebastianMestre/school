@@ -1,6 +1,9 @@
-#include "contact.h"
+#pragma once
 
+#include "contact.h"
 #include "vector.h"
+
+#include <stdint.h>
 
 struct _ContactSetSlot {
 	Contact data;

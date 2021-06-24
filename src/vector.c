@@ -3,14 +3,14 @@
 #include <assert.h>
 #include <stdlib.h>
 
-ByteVector
-byte_vector_create(size_t element_width) {
+Vector
+vector_create(size_t element_width) {
 	size_t capacity = 4;
 
 	size_t data_width = element_width * capacity;
 	void* data = malloc(data_width);
 
-	return (ByteVector) {
+	return (Vector) {
 		.data = byte_span_create(data, data_width),
 
 		.element_width = element_width,
@@ -20,18 +20,18 @@ byte_vector_create(size_t element_width) {
 }
 
 static void*
-byte_vector_at_unsafe(ByteVector v, size_t i) {
+vector_at_unsafe(Vector v, size_t i) {
 	return v.data.begin + v.element_width * i;
 }
 
 ByteSpan
-byte_vector_at(ByteVector v, size_t i) {
+vector_at(Vector v, size_t i) {
 	assert(i < v.size);
-	return byte_span_create(byte_vector_at_unsafe(v, i), v.element_width);
+	return byte_span_create(vector_at_unsafe(v, i), v.element_width);
 }
 
 void
-byte_vector_resize_storage(ByteVector* v, size_t n) {
+vector_resize_storage(Vector* v, size_t n) {
 	assert(v->size <= n);
 
 	size_t new_data_width = v->element_width * n;
@@ -45,18 +45,18 @@ byte_vector_resize_storage(ByteVector* v, size_t n) {
 }
 
 void
-byte_vector_push(ByteVector* v, ByteSpan data) {
+vector_push(Vector* v, ByteSpan data) {
 	if (v->size == v->capacity) {
-		byte_vector_resize_storage(v, v->capacity * 2);
+		vector_resize_storage(v, v->capacity * 2);
 	}
 
-	void* location = byte_vector_at_unsafe(*v, v->size);
+	void* location = vector_at_unsafe(*v, v->size);
 	byte_span_write(location, data);
 	v->size += 1;
 }
 
 void
-byte_vector_release(ByteVector* v) {
+vector_release(Vector* v) {
 	free(v->data.begin);
 	// zero out the pointers, just in case
 	v->data = (ByteSpan){};
