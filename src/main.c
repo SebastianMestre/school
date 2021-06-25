@@ -1,49 +1,57 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void buscar(void) {}
-void agregar(void) {}
-void eliminar(void) {}
-void editar(void) {}
-void cargar(void) {}
-void guardar(void) {}
-void deshacer(void) {}
-void rehacer(void) {}
-void conjuncion(void) {}
-void disjuncion(void) {}
-void guardar_ordenado(void) {}
-void buscar_por_suma_de_edades(void) {}
+#include "database.h"
+#include "storage.h"
 
-void salir(void) {
-	exit(0);
-}
+void buscar(Database* database) {}
+void agregar(Database* database) {}
+void eliminar(Database* database) {}
+void editar(Database* database) {}
+void cargar(Database* database) {}
+void guardar(Database* database) {}
+void deshacer(Database* database) {}
+void rehacer(Database* database) {}
+void conjuncion(Database* database) {}
+void disjuncion(Database* database) {}
+void guardar_ordenado(Database* database) {}
+void buscar_por_suma_de_edades(Database* database) {}
+void exit_program(Database* database) { exit(0); } // TODO: cleanup database and storage
 
-typedef void (*AccionDelPrograma)(void);
+typedef void (*ProgramAction)(Database*);
 
-struct _EntradaMenu {
-	char const* nombre;
-	AccionDelPrograma accion;
+struct _MenuEntry {
+	char const* name;
+	ProgramAction action;
 };
-typedef struct _EntradaMenu EntradaMenu;
+typedef struct _MenuEntry MenuEntry;
 
-static int obtener_seleccion_del_usuario(int opcion_maxima) {
-		int seleccionada;
-		int resultado_scanf;
+static int
+action_id_prompt(int max_value) {
+		int selected;
+		int scanf_result;
 
 		printf(">");
-		resultado_scanf = scanf("%d", &seleccionada);
-		while (!resultado_scanf || seleccionada <= 0 || seleccionada > opcion_maxima) {
+		scanf_result = scanf("%d", &selected);
+		while (scanf_result == 0 || scanf_result == EOF || selected <= 0 || selected > max_value) {
 			printf("Accion invalida, seleccione una accion valida:\n");
 			printf(">");
-			resultado_scanf = scanf("%d", &seleccionada);
+			scanf_result = scanf("%d", &selected);
 		}
 
-		return seleccionada;
+		return selected;
 }
 
 void menu() {
-#define LONGITUD_MENU 13
-	EntradaMenu entradas[LONGITUD_MENU] = {
+}
+
+int main() {
+
+	Storage storage = storage_create();
+	Database database = database_create(&storage);
+
+#define MENU_LEN 13
+	MenuEntry entries[MENU_LEN] = {
 		{"Buscar", buscar},
 		{"Agregar", agregar},
 		{"Eliminar", eliminar},
@@ -56,24 +64,20 @@ void menu() {
 		{"OR", disjuncion},
 		{"Guardar ordenado", guardar_ordenado},
 		{"Buscar por suma de edades", buscar_por_suma_de_edades},
-		{"Salir", salir},
+		{"Salir", exit_program},
 	};
 
 	while (1) {
 		printf("Menu de acciones:\n");
-		for (int i = 0; i < LONGITUD_MENU; ++i) {
-			printf("%d. %s\n", i+1, entradas[i].nombre);
+		for (int i = 0; i < MENU_LEN; ++i) {
+			printf("%d. %s\n", i+1, entries[i].name);
 		}
 
 		printf("\n");
 		printf("Seleccione una accion:\n");
 
-		int seleccionada = obtener_seleccion_del_usuario(LONGITUD_MENU);
-		EntradaMenu entrada = entradas[seleccionada - 1];
-		entrada.accion();
+		int selected = action_id_prompt(MENU_LEN);
+		MenuEntry entry = entries[selected - 1];
+		entry.action(&database);
 	}
-}
-
-int main() {
-	menu();
 }

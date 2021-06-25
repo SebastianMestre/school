@@ -2,11 +2,10 @@
 CFLAGS := -Wall -Werror
 INCLUDE := -include src/types.h
 
-all:
+all: app test
 .PHONY: all
 
-test:                       \
-                            \
+common_objects :=           \
 build/types.o               \
                             \
 build/span.o                \
@@ -20,7 +19,12 @@ build/storage.o             \
 build/history.o             \
 build/index.o               \
 build/database.o            \
-                            \
+
+app: $(common_objects)      \
+build/main.o
+	$(CC) -o $@ $^ $(LIBS)
+
+test: $(common_objects)     \
 build/test/main.o           \
 build/test/span_test.o      \
 build/test/bst_test.o

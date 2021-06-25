@@ -10,6 +10,14 @@ typedef struct _Slot Slot;
 
 #define CONTACT_REFERENCED (CONTACT_REFERENCED_IN_INDEX | CONTACT_REFERENCED_IN_HISTORY_FWD | CONTACT_REFERENCED_IN_HISTORY_BWD)
 
+Storage
+storage_create() {
+	return (Storage){
+		.holes = vector_create(sizeof(int)),
+		.slots = vector_create(sizeof(Slot)),
+	};
+}
+
 static Slot*
 get_slot(Storage storage, ContactId id) {
 	Span span = vector_at(storage.slots, id);
