@@ -27,6 +27,7 @@ build/main.o
 test: $(common_objects)     \
 build/test/main.o           \
 build/test/span_test.o      \
+build/test/vector_test.o    \
 build/test/bst_test.o
 	$(CC) -o $@ $^ $(LIBS)
 
@@ -45,9 +46,14 @@ build/index.o: src/index.c src/index.h src/storage.h src/bst.h src/vector.h src/
 
 build/database.o: src/database.c src/database.h src/index.h src/history.h src/storage.h src/circular_buffer.h src/bst.h src/vector.h src/span.h
 
-build/test/span_test.o: src/test/span_test.c src/test/span_test.h src/span.h src/test/lt.h
-build/test/bst_test.o: src/test/bst_test.c src/test/bst_test.h src/bst.h src/test/lt.h
+build/test/span_test.o: src/test/span_test.c src/test/span_test.h src/span.h
+build/test/vector_test.o: src/test/vector_test.c src/test/vector_test.h src/vector.h src/span.h
+build/test/bst_test.o: src/test/bst_test.c src/test/bst_test.h src/bst.h
 build/test/main.o: src/test/main.c src/test/bst_test.h
+
+build/test/%_test.o: src/test/%_test.c src/test/lt.h src/types.h
+	mkdir -p $(dir $@)
+	$(CC) -o $@ -c $< $(CFLAGS) $(CPPFLAGS) $(INCLUDE)
 
 build/%.o: src/%.c src/types.h
 	mkdir -p $(dir $@)

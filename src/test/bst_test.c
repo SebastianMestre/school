@@ -175,9 +175,9 @@ static void test_random_values(int data) {
 		bst_insert(&bst, SPANOF(y));
 	}
 
-	assert(bst_find(bst, SPANOF(x)) != nullptr);
+	LT_ASSERT(bst_find(bst, SPANOF(x)) != nullptr);
 	bst_erase(&bst, SPANOF(x));
-	assert(bst_find(bst, SPANOF(x)) == nullptr);
+	LT_ASSERT(bst_find(bst, SPANOF(x)) == nullptr);
 
 	bst_release(&bst);
 
