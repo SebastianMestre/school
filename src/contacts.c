@@ -8,7 +8,7 @@ struct _Slot {
 };
 typedef struct _Slot Slot;
 
-#define CONTACT_REFERENCED (CONTACT_REFERENCED_IN_BST | CONTACT_REFERENCED_IN_HISTORY_FWD | CONTACT_REFERENCED_IN_HISTORY_BWD)
+#define CONTACT_REFERENCED (CONTACT_REFERENCED_IN_INDEX | CONTACT_REFERENCED_IN_HISTORY_FWD | CONTACT_REFERENCED_IN_HISTORY_BWD)
 
 static Slot*
 get_slot(Contacts contacts, ContactId id) {
@@ -41,4 +41,11 @@ contacts_unset_flags(Contacts* contacts, ContactId id, uint8_t flags) {
 		slot->flags &= ~CONTACT_ACTIVE;
 		vector_push(&contacts->holes, SPANOF(id));
 	}
+}
+
+Contact*
+contacts_at(Contacts contacts, ContactId id) {
+	Slot* result = get_slot(contacts, id);
+	assert(result);
+	return &result->data;
 }

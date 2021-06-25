@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 #define CONTACT_ACTIVE                    (0x1)
-#define CONTACT_REFERENCED_IN_BST         (0x2)
+#define CONTACT_REFERENCED_IN_INDEX       (0x2)
 #define CONTACT_REFERENCED_IN_HISTORY_FWD (0x4)
 #define CONTACT_REFERENCED_IN_HISTORY_BWD (0x8)
 
@@ -27,6 +27,9 @@ typedef struct _Contacts Contacts;
 
 Contacts
 contacts_create();
+
+Contact*
+contacts_at(Contacts contacts, ContactId id);
 
 void
 contacts_set_flags(Contacts contacts, ContactId id, uint8_t flags);

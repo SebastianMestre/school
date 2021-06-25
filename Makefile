@@ -16,8 +16,9 @@ build/bst.o                 \
                             \
 build/contact.o             \
                             \
-build/history.o             \
 build/contacts.o            \
+build/history.o             \
+build/index.o               \
                             \
 build/test/main.o           \
 build/test/span_test.o      \
@@ -33,8 +34,9 @@ build/bst.o: src/bst.c src/bst.h src/span.h
 
 build/contact.o: src/contact.c src/contact.h
 
-build/history.o: src/history.c src/history.h src/circular_buffer.h src/span.h
 build/contacts.o: src/contacts.c src/contacts.h src/contact.h src/vector.h src/span.h
+build/history.o: src/history.c src/history.h src/contacts.h src/circular_buffer.h src/vector.h src/span.h
+build/index.o: src/index.c src/index.h src/contacts.h src/bst.h src/vector.h src/span.h
 
 build/test/span_test.o: src/test/span_test.c src/test/span_test.h src/span.h src/test/lt.h
 build/test/bst_test.o: src/test/bst_test.c src/test/bst_test.h src/bst.h src/test/lt.h
