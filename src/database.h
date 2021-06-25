@@ -19,19 +19,22 @@ database_create(Storage* storage);
 
 // no toma ownership
 OptionalContactId
-database_find_contact(Database* database, char* name, char* surname);
+database_find(Database database, char* name, char* surname);
+
+// no toma ownership
+bool database_has(Database database_has, char* name, char* surname);
 
 // toma ownership sobre, name, surname, age, y phone_number
 void
-database_create_contact(Database* database, char* name, char* surname, unsigned age, char* phone_number);
+database_insert(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
 // no toma ownership
 void
-database_delete_contact(Database* database, char* name, char* surname);
+database_delete(Database* database, char* name, char* surname);
 
 // toma ownership sobre age, y phone number
 void
-database_create_contact(Database* database, char* name, char* surname, unsigned age, char* phone_number);
+database_update(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
 // no toma ownrship
 void

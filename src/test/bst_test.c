@@ -184,7 +184,7 @@ static void test_random_values(int data) {
 #undef RAND
 }
 
-void test_all(int value) {
+static void test_all(int value) {
 	lt_reset();
 	test_find_empty(value);
 	test_insert_empty(value);
