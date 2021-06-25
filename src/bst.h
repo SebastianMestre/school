@@ -35,4 +35,7 @@ BstNode*
 bst_find(Bst tree, Span datum);
 
 void
+bst_erase(Bst* tree, Span datum);
+
+void
 bst_release(Bst* tree);

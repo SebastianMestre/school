@@ -164,17 +164,89 @@ find(Node* node, Span datum, Comparator cmp) {
 	return find(next, datum, cmp);
 }
 
-// Destruimos el arbol binario sin recursionar.
-//
-// Se rota la raiz hacia la derecha repetidas veces, hasta
-// no tener un subarbol izquierdo.
-// Llegado este punto, se elimina la raiz, y se camina hacia
-// el subarbol derecho (el unico que hay), donde se repite
-// el proceso.
-//
-// Complejidad:
-// tiempo: O(Nodos).
-// espacio: O(1).
+static void
+free_node(Node* node, Destructor dtor) { 
+	call_dtor(dtor, node->datum.begin);
+	free(node);
+}
+
+static Node*
+steal_leftmost(Node** p) {
+	assert(p != nullptr);
+
+	Node* node = *p;
+	assert(node != nullptr);
+
+	if (node->lhs == nullptr) {
+		*p = node->rhs;
+
+		// sanity: null en el puntero
+		node->rhs = nullptr;
+
+		return node;
+	} else {
+		Node* result = steal_leftmost(&node->lhs);
+		recompute_height_shallow(node);
+		return result;
+	}
+}
+
+static void
+erase(Node** p, Span datum, Comparator cmp) {
+	assert(p != nullptr);
+
+	// no permitimos que se borren cosas que no estan el el arbol
+	Node* node = *p;
+	assert(node != nullptr);
+
+	int const cmp_result = call_cmp(cmp, datum.begin, node->datum.begin);
+
+	if (cmp_result == 0) {
+		Node* lhs = node->lhs;
+		Node* rhs = node->rhs;
+
+		// el nodo que se borra es una hoja
+		if (lhs == nullptr && rhs == nullptr) {
+			*p = nullptr;
+		} else if (lhs == nullptr) {
+			// el nodo que se borra tiene un subarbol
+			*p = rhs;
+		} else if (rhs == nullptr) {
+			// el nodo que se borra tiene un subarbol
+			*p = lhs;
+		} else {
+			// el nodo que se borra tiene dos subarboles
+			Node* succ = steal_leftmost(&node->rhs);
+
+			succ->lhs = node->lhs;
+			succ->rhs = node->rhs;
+			*p = succ;
+		}
+
+		free_node(node, /* TODO */ nop_dtor);
+	} else if (cmp_result < 0) {
+		erase(&node->lhs, datum, cmp);
+	} else {
+		erase(&node->rhs, datum, cmp);
+	}
+	recompute_height_shallow(*p);
+
+	rebalance(p);
+}
+
+/*
+Destruimos el arbol binario sin recursionar.
+
+Se rota la raiz hacia la derecha repetidas veces, hasta
+no tener un subarbol izquierdo.
+Llegado este punto, se elimina la raiz, y se camina hacia
+el subarbol derecho (el unico que hay), donde se repite
+el proceso.
+
+Complejidad:
+tiempo: O(Nodos).
+espacio: O(1).
+*/
 static void
 release(Node* node, Destructor dtor) {
 	while (node != nullptr) {
@@ -203,8 +275,8 @@ bst_create(size_t element_width, Comparator cmp, Destructor dtor) {
 
 BstInsertResult
 bst_insert(Bst* bst, Span datum) {
-	assert(bst->element_width == span_width(datum));
 	assert(bst != nullptr);
+	assert(bst->element_width == span_width(datum));
 	return insert(&bst->root, datum, bst->cmp);
 }
 
@@ -212,6 +284,13 @@ Node*
 bst_find(Bst const bst, Span datum) {
 	assert(bst.element_width == span_width(datum));
 	return find(bst.root, datum, bst.cmp);
+}
+
+void
+bst_erase(Bst* bst, Span datum) {
+	assert(bst != nullptr);
+	assert(bst->element_width == span_width(datum));
+	return erase(&bst->root, datum, bst->cmp);
 }
 
 void
