@@ -7,6 +7,35 @@ typedef struct _BstNode Node;
 
 static int height(Node* node);
 
+static Node*
+create(Node* lhs, Node* rhs, Span datum) {
+	Span buffer = span_malloc(sizeof(Node) + span_width(datum));
+
+	Span node_location = span_slice(buffer, 0, sizeof(Node));
+	Span data_location = remove_prefix(buffer, sizeof(Node));
+
+	assert(node_location.end == data_location.begin);
+
+	Node node = {
+		.lhs = lhs,
+		.rhs = rhs,
+		.height = 0,
+		.datum = data_location,
+	};
+
+	span_write(node_location.begin, SPANOF(node));
+	span_write(data_location.begin, datum);
+
+	return buffer.begin;
+}
+
+static void
+free_node(Node* node, Destructor dtor) {
+	call_dtor(dtor, node->datum.begin);
+	free(node);
+}
+
+
 static int
 recompute_height_shallow(Node* node) {
 	if (node == nullptr) {
@@ -36,27 +65,6 @@ balance_factor(Node* node) {
 	return height(node->rhs) - height(node->lhs);
 }
 
-static Node*
-create(Node* lhs, Node* rhs, Span datum) {
-	Span buffer = span_malloc(sizeof(Node) + span_width(datum));
-
-	Span node_location = span_slice(buffer, 0, sizeof(Node));
-	Span data_location = remove_prefix(buffer, sizeof(Node));
-
-	assert(node_location.end == data_location.begin);
-
-	Node node = {
-		.lhs = lhs,
-		.rhs = rhs,
-		.height = 0,
-		.datum = data_location,
-	};
-
-	span_write(node_location.begin, SPANOF(node));
-	span_write(data_location.begin, datum);
-
-	return buffer.begin;
-}
 
 static void
 rot_left(Node** node) {
@@ -112,6 +120,7 @@ rebalance(Node** node) {
 	}
 }
 
+
 static BstInsertResult
 insert(Node** node, Span datum, Comparator cmp) {
 	assert(node);
@@ -162,12 +171,6 @@ find(Node* node, Span datum, Comparator cmp) {
 	Node* next = cmp_result < 0 ? node->lhs : node->rhs;
 
 	return find(next, datum, cmp);
-}
-
-static void
-free_node(Node* node, Destructor dtor) { 
-	call_dtor(dtor, node->datum.begin);
-	free(node);
 }
 
 static Node*
@@ -257,8 +260,7 @@ release(Node* node, Destructor dtor) {
 
 		// no hay subarbol izquierdo, es facil liberar
 		Node* rhs = node->rhs;
-		call_dtor(dtor, node->datum.begin);
-		free(node);
+		free_node(node, dtor);
 		node = rhs;
 	}
 }
