@@ -169,22 +169,27 @@ find(Node* node, Span datum, Comparator cmp) {
 
 
 Bst
-bst_create(Comparator comparator) {
-	assert(comparator.call != nullptr);
+bst_create(size_t element_width, Comparator cmp, Destructor dtor) {
+	assert(cmp.call != nullptr);
+	assert(dtor.call != nullptr);
 	return (Bst) {
 		.root = nullptr,
-		.comparator = comparator
+		.element_width = element_width,
+		.cmp = cmp,
+		.dtor = dtor,
 	};
 }
 
 BstInsertResult
 bst_insert(Bst* bst, Span datum) {
+	assert(bst->element_width == span_width(datum));
 	assert(bst != nullptr);
-	return insert(&bst->root, datum, bst->comparator);
+	return insert(&bst->root, datum, bst->cmp);
 }
 
 Node*
 bst_find(Bst const bst, Span datum) {
-	return find(bst.root, datum, bst.comparator);
+	assert(bst.element_width == span_width(datum));
+	return find(bst.root, datum, bst.cmp);
 }
 

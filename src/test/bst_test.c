@@ -12,10 +12,12 @@ static int cmp_span_int(Span datum, int value) {
 
 static ComparatorFunction int_cmp = (ComparatorFunction)int_cmp_impl;
 
+#define CREATE_BST() bst_create(sizeof(int), (Comparator){int_cmp}, nop_dtor)
+
 static void test_find_empty(int data) {
 	LT_TEST
 
-	Bst bst = bst_create((Comparator){int_cmp});
+	Bst bst = CREATE_BST();
 
 	// searching in an empty bst return nullptr
 	LT_ASSERT(bst_find(bst, SPANOF(data)) == nullptr);
@@ -24,7 +26,7 @@ static void test_find_empty(int data) {
 static void test_insert_empty(int data) {
 	LT_TEST_ONCE
 
-	Bst bst = bst_create((Comparator){int_cmp});
+	Bst bst = CREATE_BST();
 
 	BstInsertResult insert_result = bst_insert(&bst, SPANOF(data));
 
@@ -39,7 +41,7 @@ static void test_insert_find(int data) {
 
 	test_insert_empty(data);
 
-	Bst bst = bst_create((Comparator){int_cmp});
+	Bst bst = CREATE_BST();
 
 	bst_insert(&bst, SPANOF(data));
 
@@ -52,7 +54,7 @@ static void test_double_insert(int data) {
 
 	test_insert_empty(data);
 
-	Bst bst = bst_create((Comparator){int_cmp});
+	Bst bst = CREATE_BST();
 
 	bst_insert(&bst, SPANOF(data));
 
@@ -68,7 +70,7 @@ static void test_insert_different_values(int data) {
 	int other = data * 19;
 	if (data == other) return;
 
-	Bst bst = bst_create((Comparator){int_cmp});
+	Bst bst = CREATE_BST();
 
 	bst_insert(&bst, SPANOF(data));
 
@@ -89,7 +91,7 @@ static void test_find_different_values(int data) {
 	int other = data * 19;
 	if (data == other) return;
 
-	Bst bst = bst_create((Comparator){int_cmp});
+	Bst bst = CREATE_BST();
 
 	bst_insert(&bst, SPANOF(data));
 	bst_insert(&bst, SPANOF(other));

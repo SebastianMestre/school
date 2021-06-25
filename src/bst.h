@@ -12,10 +12,11 @@ typedef struct _BstNode BstNode;
 
 struct _Bst {
 	struct _BstNode* root;
-	Comparator const comparator;
+	size_t const element_width;
+	Comparator const cmp;
+	Destructor const dtor;
 };
 typedef struct _Bst Bst;
-
 
 struct _BstInsertResult {
 	bool success;
@@ -24,8 +25,11 @@ struct _BstInsertResult {
 typedef struct _BstInsertResult BstInsertResult;
 
 
-Bst bst_create(Comparator comparator);
+Bst
+bst_create(size_t element_width, Comparator cmp, Destructor dtor);
 
-BstInsertResult bst_insert(Bst* tree, Span datum);
-struct _BstNode* bst_find(Bst tree, Span datum);
+BstInsertResult
+bst_insert(Bst* tree, Span datum);
 
+BstNode*
+bst_find(Bst tree, Span datum);
