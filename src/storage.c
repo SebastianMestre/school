@@ -49,3 +49,30 @@ storage_at(Storage storage, ContactId id) {
 	assert(result);
 	return &result->data;
 }
+
+ContactId
+storage_insert(
+	Storage* storage,
+	char* name,
+	char* surname,
+	unsigned age,
+	char* phone_number
+) {
+	Contact to_insert = {
+		.name = name,
+		.surname = surname,
+		.age = age,
+		.phone_number = phone_number,
+	};
+
+	if (storage->holes.size > 0) {
+		ContactId position = 0;
+		span_write(&position, vector_last(storage->holes));
+		vector_put_at(storage->slots, position, SPANOF(to_insert));
+		return position;
+	} else {
+		ContactId result = storage->slots.size;
+		vector_push(&storage->slots, SPANOF(to_insert));
+		return result;
+	}
+}

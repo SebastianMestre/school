@@ -33,8 +33,14 @@ storage_create();
 Contact*
 storage_at(Storage storage, ContactId id);
 
+// toma ownership de name, surname, age, y phone_number
+ContactId
+storage_insert(Storage* storage, char* name, char* surname, unsigned age, char* phone_number);
+
+// no toma ownership
 void
 storage_set_flags(Storage storage, ContactId id, uint8_t flags);
 
+// no toma ownership
 void
 storage_unset_flags(Storage* storage, ContactId id, uint8_t flags);

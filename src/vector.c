@@ -30,6 +30,17 @@ vector_at(Vector v, size_t i) {
 	return span_slice(v.data, v.element_width * i, v.element_width);
 }
 
+Span
+vector_last(Vector v) {
+	return vector_at(v, v.size - 1);
+}
+
+void
+vector_put_at(Vector v, size_t i, Span data) {
+	assert(span_width(data) == v.element_width);
+	span_write(vector_at(v, i).begin, data);
+}
+
 void
 vector_resize_storage(Vector* v, size_t n) {
 	assert(v->size <= n);

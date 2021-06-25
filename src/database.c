@@ -9,3 +9,5 @@ database_create(Storage* storage) {
 		.history = history_create(storage),
 	};
 }
+
+
