@@ -31,14 +31,14 @@ circular_buffer_create(
 }
 
 static void
-advance_and_wrap(void** ptr, size_t stride, ByteSpan range) {
+advance_and_wrap(void** ptr, size_t stride, Span range) {
 	*ptr += stride;
 	if (*ptr == range.end)
 		*ptr = range.begin;
 }
 
 static void
-retreat_and_wrap(void** ptr, size_t stride, ByteSpan range) {
+retreat_and_wrap(void** ptr, size_t stride, Span range) {
 	if (*ptr == range.begin)
 		*ptr = range.end;
 	*ptr -= stride;
@@ -65,15 +65,15 @@ circular_buffer_pop_back(CircularBuffer* buffer) {
 }
 
 void
-circular_buffer_push_back(CircularBuffer* buffer, ByteSpan data) {
-	assert(byte_span_width(data) == buffer->element_width);
+circular_buffer_push_back(CircularBuffer* buffer, Span data) {
+	assert(span_width(data) == buffer->element_width);
 
 	if (buffer->begin == buffer->end && buffer->size != 0) {
 		assert(buffer->size == buffer->capacity);
 		circular_buffer_pop_front(buffer);
 	}
 
-	byte_span_write(buffer->end, data);
+	span_write(buffer->end, data);
 	advance_and_wrap(&buffer->end, buffer->element_width, buffer->data);
 
 	buffer->size += 1;
@@ -82,7 +82,7 @@ circular_buffer_push_back(CircularBuffer* buffer, ByteSpan data) {
 void
 circular_buffer_release(CircularBuffer* buffer) {
 	free(buffer->data.begin);
-	buffer->data = (ByteSpan){};
+	buffer->data = (Span){};
 	buffer->begin = nullptr;
 	buffer->end = nullptr;
 }

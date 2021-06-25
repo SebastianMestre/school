@@ -12,7 +12,7 @@ typedef struct _Slot Slot;
 
 static Slot*
 get_slot(Contacts contacts, ContactId id) {
-	ByteSpan span = vector_at(contacts.slots, id);
+	Span span = vector_at(contacts.slots, id);
 	return (Slot*)span.begin;
 }
 

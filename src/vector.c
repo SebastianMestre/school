@@ -11,7 +11,7 @@ vector_create(size_t element_width) {
 	void* data = malloc(data_width);
 
 	return (Vector) {
-		.data = byte_span_create(data, data_width),
+		.data = span_create(data, data_width),
 
 		.element_width = element_width,
 		.size = 0,
@@ -24,10 +24,10 @@ vector_at_ptr(Vector v, size_t i) {
 	return v.data.begin + v.element_width * i;
 }
 
-ByteSpan
+Span
 vector_at(Vector v, size_t i) {
 	assert(i < v.size);
-	return byte_span_slice(v.data, v.element_width * i, v.element_width);
+	return span_slice(v.data, v.element_width * i, v.element_width);
 }
 
 void
@@ -37,27 +37,27 @@ vector_resize_storage(Vector* v, size_t n) {
 	size_t new_data_width = v->element_width * n;
 	void* new_data = malloc(new_data_width);
 
-	byte_span_write(new_data, v->data);
+	span_write(new_data, v->data);
 	free(v->data.begin);
-	v->data = byte_span_create(new_data, new_data_width);
+	v->data = span_create(new_data, new_data_width);
 
 	v->capacity = n;
 }
 
 void
-vector_push(Vector* v, ByteSpan data) {
+vector_push(Vector* v, Span data) {
 	if (v->size == v->capacity) {
 		vector_resize_storage(v, v->capacity * 2);
 	}
 
 	void* location = vector_at_ptr(*v, v->size);
-	byte_span_write(location, data);
+	span_write(location, data);
 	v->size += 1;
 }
 
 void
 vector_release(Vector* v) {
 	free(v->data.begin);
-	// zero out the pointers, just in case
-	v->data = (ByteSpan){};
+	v->data.begin = nullptr;
+	v->data.end = nullptr;
 }
