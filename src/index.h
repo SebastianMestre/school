@@ -3,7 +3,7 @@
 #include "bst.h"
 #include "contact.h"
 
-typedef struct _Contacts Contacts;
+typedef struct _Storage Storage;
 
 struct _Index {
 	Bst bst;
@@ -11,7 +11,7 @@ struct _Index {
 typedef struct _Index Index;
 
 Index
-index_create(Contacts* contacts);
+index_create(Storage* storage);
 
 void
 index_insert(Index* index, ContactId id);

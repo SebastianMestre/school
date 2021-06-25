@@ -9,7 +9,7 @@ struct _History {
 };
 typedef struct _History History;
 
-typedef struct _Contacts Contacts;
+typedef struct _Storage Storage;
 
 History
-history_create(Contacts* contacts);
+history_create(Storage* storage);

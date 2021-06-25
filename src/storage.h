@@ -17,22 +17,24 @@ Esta estructura guarda todos los Contact en un Vector.
 Por cada Contact, tambien guarda algunas banderas, que se utilizan para saber
 cuando es seguro eliminar un contacto, para abrir espacio a uno nuevo.
 
+Aparte, en 'holes', guarda todas las posiciones vacias que hay en 'slots'.
+
 */
 
-struct _Contacts {
+struct _Storage {
 	Vector holes;
 	Vector slots;
 };
-typedef struct _Contacts Contacts;
+typedef struct _Storage Storage;
 
-Contacts
-contacts_create();
+Storage
+storage_create();
 
 Contact*
-contacts_at(Contacts contacts, ContactId id);
+storage_at(Storage storage, ContactId id);
 
 void
-contacts_set_flags(Contacts contacts, ContactId id, uint8_t flags);
+storage_set_flags(Storage storage, ContactId id, uint8_t flags);
 
 void
-contacts_unset_flags(Contacts* contacts, ContactId id, uint8_t flags);
+storage_unset_flags(Storage* storage, ContactId id, uint8_t flags);

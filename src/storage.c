@@ -1,4 +1,4 @@
-#include "contacts.h"
+#include "storage.h"
 
 #include <assert.h>
 
@@ -11,26 +11,26 @@ typedef struct _Slot Slot;
 #define CONTACT_REFERENCED (CONTACT_REFERENCED_IN_INDEX | CONTACT_REFERENCED_IN_HISTORY_FWD | CONTACT_REFERENCED_IN_HISTORY_BWD)
 
 static Slot*
-get_slot(Contacts contacts, ContactId id) {
-	Span span = vector_at(contacts.slots, id);
+get_slot(Storage storage, ContactId id) {
+	Span span = vector_at(storage.slots, id);
 	return (Slot*)span.begin;
 }
 
 void
-contacts_set_flags(Contacts contacts, ContactId id, uint8_t flags) {
+storage_set_flags(Storage storage, ContactId id, uint8_t flags) {
 	assert(!(flags & CONTACT_ACTIVE));
 
-	Slot* slot = get_slot(contacts, id);
+	Slot* slot = get_slot(storage, id);
 	assert(slot->flags & CONTACT_ACTIVE);
 
 	slot->flags |= flags;
 }
 
 void
-contacts_unset_flags(Contacts* contacts, ContactId id, uint8_t flags) {
+storage_unset_flags(Storage* storage, ContactId id, uint8_t flags) {
 	assert(!(flags & CONTACT_ACTIVE));
 
-	Slot* slot = get_slot(*contacts, id);
+	Slot* slot = get_slot(*storage, id);
 	assert(slot->flags & CONTACT_ACTIVE);
 
 	slot->flags &= ~flags;
@@ -39,13 +39,13 @@ contacts_unset_flags(Contacts* contacts, ContactId id, uint8_t flags) {
 		// TODO: contact_dtor(slot->data);
 
 		slot->flags &= ~CONTACT_ACTIVE;
-		vector_push(&contacts->holes, SPANOF(id));
+		vector_push(&storage->holes, SPANOF(id));
 	}
 }
 
 Contact*
-contacts_at(Contacts contacts, ContactId id) {
-	Slot* result = get_slot(contacts, id);
+storage_at(Storage storage, ContactId id) {
+	Slot* result = get_slot(storage, id);
 	assert(result);
 	return &result->data;
 }

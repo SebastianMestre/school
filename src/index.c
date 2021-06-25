@@ -1,6 +1,6 @@
 #include "index.h"
 
-#include "contacts.h"
+#include "storage.h"
 
 #include <string.h>
 #include <assert.h>
@@ -10,10 +10,10 @@ cmp_impl(void const* arg0, void const* arg1, void* metadata) {
 
 	ContactId lhs_id = *(ContactId const*)arg0;
 	ContactId rhs_id = *(ContactId const*)arg1;
-	Contacts* contacts = metadata;
+	Storage* storage = metadata;
 
-	Contact* lhs = contacts_at(*contacts, lhs_id);
-	Contact* rhs = contacts_at(*contacts, rhs_id);
+	Contact* lhs = storage_at(*storage, lhs_id);
+	Contact* rhs = storage_at(*storage, rhs_id);
 
 	assert(lhs);
 	assert(rhs);
@@ -32,18 +32,18 @@ cmp_impl(void const* arg0, void const* arg1, void* metadata) {
 static void
 dtor_impl(void* arg0, void* metadata) {
 	ContactId id = *(ContactId*)arg0;
-	Contacts* contacts = metadata;
+	Storage* storage = metadata;
 
-	contacts_unset_flags(contacts, id, CONTACT_REFERENCED_IN_INDEX);
+	storage_unset_flags(storage, id, CONTACT_REFERENCED_IN_INDEX);
 }
 
 Index
-index_create(Contacts* contacts) {
+index_create(Storage* storage) {
 	return (Index){
 		.bst = bst_create(
 			sizeof(ContactId),
-			(Comparator){ cmp_impl, contacts },
-			(Destructor){ dtor_impl, contacts }
+			(Comparator){ cmp_impl, storage },
+			(Destructor){ dtor_impl, storage }
 		),
 	};
 }
