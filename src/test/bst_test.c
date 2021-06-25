@@ -3,8 +3,13 @@
 #include "lt.h"
 
 static int int_cmp_impl(int const* lhs, int const* rhs, void* metadata) {
-	return lhs - rhs;
+	return *lhs - *rhs;
 }
+
+static int cmp_span_int(Span datum, int value) {
+	return int_cmp_impl(datum.begin, &value, nullptr);
+}
+
 static ComparatorFunction int_cmp = (ComparatorFunction)int_cmp_impl;
 
 static void test_find_empty(int data) {
@@ -13,7 +18,7 @@ static void test_find_empty(int data) {
 	Bst bst = bst_create((Comparator){int_cmp});
 
 	// searching in an empty bst return nullptr
-	LT_ASSERT(bst_find(bst, &data) == nullptr);
+	LT_ASSERT(bst_find(bst, SPANOF(data)) == nullptr);
 }
 
 static void test_insert_empty(int data) {
@@ -21,12 +26,12 @@ static void test_insert_empty(int data) {
 
 	Bst bst = bst_create((Comparator){int_cmp});
 
-	BstInsertResult insert_result = bst_insert(&bst, &data);
+	BstInsertResult insert_result = bst_insert(&bst, SPANOF(data));
 
 	// inserting into an empty bst should succeed
 	LT_ASSERT(insert_result.success);
 	// and the content of the node should be what we inserted
-	LT_ASSERT(insert_result.position->datum == &data);
+	LT_ASSERT(cmp_span_int(insert_result.position->datum, data) == 0);
 }
 
 static void test_insert_find(int data) {
@@ -36,10 +41,10 @@ static void test_insert_find(int data) {
 
 	Bst bst = bst_create((Comparator){int_cmp});
 
-	bst_insert(&bst, &data);
+	bst_insert(&bst, SPANOF(data));
 
 	// finding a value that has been inserted should not return nullptr
-	LT_ASSERT(bst_find(bst, &data) != nullptr);
+	LT_ASSERT(bst_find(bst, SPANOF(data)) != nullptr);
 }
 
 static void test_double_insert(int data) {
@@ -49,10 +54,10 @@ static void test_double_insert(int data) {
 
 	Bst bst = bst_create((Comparator){int_cmp});
 
-	bst_insert(&bst, &data);
+	bst_insert(&bst, SPANOF(data));
 
 	// inserting a value a second time should not succeed
-	LT_ASSERT(!bst_insert(&bst, &data).success);
+	LT_ASSERT(!bst_insert(&bst, SPANOF(data)).success);
 }
 
 static void test_insert_different_values(int data) {
@@ -65,14 +70,14 @@ static void test_insert_different_values(int data) {
 
 	Bst bst = bst_create((Comparator){int_cmp});
 
-	bst_insert(&bst, &data);
+	bst_insert(&bst, SPANOF(data));
 
-	BstInsertResult insert_result = bst_insert(&bst, &other);
+	BstInsertResult insert_result = bst_insert(&bst, SPANOF(other));
 
 	// inserting a value different than the one that was inserted should succeed
 	LT_ASSERT(insert_result.success);
 	// and its content should be what we inserted
-	LT_ASSERT(insert_result.position->datum == &other);
+	LT_ASSERT(cmp_span_int(insert_result.position->datum, other) == 0);
 }
 
 static void test_find_different_values(int data) {
@@ -86,11 +91,11 @@ static void test_find_different_values(int data) {
 
 	Bst bst = bst_create((Comparator){int_cmp});
 
-	bst_insert(&bst, &data);
-	bst_insert(&bst, &other);
+	bst_insert(&bst, SPANOF(data));
+	bst_insert(&bst, SPANOF(other));
 
-	BstNode* p1 = bst_find(bst, &data);
-	BstNode* p2 = bst_find(bst, &other);
+	BstNode* p1 = bst_find(bst, SPANOF(data));
+	BstNode* p2 = bst_find(bst, SPANOF(other));
 
 	LT_ASSERT(p1 != nullptr);
 	LT_ASSERT(p2 != nullptr);

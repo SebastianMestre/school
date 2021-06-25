@@ -37,14 +37,25 @@ balance_factor(Node* node) {
 }
 
 static Node*
-create(Node* lhs, Node* rhs, void* datum) {
-	Node* result = malloc(sizeof(Node));
-	*result = (Node) {
+create(Node* lhs, Node* rhs, Span datum) {
+	Span buffer = span_malloc(sizeof(Node) + span_width(datum));
+
+	Span node_location = span_slice(buffer, 0, sizeof(Node));
+	Span data_location = remove_prefix(buffer, sizeof(Node));
+
+	assert(node_location.end == data_location.begin);
+
+	Node node = {
 		.lhs = lhs,
 		.rhs = rhs,
-		.datum = datum,
+		.height = 0,
+		.datum = data_location,
 	};
-	return result;
+
+	span_write(node_location.begin, SPANOF(node));
+	span_write(data_location.begin, datum);
+
+	return buffer.begin;
 }
 
 static void
@@ -105,7 +116,7 @@ rebalance(Node** node, int cmp_result) {
 }
 
 static BstInsertResult
-insert(Node** node, void* datum, Comparator cmp) {
+insert(Node** node, Span datum, Comparator cmp) {
 	assert(node);
 
 	if (*node == nullptr) {
@@ -116,7 +127,7 @@ insert(Node** node, void* datum, Comparator cmp) {
 		};
 	}
 
-	int const cmp_result = call_cmp(cmp, datum, (*node)->datum);
+	int const cmp_result = call_cmp(cmp, datum.begin, (*node)->datum.begin);
 
 	if (cmp_result == 0) {
 		return (BstInsertResult) {
@@ -140,12 +151,12 @@ insert(Node** node, void* datum, Comparator cmp) {
 }
 
 static Node*
-find(Node* node, void const* datum, Comparator cmp) {
+find(Node* node, Span datum, Comparator cmp) {
 	if (node == nullptr) {
 		return nullptr;
 	}
 
-	int cmp_result = call_cmp(cmp, datum, node->datum);
+	int cmp_result = call_cmp(cmp, datum.begin, node->datum.begin);
 
 	if (cmp_result == 0) {
 		return node;
@@ -167,13 +178,13 @@ bst_create(Comparator comparator) {
 }
 
 BstInsertResult
-bst_insert(Bst* bst, void* datum) {
+bst_insert(Bst* bst, Span datum) {
 	assert(bst != nullptr);
 	return insert(&bst->root, datum, bst->comparator);
 }
 
 Node*
-bst_find(Bst const bst, void const* datum) {
+bst_find(Bst const bst, Span datum) {
 	return find(bst.root, datum, bst.comparator);
 }
 
