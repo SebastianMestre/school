@@ -33,3 +33,6 @@ bst_insert(Bst* tree, Span datum);
 
 BstNode*
 bst_find(Bst tree, Span datum);
+
+void
+bst_release(Bst* tree);

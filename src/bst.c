@@ -167,6 +167,30 @@ find(Node* node, Span datum, Comparator cmp) {
 	return find(next, datum, cmp);
 }
 
+// Destruimos el arbol binario sin recursionar.
+//
+// Se rota la raiz hacia la derecha repetidas veces, hasta
+// no tener un subarbol izquierdo.
+// Llegado este punto, se elimina la raiz, y se camina hacia
+// el subarbol derecho (el unico que hay), donde se repite
+// el proceso.
+//
+// Complejidad:
+// tiempo: O(Nodos).
+// espacio: O(1).
+static void
+release(Node* node, Destructor dtor) {
+	while (node != nullptr) {
+		while (node->lhs != nullptr)
+			rot_right(&node);
+
+		// no hay subarbol izquierdo, es facil liberar
+		Node* rhs = node->rhs;
+		call_dtor(dtor, node->datum.begin);
+		free(node);
+		node = rhs;
+	}
+}
 
 Bst
 bst_create(size_t element_width, Comparator cmp, Destructor dtor) {
@@ -193,3 +217,8 @@ bst_find(Bst const bst, Span datum) {
 	return find(bst.root, datum, bst.cmp);
 }
 
+void
+bst_release(Bst* bst) {
+	release(bst->root, bst->dtor);
+	bst->root = nullptr;
+}
