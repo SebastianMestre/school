@@ -229,9 +229,11 @@ erase(Node** p, Span datum, Comparator cmp) {
 	} else {
 		erase(&node->rhs, datum, cmp);
 	}
-	recompute_height_shallow(*p);
 
-	rebalance(p);
+	if (*p != nullptr) {
+		recompute_height_shallow(*p);
+		rebalance(p);
+	}
 }
 
 /*
