@@ -81,6 +81,10 @@ circular_buffer_push_back(CircularBuffer* buffer, Span data) {
 
 void
 circular_buffer_release(CircularBuffer* buffer) {
+	while (buffer->size) {
+		circular_buffer_pop_back(buffer);
+	}
+
 	free(buffer->data.begin);
 	buffer->data = (Span){};
 	buffer->begin = nullptr;
