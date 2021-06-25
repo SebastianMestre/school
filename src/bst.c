@@ -87,7 +87,7 @@ rot_right(Node** node) {
 }
 
 static void
-rebalance(Node** node, int cmp_result) {
+rebalance(Node** node) {
 
 	assert(node != nullptr);
 	assert(*node != nullptr);
@@ -95,23 +95,20 @@ rebalance(Node** node, int cmp_result) {
 	assert(-3 < balance_factor(*node));
 	assert(balance_factor(*node) <  3);
 
-	assert(cmp_result != 0);
-
 	Node* old_root = *node;
-	if (cmp_result < 0) {
-		if (balance_factor(old_root) == -2) {
-			if (balance_factor(old_root->lhs) == 1) {
-				rot_left(&old_root->lhs);
-			}
-			rot_right(node);
+	int bf = balance_factor(old_root);
+	if (bf == -2) {
+		assert(balance_factor(old_root->lhs) < 2);
+		if (balance_factor(old_root->lhs) == 1) {
+			rot_left(&old_root->lhs);
 		}
-	} else {
-		if (balance_factor(old_root) == 2) {
-			if (balance_factor(old_root->rhs) == -1) {
-				rot_right(&old_root->rhs);
-			}
-			rot_left(node);
+		rot_right(node);
+	} else if (bf >= 2) {
+		assert(balance_factor(old_root->rhs) > -2);
+		if (balance_factor(old_root->rhs) == -1) {
+			rot_right(&old_root->rhs);
 		}
+		rot_left(node);
 	}
 }
 
@@ -145,7 +142,7 @@ insert(Node** node, Span datum, Comparator cmp) {
 	}
 
 	recompute_height_shallow(*node);
-	rebalance(node, cmp_result);
+	rebalance(node);
 
 	return result;
 }
