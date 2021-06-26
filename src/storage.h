@@ -24,6 +24,9 @@ typedef struct _Storage Storage;
 Storage
 storage_create();
 
+void
+storage_release(Storage* storage);
+
 Contact*
 storage_at(Storage storage, ContactId id);
 

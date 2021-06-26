@@ -29,7 +29,7 @@ history_create(Storage* storage) {
 	return (History){
 		.storage = storage,
 		.actions = circular_buffer_create(
-			sizeof(ContactId),
+			sizeof(Action),
 			HISTORY_SIZE,
 			(Destructor){
 				action_dtor_impl,
@@ -37,6 +37,11 @@ history_create(Storage* storage) {
 			}
 		),
 	};
+}
+
+void
+history_release(History* history) {
+	circular_buffer_release(&history->actions);
 }
 
 void

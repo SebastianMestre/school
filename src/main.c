@@ -3,10 +3,40 @@
 #include <stdlib.h>
 
 #include "database.h"
+#include "io.h"
 #include "storage.h"
+#include "string.h"
+
+#define BUF_SIZE 128
 
 void buscar(Database* database) {}
-void agregar(Database* database) {}
+void agregar(Database* database) {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+	char buf2[BUF_SIZE];
+	char buf3[BUF_SIZE];
+
+	puts("Ingrese nombre");
+	assert(get_line(buf0, BUF_SIZE, stdin));
+
+	puts("Ingrese apellido");
+	assert(get_line(buf1, BUF_SIZE, stdin));
+
+	puts("Ingrese edad");
+	unsigned age;
+	assert(get_line_as_uint(buf2, BUF_SIZE, &age, stdin));
+
+	puts("Ingrese telefono");
+	assert(get_line(buf3, BUF_SIZE, stdin));
+
+	// TODO: validate string
+	// TODO: trim strings
+	char* name = string_dup(buf0);
+	char* surname = string_dup(buf1);
+	char* phone_number = string_dup(buf3);
+
+	database_insert(database, name, surname, age, phone_number);
+}
 void eliminar(Database* database) {}
 void editar(Database* database) {}
 void cargar(Database* database) {}
@@ -29,26 +59,17 @@ typedef struct _MenuEntry MenuEntry;
 
 static int
 action_id_prompt(int max_value) {
+		char buf[BUF_SIZE];
 		int selected;
-		int scanf_result;
 
 		printf(">");
-		scanf_result = scanf("%d", &selected);
-		while (scanf_result != 1 || selected <= 0 || selected > max_value) {
-			assert(scanf_result != EOF);
-			if (scanf_result == 0) {
-				while (fgetc(stdin) != '\n');
-			}
-
+		while (!get_line_as_int(buf, BUF_SIZE, &selected, stdin) || selected <= 0 || selected > max_value) {
+			assert(file_peek(stdin) != EOF);
 			printf("Accion invalida, seleccione una accion valida:\n");
 			printf(">");
-			scanf_result = scanf("%d", &selected);
 		}
 
 		return selected;
-}
-
-void menu() {
 }
 
 int main() {
@@ -83,7 +104,17 @@ int main() {
 		printf("Seleccione una accion:\n");
 
 		int selected = action_id_prompt(MENU_LEN);
+
+		if (selected == MENU_LEN) {
+			break;
+		}
+
 		MenuEntry entry = entries[selected - 1];
 		entry.action(&database);
 	}
+
+	database_release(&database);
+	storage_release(&storage);
+
+	return 0;
 }

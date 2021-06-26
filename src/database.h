@@ -19,6 +19,9 @@ typedef struct _Database Database;
 Database
 database_create(Storage* storage);
 
+void
+database_release(Database* database);
+
 // toma ownership de name y surname
 OptionalContactId
 database_find(Database* database, char* name, char* surname);

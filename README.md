@@ -10,7 +10,9 @@ codigo:
 responsabilidad de quien llama.
 - Se considera que cualquier objeto se puede 'mover' copiando los bits a un nuevo
 lugar, y no volviendo a usar el objeto original.
-- Si es posible, las estructuras se toman por valor.
+- Las estructuras conceptualmente pequennas se pasan por valor (en particular, si
+no hay una buena razon para pasar por puntero, Span se pasa por valor, lo mismo
+para OptionalContactId, etc).
 
 # Patrones
 

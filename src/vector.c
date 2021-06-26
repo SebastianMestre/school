@@ -6,17 +6,22 @@
 Vector
 vector_create(size_t element_width) {
 	size_t capacity = 4;
-
 	size_t data_width = element_width * capacity;
-	void* data = malloc(data_width);
 
 	return (Vector) {
-		.data = span_create(data, data_width),
+		.data = span_malloc(data_width),
 
 		.element_width = element_width,
 		.size = 0,
 		.capacity = capacity,
 	};
+}
+
+void
+vector_release(Vector* v) {
+	free(v->data.begin);
+	v->data.begin = nullptr;
+	v->data.end = nullptr;
 }
 
 static void*
@@ -78,11 +83,4 @@ Span
 vector_push_incomplete(Vector* v, Span data) {
 	assert(span_width(data) <= v->element_width );
 	return push(v, data);
-}
-
-void
-vector_release(Vector* v) {
-	free(v->data.begin);
-	v->data.begin = nullptr;
-	v->data.end = nullptr;
 }

@@ -14,7 +14,7 @@ struct _Slot {
 typedef struct _Slot Slot;
 
 SlotMap
-slot_map_create(size_t element_width) {
+slot_map_create(size_t element_width, Destructor dtor) {
 	size_t slot_width = sizeof(Slot) + element_width;
 	// redondeo a multiplo de 8
 	slot_width = ((slot_width + 8 - 1) / 8) * 8;
@@ -22,7 +22,15 @@ slot_map_create(size_t element_width) {
 	return (SlotMap){
 		.holes = vector_create(sizeof(size_t)),
 		.slots = vector_create(slot_width),
+		.element_width = element_width,
+		.dtor = dtor,
 	};
+}
+
+void
+slot_map_release(SlotMap* slot_map) {
+	vector_release(&slot_map->holes);
+	vector_release(&slot_map->slots);
 }
 
 static Slot*

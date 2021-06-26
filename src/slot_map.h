@@ -13,7 +13,10 @@ typedef struct _SlotMap SlotMap;
 
 
 SlotMap
-slot_map_create(size_t element_width);
+slot_map_create(size_t element_width, Destructor dtor);
+
+void
+slot_map_release(SlotMap* slot_map);
 
 Span
 slot_map_at(SlotMap* map, size_t id);

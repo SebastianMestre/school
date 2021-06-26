@@ -16,6 +16,9 @@ History
 history_create(Storage* storage);
 
 void
+history_release(History* history);
+
+void
 history_record_inserted(History* history, ContactId id);
 
 void

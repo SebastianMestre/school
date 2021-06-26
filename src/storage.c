@@ -5,8 +5,13 @@
 Storage
 storage_create() {
 	return (Storage){
-		.slot_map = slot_map_create(sizeof(Contact)),
+		.slot_map = slot_map_create(sizeof(Contact), nop_dtor),
 	};
+}
+
+void
+storage_release(Storage* storage) {
+	slot_map_release(&storage->slot_map);
 }
 
 Contact*

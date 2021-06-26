@@ -14,6 +14,12 @@ database_create(Storage* storage) {
 }
 
 void
+database_release(Database* database) {
+	index_release(&database->index);
+	history_release(&database->history);
+}
+
+void
 database_insert(
 	Database* database,
 	char* name,

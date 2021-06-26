@@ -15,6 +15,9 @@ Index
 index_create(Storage* storage);
 
 void
+index_release(Index* index);
+
+void
 index_insert(Index* index, ContactId id);
 
 // TODO: return success status?
