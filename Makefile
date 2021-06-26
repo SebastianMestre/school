@@ -52,7 +52,7 @@ build/index.o: src/index.c src/index.h src/storage.h src/bst.h src/vector.h src/
 build/database.o: src/database.c src/database.h src/index.h src/history.h src/storage.h src/circular_buffer.h src/bst.h src/vector.h src/span.h
 
 build/io.o: src/io.c src/io.h
-build/main.o: src/main.c src/io.h src/database.h src/index.h src/history.h src/storage.h src/circular_buffer.h src/bst.h src/vector.h src/span.h
+build/main.o: src/main.c src/io.h src/database.h src/index.h src/history.h src/storage.h src/slot_map.h src/circular_buffer.h src/bst.h src/vector.h src/span.h
 
 build/test/span_test.o: src/test/span_test.c src/test/span_test.h src/span.h
 build/test/vector_test.o: src/test/vector_test.c src/test/vector_test.h src/vector.h src/span.h

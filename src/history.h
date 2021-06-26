@@ -9,6 +9,7 @@ typedef struct _Storage Storage;
 struct _History {
 	Storage* storage;
 	CircularBuffer actions;
+	void* next_action;
 };
 typedef struct _History History;
 

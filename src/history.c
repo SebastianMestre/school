@@ -2,6 +2,8 @@
 
 #include "storage.h"
 
+#include <assert.h>
+
 #define HISTORY_SIZE (10)
 
 struct _Action {
@@ -26,7 +28,7 @@ dtor_impl(void* action_ptr, void* storage_ptr) {
 
 History
 history_create(Storage* storage) {
-	return (History){
+	History result = {
 		.storage = storage,
 		.actions = circular_buffer_create(
 			sizeof(Action),
@@ -37,6 +39,8 @@ history_create(Storage* storage) {
 			}
 		),
 	};
+	result.next_action = result.actions.begin;
+	return result;
 }
 
 void
@@ -71,4 +75,14 @@ history_record_updated(History* history, ContactId old_id, ContactId new_id) {
 		.backwards = (OptionalContactId){true, old_id},
 	};
 	circular_buffer_push_back(&history->actions, SPANOF(action));
+}
+
+void history_advance_cursor(History* history) {
+	assert(history->next_action != history->actions.end);
+	assert(history->next_action != history->actions.data.end);
+
+	history->next_action += sizeof(Action);
+	if (history->next_action == history->actions.data.end) {
+		history->next_action = history->actions.data.begin;
+	}
 }
