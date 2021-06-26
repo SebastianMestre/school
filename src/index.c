@@ -40,6 +40,7 @@ dtor_impl(void* arg0, void* metadata) {
 Index
 index_create(Storage* storage) {
 	return (Index){
+		.storage = storage,
 		.bst = bst_create(
 			sizeof(ContactId),
 			(Comparator){ cmp_impl, storage },
@@ -50,6 +51,7 @@ index_create(Storage* storage) {
 
 void
 index_insert(Index* index, ContactId id) {
+	storage_increase_refcount(*index->storage, id);
 	bst_insert(&index->bst, SPANOF(id));
 }
 

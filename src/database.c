@@ -21,4 +21,9 @@ database_insert(
 ) {
 	ContactId id = storage_insert(database->storage, name, surname, age, phone_number);
 	index_insert(&database->index, id);
+	history_record_inserted(&database->history, id);
+}
+
+void
+database_undo(Database* database) {
 }
