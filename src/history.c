@@ -6,11 +6,7 @@
 
 #define HISTORY_SIZE (10)
 
-struct _Action {
-	OptionalContactId forwards;
-	OptionalContactId backwards;
-};
-typedef struct _Action Action;
+typedef HistoryAction Action;
 
 static void
 dtor_impl(void* action_ptr, void* storage_ptr) {
@@ -85,4 +81,10 @@ void history_advance_cursor(History* history) {
 	if (history->next_action == history->actions.data.end) {
 		history->next_action = history->actions.data.begin;
 	}
+}
+
+Action*
+history_next_action(History* history) {
+	assert(history->next_action != history->actions.end);
+	return history->next_action;
 }

@@ -35,7 +35,8 @@ void
 database_insert(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
 // toma ownership de name y surname
-void
+// devuelve false si no existe lo que se quiere borrar
+bool
 database_delete(Database* database, char* name, char* surname);
 
 // toma ownership sobre age, y phone number
@@ -48,8 +49,8 @@ database_clear_history(Database* database);
 
 // no toma ownership
 void
-database_undo(Database* database);
+database_rewind_history(Database* database);
 
 // no toma ownership
 void
-database_redo(Database* database);
+database_advance_history(Database* database);
