@@ -9,7 +9,28 @@
 
 #define BUF_SIZE 128
 
-void buscar(Database* database) {}
+void buscar(Database* database) {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+
+	puts("Ingrese nombre");
+	assert(get_line(buf0, BUF_SIZE, stdin));
+
+	puts("Ingrese apellido");
+	assert(get_line(buf1, BUF_SIZE, stdin));
+
+	// TODO: validate strings
+	// TODO: trim strings
+	char* name = string_dup(buf0);
+	char* surname = string_dup(buf1);
+
+	OptionalContactId contact = database_find(database, name, surname);
+	if (!contact.active) {
+		puts("No existe un contacto con ese nombre y apellido");
+	} else {
+		printf("Id de contacto: %lu (TODO: implement print)\n", contact.id);
+	}
+}
 
 void agregar(Database* database) {
 	char buf0[BUF_SIZE];
@@ -30,21 +51,54 @@ void agregar(Database* database) {
 	puts("Ingrese telefono");
 	assert(get_line(buf3, BUF_SIZE, stdin));
 
-	// TODO: validate string
+	// TODO: validate strings
 	// TODO: trim strings
 	char* name = string_dup(buf0);
 	char* surname = string_dup(buf1);
 	char* phone_number = string_dup(buf3);
 
-	database_insert(database, name, surname, age, phone_number);
+	bool success = database_insert(database, name, surname, age, phone_number);
+	if (!success) {
+		puts("Ya existe un contacto con ese nombre y apellido");
+	}
 }
 
-void eliminar(Database* database) {}
+void eliminar(Database* database) {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+
+	puts("Ingrese nombre");
+	assert(get_line(buf0, BUF_SIZE, stdin));
+
+	puts("Ingrese apellido");
+	assert(get_line(buf1, BUF_SIZE, stdin));
+
+	// TODO: validate strings
+	// TODO: trim strings
+	char* name = string_dup(buf0);
+	char* surname = string_dup(buf1);
+
+	bool success = database_delete(database, name, surname);
+	if (!success) {
+		puts("No existe un contacto con ese nombre y apellido");
+	}
+}
+
 void editar(Database* database) {}
+
 void cargar(Database* database) {}
 void guardar(Database* database) {}
-void deshacer(Database* database) {}
-void rehacer(Database* database) {}
+
+void deshacer(Database* database) {
+	/* TODO bool success = */ database_rewind_history(database);
+	/* if (!success) puts("se encuentra al principio de la historia") */
+}
+
+void rehacer(Database* database) {
+	/* TODO bool success = */ database_advance_history(database);
+	/* if (!success) puts("se encuentra al final de la historia") */
+}
+
 void conjuncion(Database* database) {}
 void disjuncion(Database* database) {}
 void guardar_ordenado(Database* database) {}

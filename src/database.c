@@ -4,6 +4,8 @@
 
 #include <assert.h>
 
+// TODO: delete future events when inserting/deleting/updating
+
 Database
 database_create(Storage* storage) {
 	return (Database) {
