@@ -55,8 +55,8 @@ vector_resize_storage(Vector* v, size_t n) {
 	v->capacity = n;
 }
 
-void
-vector_push(Vector* v, Span data) {
+static Span
+push(Vector* v, Span data) {
 	if (v->size == v->capacity) {
 		vector_resize_storage(v, v->capacity * 2);
 	}
@@ -64,6 +64,20 @@ vector_push(Vector* v, Span data) {
 	void* location = vector_at_ptr(*v, v->size);
 	span_write(location, data);
 	v->size += 1;
+
+	return span_create(location, v->element_width);
+}
+
+Span
+vector_push(Vector* v, Span data) {
+	assert(span_width(data) == v->element_width );
+	return push(v, data);
+}
+
+Span
+vector_push_incomplete(Vector* v, Span data) {
+	assert(span_width(data) <= v->element_width );
+	return push(v, data);
 }
 
 void

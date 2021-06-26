@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-// A byte vector holds sequences of bytes, all of the same length.
+// Un vector guarda secuencias de bytes, cada una del mismo ancho.
 struct _Vector {
 	Span data;
 
@@ -27,8 +27,16 @@ vector_put_at(Vector v, size_t i, Span data);
 void
 vector_resize_storage(Vector* v, size_t n);
 
-void
+// inserta data al final del vector
+// devuelve el espacio de memoria donde quedaron los datos
+Span
 vector_push(Vector* v, Span data);
+
+// inserta data al final del vector
+// devuelve el espacio de memoria donde quedaron los datos
+// tolera que data sea menos ancho que un elemento
+Span
+vector_push_incomplete(Vector* v, Span data);
 
 void
 vector_release(Vector* v);
