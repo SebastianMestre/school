@@ -55,6 +55,11 @@ index_insert(Index* index, ContactId id) {
 	bst_insert(&index->bst, SPANOF(id));
 }
 
+void
+index_delete(Index* index, ContactId id) {
+	bst_erase(&index->bst, SPANOF(id));
+}
+
 OptionalContactId
 index_find(Index index, ContactId id) {
 	BstNode* node = bst_find(index.bst, SPANOF(id));

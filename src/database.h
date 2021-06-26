@@ -13,6 +13,8 @@ struct _Database {
 };
 typedef struct _Database Database;
 
+// TODO: devolver status?
+
 // no toma ownership
 Database
 database_create(Storage* storage);
