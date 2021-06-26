@@ -27,10 +27,14 @@ vector_put_at(Vector v, size_t i, Span data);
 void
 vector_resize_storage(Vector* v, size_t n);
 
-// inserta data al final del vector
+// inserta un dato al final del vector
 // devuelve el espacio de memoria donde quedaron los datos
 Span
 vector_push(Vector* v, Span data);
+
+// elimina el dato del final del vector
+void
+vector_pop(Vector* v);
 
 // inserta data al final del vector
 // devuelve el espacio de memoria donde quedaron los datos

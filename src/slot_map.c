@@ -51,7 +51,7 @@ slot_map_insert(SlotMap* map, Span data) {
 	if (map->holes.size > 0) {
 		size_t position = 0;
 		span_write(&position, vector_last(map->holes));
-		// TODO vector_pop(&map->holes);
+		vector_pop(&map->holes);
 
 		Metadata* slot = get_metadata(map, position);
 		assert(!slot->active);
