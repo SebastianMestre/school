@@ -6,6 +6,7 @@
 struct _SlotMap {
 	Vector holes;
 	Vector slots;
+	Vector slot_metadata;
 	size_t element_width;
 	Destructor dtor;
 };
