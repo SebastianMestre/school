@@ -51,7 +51,7 @@ index_create(Storage* storage) {
 
 void
 index_insert(Index* index, ContactId id) {
-	storage_increase_refcount(*index->storage, id);
+	storage_increase_refcount(index->storage, id);
 	bst_insert(&index->bst, SPANOF(id));
 }
 

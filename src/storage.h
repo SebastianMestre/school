@@ -1,7 +1,7 @@
 #pragma once
 
 #include "contact.h"
-#include "vector.h"
+#include "slot_map.h"
 
 #include <stdint.h>
 
@@ -17,8 +17,7 @@ Aparte, en 'holes', guarda todas las posiciones vacias que hay en 'slots'.
 */
 
 struct _Storage {
-	Vector holes;
-	Vector slots;
+	SlotMap slot_map;
 };
 typedef struct _Storage Storage;
 
@@ -34,7 +33,11 @@ storage_insert(Storage* storage, char* name, char* surname, unsigned age, char* 
 
 // no toma ownership
 void
-storage_increase_refcount(Storage storage, ContactId id);
+storage_delete(Storage* storage, ContactId id);
+
+// no toma ownership
+void
+storage_increase_refcount(Storage* storage, ContactId id);
 
 // no toma ownership
 void

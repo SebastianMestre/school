@@ -19,18 +19,19 @@ typedef struct _Database Database;
 Database
 database_create(Storage* storage);
 
-// no toma ownership
+// toma ownership de name y surname
 OptionalContactId
-database_find(Database database, char* name, char* surname);
+database_find(Database* database, char* name, char* surname);
 
-// no toma ownership
-bool database_has(Database database_has, char* name, char* surname);
+// toma ownership de name y surname
+bool
+database_has(Database* database_has, char* name, char* surname);
 
 // toma ownership sobre, name, surname, age, y phone_number
 void
 database_insert(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
-// no toma ownership
+// toma ownership de name y surname
 void
 database_delete(Database* database, char* name, char* surname);
 
@@ -38,7 +39,7 @@ database_delete(Database* database, char* name, char* surname);
 void
 database_update(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
-// no toma ownrship
+// no toma ownership
 void
 database_clear_history(Database* database);
 

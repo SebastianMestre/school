@@ -41,7 +41,7 @@ history_create(Storage* storage) {
 
 void
 history_record_inserted(History* history, ContactId id) {
-	storage_increase_refcount(*history->storage, id);
+	storage_increase_refcount(history->storage, id);
 	Action action = {
 		.forwards = (OptionalContactId){true, id},
 	};
@@ -50,7 +50,7 @@ history_record_inserted(History* history, ContactId id) {
 
 void
 history_record_deleted(History* history, ContactId id) {
-	storage_increase_refcount(*history->storage, id);
+	storage_increase_refcount(history->storage, id);
 	Action action = {
 		.backwards = (OptionalContactId){true, id},
 	};
@@ -59,8 +59,8 @@ history_record_deleted(History* history, ContactId id) {
 
 void
 history_record_updated(History* history, ContactId old_id, ContactId new_id) {
-	storage_increase_refcount(*history->storage, new_id);
-	storage_increase_refcount(*history->storage, old_id);
+	storage_increase_refcount(history->storage, new_id);
+	storage_increase_refcount(history->storage, old_id);
 	Action action = {
 		.forwards = (OptionalContactId){true, new_id},
 		.backwards = (OptionalContactId){true, old_id},

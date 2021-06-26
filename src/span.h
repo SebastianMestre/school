@@ -2,9 +2,9 @@
 
 #include <stddef.h>
 
-// A span is essentially a pointer to a piece of memory. Unlike a regular
-// pointer, it knows the extent of what it points to.
-// Like any other pointer, it does not necesarily own what it points to.
+// Un span es esencialemente un puntero a una region de memoria.
+// A diferencia de un puntero comun, tambien sabe el final de la region.
+// Como cualquier puntero, no necesariamente tiene ownership.
 struct _Span {
 	void* begin;
 	void* end;
