@@ -13,7 +13,7 @@ typedef struct _Contact Contact;
 typedef size_t ContactId;
 
 struct _OptionalContactId {
-	bool found;
-	ContactId value;
+	bool active;
+	ContactId id;
 };
 typedef struct _OptionalContactId OptionalContactId;

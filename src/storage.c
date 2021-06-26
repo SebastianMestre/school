@@ -4,11 +4,10 @@
 
 struct _Slot {
 	Contact data;
-	uint8_t flags;
+	bool active;
+	uint8_t refcount;
 };
 typedef struct _Slot Slot;
-
-#define CONTACT_REFERENCED (CONTACT_REFERENCED_IN_INDEX | CONTACT_REFERENCED_IN_HISTORY_FWD | CONTACT_REFERENCED_IN_HISTORY_BWD)
 
 Storage
 storage_create() {
@@ -25,28 +24,21 @@ get_slot(Storage storage, ContactId id) {
 }
 
 void
-storage_set_flags(Storage storage, ContactId id, uint8_t flags) {
-	assert(!(flags & CONTACT_ACTIVE));
-
+storage_increase_refcount(Storage storage, ContactId id) {
 	Slot* slot = get_slot(storage, id);
-	assert(slot->flags & CONTACT_ACTIVE);
-
-	slot->flags |= flags;
+	assert(slot->active);
+	slot->refcount += 1;
 }
 
 void
-storage_unset_flags(Storage* storage, ContactId id, uint8_t flags) {
-	assert(!(flags & CONTACT_ACTIVE));
-
+storage_decrease_refcount(Storage* storage, ContactId id) {
 	Slot* slot = get_slot(*storage, id);
-	assert(slot->flags & CONTACT_ACTIVE);
+	assert(slot->active);
+	slot->refcount -= 1;
 
-	slot->flags &= ~flags;
-
-	if (!(slot->flags & CONTACT_REFERENCED)) {
+	if (slot->refcount == 0) {
 		// TODO: contact_dtor(slot->data);
-
-		slot->flags &= ~CONTACT_ACTIVE;
+		slot->active = false;
 		vector_push(&storage->holes, SPANOF(id));
 	}
 }
@@ -54,7 +46,6 @@ storage_unset_flags(Storage* storage, ContactId id, uint8_t flags) {
 Contact*
 storage_at(Storage storage, ContactId id) {
 	Slot* result = get_slot(storage, id);
-	assert(result);
 	return &result->data;
 }
 

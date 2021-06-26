@@ -5,11 +5,6 @@
 
 #include <stdint.h>
 
-#define CONTACT_ACTIVE                    (0x1)
-#define CONTACT_REFERENCED_IN_INDEX       (0x2)
-#define CONTACT_REFERENCED_IN_HISTORY_FWD (0x4)
-#define CONTACT_REFERENCED_IN_HISTORY_BWD (0x8)
-
 /*
 
 Esta estructura guarda todos los Contact en un Vector.
@@ -39,8 +34,8 @@ storage_insert(Storage* storage, char* name, char* surname, unsigned age, char* 
 
 // no toma ownership
 void
-storage_set_flags(Storage storage, ContactId id, uint8_t flags);
+storage_increase_refcount(Storage storage, ContactId id);
 
 // no toma ownership
 void
-storage_unset_flags(Storage* storage, ContactId id, uint8_t flags);
+storage_decrease_refcount(Storage* storage, ContactId id);

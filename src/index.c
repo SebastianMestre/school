@@ -34,7 +34,7 @@ dtor_impl(void* arg0, void* metadata) {
 	ContactId id = *(ContactId*)arg0;
 	Storage* storage = metadata;
 
-	storage_unset_flags(storage, id, CONTACT_REFERENCED_IN_INDEX);
+	storage_decrease_refcount(storage, id);
 }
 
 Index

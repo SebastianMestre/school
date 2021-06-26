@@ -5,6 +5,7 @@
 Database
 database_create(Storage* storage) {
 	return (Database) {
+		.storage = storage,
 		.index = index_create(storage),
 		.history = history_create(storage),
 	};
