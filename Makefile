@@ -12,6 +12,7 @@ build/span.o                \
 build/vector.o              \
 build/circular_buffer.o     \
 build/bst.o                 \
+build/slot_map.o            \
                             \
 build/contact.o             \
                             \
@@ -37,10 +38,11 @@ build/span.o: src/span.c src/span.h
 build/vector.o: src/vector.c src/vector.h src/span.h
 build/circular_buffer.o: src/circular_buffer.c src/circular_buffer.h src/span.h
 build/bst.o: src/bst.c src/bst.h src/span.h
+build/slot_map.o: src/slot_map.c src/slot_map.h src/vector.h src/span.h
 
 build/contact.o: src/contact.c src/contact.h
 
-build/storage.o: src/storage.c src/storage.h src/contact.h src/vector.h src/span.h
+build/storage.o: src/storage.c src/storage.h src/contact.h src/slot_map.h src/vector.h src/span.h
 build/history.o: src/history.c src/history.h src/storage.h src/circular_buffer.h src/vector.h src/span.h
 build/index.o: src/index.c src/index.h src/storage.h src/bst.h src/vector.h src/span.h
 
