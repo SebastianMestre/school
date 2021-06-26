@@ -161,17 +161,15 @@ static void test_erase_one_not_the_other(int data) {
 
 static void test_random_values(int data) {
 
-// PRNG robado de internet (donde???)
-#define RAND() (seed = (seed * 1103515245 + 12345) & ((1U << 31) - 1))
-	int seed = data;
+	lt_srand(data);
 
 	Bst bst = CREATE_BST();
 
-	int x = RAND();
+	int x = lt_rand();
 	bst_insert(&bst, SPANOF(x));
 
 	for (int i = 0; i < 100; ++i) {
-		int y = RAND();
+		int y = lt_rand();
 		bst_insert(&bst, SPANOF(y));
 	}
 
@@ -180,8 +178,6 @@ static void test_random_values(int data) {
 	LT_ASSERT(bst_find(bst, SPANOF(x)) == nullptr);
 
 	bst_release(&bst);
-
-#undef RAND
 }
 
 static void test_all(int value) {
