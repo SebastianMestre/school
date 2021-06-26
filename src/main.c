@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -33,7 +34,12 @@ action_id_prompt(int max_value) {
 
 		printf(">");
 		scanf_result = scanf("%d", &selected);
-		while (scanf_result == 0 || scanf_result == EOF || selected <= 0 || selected > max_value) {
+		while (scanf_result != 1 || selected <= 0 || selected > max_value) {
+			assert(scanf_result != EOF);
+			if (scanf_result == 0) {
+				while (fgetc(stdin) != '\n');
+			}
+
 			printf("Accion invalida, seleccione una accion valida:\n");
 			printf(">");
 			scanf_result = scanf("%d", &selected);
