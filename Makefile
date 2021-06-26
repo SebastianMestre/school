@@ -1,6 +1,7 @@
 
-CFLAGS := -Wall -Werror
+CFLAGS := -Wall -Werror -g # -fsanitize=address
 INCLUDE := -include src/types.h
+LIBS := # -lasan
 
 all: app test
 .PHONY: all

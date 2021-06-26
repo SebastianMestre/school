@@ -10,6 +10,7 @@
 #define BUF_SIZE 128
 
 void buscar(Database* database) {}
+
 void agregar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
@@ -37,6 +38,7 @@ void agregar(Database* database) {
 
 	database_insert(database, name, surname, age, phone_number);
 }
+
 void eliminar(Database* database) {}
 void editar(Database* database) {}
 void cargar(Database* database) {}
@@ -64,7 +66,7 @@ action_id_prompt(int max_value) {
 
 		printf(">");
 		while (!get_line_as_int(buf, BUF_SIZE, &selected, stdin) || selected <= 0 || selected > max_value) {
-			assert(file_peek(stdin) != EOF);
+			assert(!feof(stdin));
 			printf("Accion invalida, seleccione una accion valida:\n");
 			printf(">");
 		}

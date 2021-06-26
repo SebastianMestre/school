@@ -11,7 +11,7 @@ struct _Action {
 typedef struct _Action Action;
 
 static void
-action_dtor_impl(void* action_ptr, void* storage_ptr) {
+dtor_impl(void* action_ptr, void* storage_ptr) {
 	Storage* storage = (Storage*)storage_ptr;
 	Action* action = (Action*)action_ptr;
 
@@ -32,7 +32,7 @@ history_create(Storage* storage) {
 			sizeof(Action),
 			HISTORY_SIZE,
 			(Destructor){
-				action_dtor_impl,
+				dtor_impl,
 				storage
 			}
 		),

@@ -1,11 +1,24 @@
 #include "storage.h"
 
 #include <assert.h>
+#include <stdlib.h>
+
+static void
+dtor_impl(void* arg0, void* metadata) {
+	assert(metadata == nullptr);
+	Contact* contact = arg0;
+	free(contact->name);
+	free(contact->surname);
+	free(contact->phone_number);
+}
 
 Storage
 storage_create() {
 	return (Storage){
-		.slot_map = slot_map_create(sizeof(Contact), nop_dtor),
+		.slot_map = slot_map_create(
+			sizeof(Contact),
+			(Destructor){ dtor_impl, nullptr }
+		),
 	};
 }
 
