@@ -6,12 +6,12 @@
 
 #define HISTORY_SIZE (10)
 
-typedef HistoryAction Action;
+typedef HistoryEvent Event;
 
 static void
 dtor_impl(void* action_ptr, void* storage_ptr) {
 	Storage* storage = (Storage*)storage_ptr;
-	Action* action = (Action*)action_ptr;
+	Event* action = (Event*)action_ptr;
 
 	if (action->forwards.active) {
 		storage_decrease_refcount(storage, action->forwards.id);
@@ -27,7 +27,7 @@ history_create(Storage* storage) {
 	History result = {
 		.storage = storage,
 		.actions = circular_buffer_create(
-			sizeof(Action),
+			sizeof(Event),
 			HISTORY_SIZE,
 			(Destructor){
 				dtor_impl,
@@ -47,7 +47,7 @@ history_release(History* history) {
 void
 history_record_inserted(History* history, ContactId id) {
 	storage_increase_refcount(history->storage, id);
-	Action action = {
+	Event action = {
 		.forwards = (OptionalContactId){true, id},
 	};
 	circular_buffer_push_back(&history->actions, SPANOF(action));
@@ -56,7 +56,7 @@ history_record_inserted(History* history, ContactId id) {
 void
 history_record_deleted(History* history, ContactId id) {
 	storage_increase_refcount(history->storage, id);
-	Action action = {
+	Event action = {
 		.backwards = (OptionalContactId){true, id},
 	};
 	circular_buffer_push_back(&history->actions, SPANOF(action));
@@ -66,7 +66,7 @@ void
 history_record_updated(History* history, ContactId old_id, ContactId new_id) {
 	storage_increase_refcount(history->storage, new_id);
 	storage_increase_refcount(history->storage, old_id);
-	Action action = {
+	Event action = {
 		.forwards = (OptionalContactId){true, new_id},
 		.backwards = (OptionalContactId){true, old_id},
 	};
@@ -76,7 +76,7 @@ history_record_updated(History* history, ContactId old_id, ContactId new_id) {
 void history_advance_cursor(History* history) {
 	assert(history->next_action != history->actions.end);
 
-	history->next_action += sizeof(Action);
+	history->next_action += sizeof(Event);
 	if (history->next_action == history->actions.data.end) {
 		history->next_action = history->actions.data.begin;
 	}
@@ -88,10 +88,10 @@ void history_retreat_cursor(History* history) {
 	if (history->next_action == history->actions.data.begin) {
 		history->next_action = history->actions.data.end;
 	}
-	history->next_action -= sizeof(Action);
+	history->next_action -= sizeof(Event);
 }
 
-Action*
+Event*
 history_next_action(History* history) {
 	assert(history->next_action != history->actions.end);
 	return history->next_action;

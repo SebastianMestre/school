@@ -47,6 +47,7 @@ slot_map_at(SlotMap* map, size_t id) {
 
 size_t
 slot_map_insert(SlotMap* map, Span data) {
+	assert(span_width(data) == map->element_width);
 	if (map->holes.size > 0) {
 		size_t position = 0;
 		span_write(&position, vector_last(map->holes));

@@ -31,7 +31,7 @@ bool
 database_has(Database* database_has, char* name, char* surname);
 
 // toma ownership sobre, name, surname, age, y phone_number
-void
+bool
 database_insert(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
 // toma ownership de name y surname

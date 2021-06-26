@@ -6,11 +6,11 @@
 
 typedef struct _Storage Storage;
 
-struct _HistoryAction {
+struct _HistoryEvent {
 	OptionalContactId forwards;
 	OptionalContactId backwards;
 };
-typedef struct _HistoryAction HistoryAction;
+typedef struct _HistoryEvent HistoryEvent;
 
 struct _History {
 	Storage* storage;
@@ -34,9 +34,9 @@ history_record_deleted(History* history, ContactId id);
 void
 history_record_updated(History* history, ContactId old_id, ContactId new_id);
 
-// devuelve un puntero a la siguiente accion que de debe realizar
+// devuelve un puntero al evento que le sigue al cursor.
 // el puntero se invalida al llamar cualquier otra funcion de history
-HistoryAction*
+HistoryEvent*
 history_next_action(History* history);
 
 // hace que el cursor de la historia apunte al siguiente evento

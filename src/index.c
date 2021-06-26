@@ -77,5 +77,5 @@ index_find(Index index, ContactId id) {
 	}
 	ContactId result;
 	span_write(&result, node->datum);
-	return (OptionalContactId){false, result};
+	return (OptionalContactId){true, result};
 }
