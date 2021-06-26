@@ -32,6 +32,7 @@ test: $(common_objects)     \
 build/test/main.o           \
 build/test/span_test.o      \
 build/test/vector_test.o    \
+build/test/slot_map_test.o  \
 build/test/bst_test.o
 	$(CC) -o $@ $^ $(LIBS)
 
@@ -57,7 +58,8 @@ build/main.o: src/main.c src/io.h src/database.h src/index.h src/history.h src/s
 build/test/span_test.o: src/test/span_test.c src/test/span_test.h src/span.h
 build/test/vector_test.o: src/test/vector_test.c src/test/vector_test.h src/vector.h src/span.h
 build/test/bst_test.o: src/test/bst_test.c src/test/bst_test.h src/bst.h
-build/test/main.o: src/test/main.c src/test/bst_test.h
+build/test/slot_map_test.o: src/test/slot_map_test.c src/test/slot_map_test.h src/slot_map.h
+build/test/main.o: src/test/main.c src/test/bst_test.h src/test/span_test.h src/test/vector_test.h src/test/slot_map_test.h
 
 build/test/%_test.o: src/test/%_test.c src/test/lt.h src/types.h
 	mkdir -p $(dir $@)
