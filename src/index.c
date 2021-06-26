@@ -54,10 +54,14 @@ index_release(Index* index) {
 	bst_release(&index->bst);
 }
 
-void
+bool
 index_insert(Index* index, ContactId id) {
 	storage_increase_refcount(index->storage, id);
-	bst_insert(&index->bst, SPANOF(id));
+	BstInsertResult insert_result = bst_insert(&index->bst, SPANOF(id));
+	if (!insert_result.success) {
+		storage_decrease_refcount(index->storage, id);
+	}
+	return insert_result.success;
 }
 
 void

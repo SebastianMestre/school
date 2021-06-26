@@ -75,12 +75,20 @@ history_record_updated(History* history, ContactId old_id, ContactId new_id) {
 
 void history_advance_cursor(History* history) {
 	assert(history->next_action != history->actions.end);
-	assert(history->next_action != history->actions.data.end);
 
 	history->next_action += sizeof(Action);
 	if (history->next_action == history->actions.data.end) {
 		history->next_action = history->actions.data.begin;
 	}
+}
+
+void history_retreat_cursor(History* history) {
+	assert(history->next_action != history->actions.begin);
+
+	if (history->next_action == history->actions.data.begin) {
+		history->next_action = history->actions.data.end;
+	}
+	history->next_action -= sizeof(Action);
 }
 
 Action*

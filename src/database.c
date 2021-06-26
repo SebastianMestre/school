@@ -60,22 +60,31 @@ database_find(Database* database, char* name, char* surname) {
 }
 
 void
-database_undo(Database* database) {
+database_rewind_history(Database* database) {
+	history_retreat_cursor(&database->history);
+	HistoryAction* action = history_next_action(&database->history);
+
+	if (action->forwards.active) {
+		index_delete(&database->index, action->forwards.id);
+	}
+
+	if (action->backwards.active) {
+		bool success = index_insert(&database->index, action->backwards.id);
+		assert(success);
+	}
 }
 
 void
 database_advance_history(Database* database) {
 	HistoryAction* action = history_next_action(&database->history);
+	history_advance_cursor(&database->history);
 
 	if (action->backwards.active) {
-		/* TODO bool success = */ index_delete(&database->index, action->backwards.id);
-		/* TODO assert(success); */
+		index_delete(&database->index, action->backwards.id);
 	}
 
 	if (action->forwards.active) {
-		/* TODO bool success = */ index_insert(&database->index, action->forwards.id);
-		/* TODO assert(success); */
+		bool success = index_insert(&database->index, action->forwards.id);
+		assert(success);
 	}
-
-	history_advance_cursor(&database->history);
 }

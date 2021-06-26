@@ -41,3 +41,6 @@ history_next_action(History* history);
 
 // hace que el cursor de la historia apunte al siguiente evento
 void history_advance_cursor(History* history);
+
+// hace que el cursor de la historia apunte al evento anterior
+void history_retreat_cursor(History* history);
