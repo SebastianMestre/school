@@ -74,7 +74,7 @@ history_record_updated(History* history, ContactId old_id, ContactId new_id) {
 }
 
 void history_advance_cursor(History* history) {
-	assert(history->next_action != history->actions.end);
+	assert(!history_cursor_at_end(history));
 
 	history->next_action += sizeof(Event);
 	if (history->next_action == history->actions.data.end) {
@@ -95,4 +95,14 @@ Event*
 history_next_action(History* history) {
 	assert(history->next_action != history->actions.end);
 	return history->next_action;
+}
+
+bool
+history_cursor_at_begin(History const* history) {
+	return history->next_action == history->actions.begin;
+}
+
+bool
+history_cursor_at_end(History const* history) {
+	return history->next_action == history->actions.end;
 }

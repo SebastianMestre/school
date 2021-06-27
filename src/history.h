@@ -40,7 +40,17 @@ HistoryEvent*
 history_next_action(History* history);
 
 // hace que el cursor de la historia apunte al siguiente evento
-void history_advance_cursor(History* history);
+void
+history_advance_cursor(History* history);
 
 // hace que el cursor de la historia apunte al evento anterior
-void history_retreat_cursor(History* history);
+void
+history_retreat_cursor(History* history);
+
+// devuelve true sii el cursor esta al principio de la historia
+bool
+history_cursor_at_begin(History const* history);
+
+// devuelve true sii el cursor esta al final de la historia
+bool
+history_cursor_at_end(History const* history);
