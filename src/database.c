@@ -77,6 +77,11 @@ database_find(Database* database, char* name, char* surname) {
 	return found;
 }
 
+void
+database_clear_history(Database* database) {
+	history_clear(&database->history);
+}
+
 bool
 database_rewind(Database* database) {
 	if (history_cursor_at_begin(&database->history))

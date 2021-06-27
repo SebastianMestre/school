@@ -45,6 +45,11 @@ history_release(History* history) {
 }
 
 void
+history_clear(History* history) {
+	circular_buffer_clear(&history->actions);
+}
+
+void
 history_clear_future(History* history) {
 	if (history->actions.size == 0)
 		return;

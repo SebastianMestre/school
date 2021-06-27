@@ -30,6 +30,23 @@ circular_buffer_create(
 	};
 }
 
+void
+circular_buffer_release(CircularBuffer* buffer) {
+	circular_buffer_clear(buffer);
+
+	free(buffer->data.begin);
+	buffer->data = (Span){};
+	buffer->begin = nullptr;
+	buffer->end = nullptr;
+}
+
+void
+circular_buffer_clear(CircularBuffer* buffer) {
+	while (buffer->size != 0) {
+		circular_buffer_pop_back(buffer);
+	}
+}
+
 static void
 advance_and_wrap(void** ptr, size_t stride, Span range) {
 	*ptr += stride;
@@ -77,16 +94,4 @@ circular_buffer_push_back(CircularBuffer* buffer, Span data) {
 	advance_and_wrap(&buffer->end, buffer->element_width, buffer->data);
 
 	buffer->size += 1;
-}
-
-void
-circular_buffer_release(CircularBuffer* buffer) {
-	while (buffer->size != 0) {
-		circular_buffer_pop_back(buffer);
-	}
-
-	free(buffer->data.begin);
-	buffer->data = (Span){};
-	buffer->begin = nullptr;
-	buffer->end = nullptr;
 }

@@ -24,6 +24,12 @@ CircularBuffer
 circular_buffer_create(size_t element_width, size_t capacity, Destructor dtor);
 
 void
+circular_buffer_release(CircularBuffer* buffer);
+
+void
+circular_buffer_clear(CircularBuffer* buffer);
+
+void
 circular_buffer_pop_front(CircularBuffer* buffer);
 
 void
@@ -31,6 +37,3 @@ circular_buffer_pop_back(CircularBuffer* buffer);
 
 void
 circular_buffer_push_back(CircularBuffer* buffer, Span data);
-
-void
-circular_buffer_release(CircularBuffer* buffer);

@@ -25,15 +25,23 @@ history_create(Storage* storage);
 void
 history_release(History* history);
 
+// elimina todos los eventos de la historia
+void
+history_clear(History* history);
+
+// elimina todos los eventos futuros de la historia
 void
 history_clear_future(History* history);
 
+// guarda un evento indicando que se inserto un contacto
 void
 history_record_inserted(History* history, ContactId id);
 
+// guarda un evento indicando que se elimino un contacto
 void
 history_record_deleted(History* history, ContactId id);
 
+// guarda un evento indicando que se actualizo un contacto
 void
 history_record_updated(History* history, ContactId old_id, ContactId new_id);
 
