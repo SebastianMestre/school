@@ -96,19 +96,35 @@ void cargar(Database* database) {}
 void guardar(Database* database) {}
 
 void deshacer(Database* database) {
-	/* TODO bool success = */ database_rewind(database);
-	/* if (!success) puts("se encuentra al principio de la historia") */
+	bool success = database_rewind(database);
+	if (success) {
+		puts("Se deshizo la ultima operacion");
+	} else {
+		puts("No hay operaciones para deshacer");
+	}
 }
 
 void rehacer(Database* database) {
-	/* TODO bool success = */ database_advance(database);
-	/* if (!success) puts("se encuentra al final de la historia") */
+	bool success = database_advance(database);
+	if (success) {
+		puts("Se rehizo la ultima operacion");
+	} else {
+		puts("No hay operaciones para rehacer");
+	}
 }
 
-void conjuncion(Database* database) {}
-void disjuncion(Database* database) {}
-void guardar_ordenado(Database* database) {}
-void buscar_por_suma_de_edades(Database* database) {}
+void conjuncion(Database* database) {
+}
+
+void disjuncion(Database* database) {
+}
+
+void guardar_ordenado(Database* database) {
+}
+
+void buscar_por_suma_de_edades(Database* database) {
+}
+
 void exit_program(Database* database) { exit(0); } // TODO: cleanup database and storage
 
 typedef void (*ProgramAction)(Database*);
