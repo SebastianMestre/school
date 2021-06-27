@@ -64,8 +64,11 @@ database_find(Database* database, char* name, char* surname) {
 	return found;
 }
 
-void
+bool
 database_rewind_history(Database* database) {
+	if (history_cursor_at_begin(&database->history))
+		return false;
+
 	history_retreat_cursor(&database->history);
 	HistoryEvent* action = history_next_action(&database->history);
 
@@ -77,10 +80,15 @@ database_rewind_history(Database* database) {
 		bool success = index_insert(&database->index, action->backwards.id);
 		assert(success);
 	}
+
+	return true;
 }
 
-void
+bool
 database_advance_history(Database* database) {
+	if (history_cursor_at_end(&database->history))
+		return false;
+
 	HistoryEvent* action = history_next_action(&database->history);
 	history_advance_cursor(&database->history);
 
@@ -92,4 +100,6 @@ database_advance_history(Database* database) {
 		bool success = index_insert(&database->index, action->forwards.id);
 		assert(success);
 	}
+
+	return true;
 }
