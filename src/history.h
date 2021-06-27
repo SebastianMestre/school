@@ -26,6 +26,9 @@ void
 history_release(History* history);
 
 void
+history_clear_future(History* history);
+
+void
 history_record_inserted(History* history, ContactId id);
 
 void

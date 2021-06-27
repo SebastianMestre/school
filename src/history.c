@@ -45,6 +45,16 @@ history_release(History* history) {
 }
 
 void
+history_clear_future(History* history) {
+	if (history->actions.size == 0)
+		return;
+
+	while (history->next_action != history->actions.end) {
+		circular_buffer_pop_back(&history->actions);
+	}
+}
+
+void
 history_record_inserted(History* history, ContactId id) {
 	storage_increase_refcount(history->storage, id);
 	Event action = {
@@ -83,7 +93,7 @@ void history_advance_cursor(History* history) {
 }
 
 void history_retreat_cursor(History* history) {
-	assert(history->next_action != history->actions.begin);
+	assert(!history_cursor_at_begin(history));
 
 	if (history->next_action == history->actions.data.begin) {
 		history->next_action = history->actions.data.end;
