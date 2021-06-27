@@ -195,7 +195,7 @@ steal_leftmost(Node** p) {
 }
 
 static void
-erase(Node** p, Span datum, Comparator cmp) {
+erase(Node** p, Span datum, Comparator cmp, Destructor dtor) {
 	assert(p != nullptr);
 
 	// no permitimos que se borren cosas que no estan el el arbol
@@ -226,11 +226,11 @@ erase(Node** p, Span datum, Comparator cmp) {
 			*p = succ;
 		}
 
-		free_node(node, /* TODO */ nop_dtor);
+		free_node(node, dtor);
 	} else if (cmp_result < 0) {
-		erase(&node->lhs, datum, cmp);
+		erase(&node->lhs, datum, cmp, dtor);
 	} else {
-		erase(&node->rhs, datum, cmp);
+		erase(&node->rhs, datum, cmp, dtor);
 	}
 
 	if (*p != nullptr) {
@@ -294,7 +294,7 @@ void
 bst_erase(Bst* bst, Span datum) {
 	assert(bst != nullptr);
 	assert(bst->element_width == span_width(datum));
-	return erase(&bst->root, datum, bst->cmp);
+	return erase(&bst->root, datum, bst->cmp, bst->dtor);
 }
 
 void
