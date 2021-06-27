@@ -14,9 +14,11 @@ void buscar(Database* database) {
 	char buf1[BUF_SIZE];
 
 	puts("Ingrese nombre");
+	printf(">");
 	assert(get_line(buf0, BUF_SIZE, stdin));
 
 	puts("Ingrese apellido");
+	printf(">");
 	assert(get_line(buf1, BUF_SIZE, stdin));
 
 	// TODO: validate strings
@@ -39,16 +41,20 @@ void agregar(Database* database) {
 	char buf3[BUF_SIZE];
 
 	puts("Ingrese nombre");
+	printf(">");
 	assert(get_line(buf0, BUF_SIZE, stdin));
 
 	puts("Ingrese apellido");
+	printf(">");
 	assert(get_line(buf1, BUF_SIZE, stdin));
 
 	puts("Ingrese edad");
+	printf(">");
 	unsigned age;
 	assert(get_line_as_uint(buf2, BUF_SIZE, &age, stdin));
 
 	puts("Ingrese telefono");
+	printf(">");
 	assert(get_line(buf3, BUF_SIZE, stdin));
 
 	// TODO: validate strings
@@ -150,12 +156,12 @@ int main() {
 		{"Salir", exit_program},
 	};
 
-	while (1) {
-		printf("Menu de acciones:\n");
-		for (int i = 0; i < MENU_LEN; ++i) {
-			printf("%d. %s\n", i+1, entries[i].name);
-		}
+	printf("Menu de acciones:\n");
+	for (int i = 0; i < MENU_LEN; ++i) {
+		printf("%d. %s\n", i+1, entries[i].name);
+	}
 
+	while (1) {
 		printf("\n");
 		printf("Seleccione una accion:\n");
 
