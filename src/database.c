@@ -6,6 +6,10 @@
 
 // TODO: delete future events when inserting/deleting/updating
 
+// Nota de implementacion: advance/rewind asumen que las operacione que hacen
+// siempre son exitosas. Para que esto sea verdad, tenemos que tener mucho
+// cuidado de no meter operaciones invalidas en la historia.
+
 Database
 database_create(Storage* storage) {
 	return (Database) {
@@ -37,8 +41,12 @@ database_insert(
 		return false;
 	}
 
-	index_insert(&database->index, id);
+	history_clear_future(&database->history);
 	history_record_inserted(&database->history, id);
+
+	bool success = index_insert(&database->index, id);
+	assert(success);
+	history_advance_cursor(&database->history);
 
 	return true;
 }
@@ -51,8 +59,13 @@ database_delete(Database* database, char* name, char* surname) {
 	}
 
 	ContactId id = found.id;
+
+	history_clear_future(&database->history);
 	history_record_deleted(&database->history, id);
+
 	index_delete(&database->index, id);
+	history_advance_cursor(&database->history);
+
 	return true;
 }
 
@@ -65,7 +78,7 @@ database_find(Database* database, char* name, char* surname) {
 }
 
 bool
-database_rewind_history(Database* database) {
+database_rewind(Database* database) {
 	if (history_cursor_at_begin(&database->history))
 		return false;
 
@@ -85,7 +98,7 @@ database_rewind_history(Database* database) {
 }
 
 bool
-database_advance_history(Database* database) {
+database_advance(Database* database) {
 	if (history_cursor_at_end(&database->history))
 		return false;
 

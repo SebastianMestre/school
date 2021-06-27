@@ -50,9 +50,9 @@ database_clear_history(Database* database);
 // no toma ownership
 // devuelve false sii no hay eventos para deshacer
 bool
-database_rewind_history(Database* database);
+database_rewind(Database* database);
 
 // no toma ownership
 // devuelve false sii no hay eventos para reshacer
 bool
-database_advance_history(Database* database);
+database_advance(Database* database);

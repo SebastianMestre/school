@@ -90,12 +90,12 @@ void cargar(Database* database) {}
 void guardar(Database* database) {}
 
 void deshacer(Database* database) {
-	/* TODO bool success = */ database_rewind_history(database);
+	/* TODO bool success = */ database_rewind(database);
 	/* if (!success) puts("se encuentra al principio de la historia") */
 }
 
 void rehacer(Database* database) {
-	/* TODO bool success = */ database_advance_history(database);
+	/* TODO bool success = */ database_advance(database);
 	/* if (!success) puts("se encuentra al final de la historia") */
 }
 
