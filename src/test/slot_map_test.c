@@ -54,6 +54,8 @@ random_test(int arg) {
 		LT_ASSERT(map_value == value[i]);
 	}
 
+	slot_map_release(&m);
+
 #undef N
 }
 
