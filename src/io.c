@@ -20,11 +20,8 @@ get_line(char* buf, size_t n, FILE* f) {
 	return false;
 }
 
-bool
-get_line_as_int(char* buf, size_t n, int* out, FILE* f) {
-	if (!get_line(buf, n, f))
-		return false;
-
+static bool
+parse_int(char* buf, int* out) {
 	for (; *buf == ' ' || *buf == '\t'; ++buf) {}
 	if (*buf == '\0')
 		return false;
@@ -58,6 +55,33 @@ get_line_as_int(char* buf, size_t n, int* out, FILE* f) {
 
 	return true;
 }
+
+bool
+get_line_as_int(char* buf, size_t n, int* out, FILE* f) {
+	if (!get_line(buf, n, f))
+		return false;
+	return parse_int(buf, out);
+}
+
+void
+get_line_as_int_retry(char* buf, size_t n, int* out, char const* line_error_msg, char const* value_error_msg, FILE* f) {
+	while (1) {
+		bool ok;
+		ok = get_line(buf, n, f);
+		if (!ok) {
+			printf("%s", line_error_msg);
+			continue;
+		}
+		assert(!feof(f));
+		ok = parse_int(buf, out);
+		if (!ok) {
+			printf("%s", value_error_msg);
+			continue;
+		}
+		return;
+	}
+}
+
 
 static bool
 parse_uint(char* buf, unsigned int* out) {

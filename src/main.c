@@ -171,13 +171,14 @@ action_id_prompt(int max_value) {
 		int selected;
 
 		printf(">");
-		while (!get_line_as_int(buf, BUF_SIZE, &selected, stdin) || selected <= 0 || selected > max_value) {
-			assert(!feof(stdin));
-			printf("Accion invalida, seleccione una accion valida:\n");
-			printf(">");
+		while (1) {
+			get_line_as_int_retry(buf, BUF_SIZE, &selected, "Linea demasiado larga. Vuelva a intentar:\n>", "Inserte un numero valido:\n>", stdin);
+			if (selected < 1 || max_value < selected) {
+				printf("Seleccion fuera de rango. Inserte una opcion valida:\n>");
+				continue;
+			}
+			return selected;
 		}
-
-		return selected;
 }
 
 int main() {
