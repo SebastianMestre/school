@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static void
 dtor_impl(void* arg0, void* metadata) {
@@ -24,6 +25,9 @@ storage_create() {
 
 void
 storage_release(Storage* storage) {
+	if (storage->slot_map.cells.size > 0) {
+		fprintf(stderr, "No se limpio correctamente el storage.\n");
+	}
 	slot_map_release(&storage->slot_map);
 }
 

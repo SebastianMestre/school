@@ -30,6 +30,11 @@ slot_map_create(size_t element_width, Destructor dtor) {
 
 void
 slot_map_release(SlotMap* slot_map) {
+	while (slot_map->cells.size != 0) {
+		call_dtor(slot_map->dtor, vector_last(slot_map->cells).begin);
+		vector_pop(&slot_map->cells);
+	}
+
 	vector_release(&slot_map->cells);
 	vector_release(&slot_map->cell_data);
 	vector_release(&slot_map->slots);
