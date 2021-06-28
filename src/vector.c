@@ -41,9 +41,9 @@ vector_last(Vector v) {
 }
 
 void
-vector_put_at(Vector v, size_t i, Span data) {
-	assert(span_width(data) == v.element_width);
-	span_write(vector_at(v, i).begin, data);
+vector_put_at(Vector* v, size_t i, Span data) {
+	assert(span_width(data) == v->element_width);
+	span_write(vector_at(*v, i).begin, data);
 }
 
 void

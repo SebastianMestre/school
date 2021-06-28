@@ -22,7 +22,7 @@ Span
 vector_last(Vector v);
 
 void
-vector_put_at(Vector v, size_t i, Span data);
+vector_put_at(Vector* v, size_t i, Span data);
 
 void
 vector_resize_storage(Vector* v, size_t n);

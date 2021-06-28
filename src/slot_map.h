@@ -4,9 +4,12 @@
 #include "vector.h"
 
 struct _SlotMap {
+	Vector cells;
+	Vector cell_data;
+
+	Vector slot_data;
 	Vector holes;
-	Vector slots;
-	Vector slot_metadata;
+
 	size_t element_width;
 	Destructor dtor;
 };
