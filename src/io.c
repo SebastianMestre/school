@@ -84,7 +84,7 @@ get_line_as_int_retry(char* buf, size_t n, int* out, char const* line_error_msg,
 
 
 static bool
-parse_uint(char* buf, unsigned int* out) {
+parse_u32(char* buf, unsigned int* out) {
 	for (; *buf == ' ' || *buf == '\t'; ++buf) {}
 	if (*buf == '\0')
 		return false;
@@ -111,14 +111,14 @@ parse_uint(char* buf, unsigned int* out) {
 }
 
 bool
-get_line_as_uint(char* buf, size_t n, unsigned int* out, FILE* f) {
+get_line_as_u32(char* buf, size_t n, unsigned int* out, FILE* f) {
 	if (!get_line(buf, n, f))
 		return false;
-	return parse_uint(buf, out);
+	return parse_u32(buf, out);
 }
 
 void
-get_line_as_uint_retry(char* buf, size_t n, unsigned int* out, char const* line_error_msg, char const* value_error_msg, FILE* f) {
+get_line_as_u32_retry(char* buf, size_t n, unsigned int* out, char const* line_error_msg, char const* value_error_msg, FILE* f) {
 	while (1) {
 		bool ok;
 		ok = get_line(buf, n, f);
@@ -127,7 +127,7 @@ get_line_as_uint_retry(char* buf, size_t n, unsigned int* out, char const* line_
 			continue;
 		}
 		assert(!feof(f));
-		ok = parse_uint(buf, out);
+		ok = parse_u32(buf, out);
 		if (!ok) {
 			printf("%s", value_error_msg);
 			continue;

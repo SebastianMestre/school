@@ -43,7 +43,8 @@ void test_decrease_size(int value) {
 }
 */
 
-void test_all(int value) {
+static void
+test_all(int value) {
 	lt_reset();
 	test_increase_size(value);
 }

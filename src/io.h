@@ -22,11 +22,11 @@ get_line_as_int_retry(char* buf, size_t n, int* out, char const* line_error_msg,
 
 // lo mismo que get_line_as_int pero unsigned
 bool
-get_line_as_uint(char* buf, size_t n, unsigned int* out, FILE* f);
+get_line_as_u32(char* buf, size_t n, uint32_t* out, FILE* f);
 
 // lo mismo que get_line_as_int_retry pero unsigned
 void
-get_line_as_uint_retry(char* buf, size_t n, unsigned int* out, char const* line_error_msg, char const* value_error_msg, FILE* f);
+get_line_as_u32_retry(char* buf, size_t n, uint32_t* out, char const* line_error_msg, char const* value_error_msg, FILE* f);
 
 // imprime un string en modo titulo
 void

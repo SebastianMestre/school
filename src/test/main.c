@@ -3,6 +3,7 @@
 #include "vector_test.h"
 #include "slot_map_test.h"
 #include "database_test.h"
+#include "search_by_sum_test.h"
 
 int main() {
 	bst_test();
@@ -10,4 +11,5 @@ int main() {
 	vector_test();
 	slot_map_test();
 	database_test();
+	search_by_sum_test();
 }

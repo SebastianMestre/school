@@ -6,6 +6,7 @@
 #include "io.h"
 #include "storage.h"
 #include "string.h"
+#include "search_by_sum.h"
 
 #define BUF_SIZE 128
 
@@ -69,8 +70,8 @@ void agregar(Database* database) {
 
 	puts("Ingrese edad");
 	printf(">");
-	unsigned age;
-	get_line_as_uint_retry(buf2, BUF_SIZE, &age, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
+	uint32_t age;
+	get_line_as_u32_retry(buf2, BUF_SIZE, &age, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
 
 	puts("Ingrese telefono");
 	printf(">");
@@ -152,10 +153,51 @@ void disjuncion(Database* database) {
 void guardar_ordenado(Database* database) {
 }
 
-void buscar_por_suma_de_edades(Database* database) {
-}
+struct _TwoVectors {
+	Vector first;
+	Vector second;
+};
 
-void exit_program(Database* database) { exit(0); } // TODO: cleanup database and storage
+void buscar_por_suma_de_edades(Database* database) {
+	char buf0[BUF_SIZE];
+
+	printf("Ingrese un natural:\n>");
+	uint32_t sum;
+	while (1) {
+		get_line_as_u32_retry(buf0, BUF_SIZE, &sum, "Linea muy larga. Vuelva a intentar:\n>", "Ingrese un natural valido:\n>", stdin);
+		if (sum == 0) {
+			printf("Ingrese un numero mayor a 0:\n>");
+			continue;
+		}
+		break;
+	}
+
+	Vector contact_ids = database_contacts(database);
+
+	Vector ages = vector_create(sizeof(uint32_t));
+	for (size_t i = 0; i < contact_ids.size; ++i) {
+		ContactId id; span_write(&id, vector_at(contact_ids, i));
+		uint32_t age = storage_at(database->storage, id)->age;
+		vector_push(&ages, SPANOF(age));
+	}
+
+	Vector result = search_by_sum(ages.data.begin, ages.size, sum);
+
+	if (result.size == 0) {
+		printf("No existe un conjunto de contactos que sumen %u\n", sum);
+	} else {
+		for (size_t i = 0; i < result.size; ++i) {
+			size_t j; span_write(&j, vector_at(result, i));
+			ContactId id; span_write(&id, vector_at(contact_ids, j));
+			Contact* contact = storage_at(database->storage, id);
+			print_contact(contact);
+		}
+	}
+
+	vector_release(&result);
+	vector_release(&ages);
+	vector_release(&contact_ids);
+}
 
 typedef void (*ProgramAction)(Database*);
 
@@ -200,7 +242,7 @@ int main() {
 		{"OR", disjuncion},
 		{"Guardar ordenado", guardar_ordenado},
 		{"Buscar por suma de edades", buscar_por_suma_de_edades},
-		{"Salir", exit_program},
+		{"Salir", nullptr},
 	};
 
 	printf("Menu de acciones:\n");
