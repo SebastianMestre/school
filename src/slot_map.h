@@ -7,7 +7,7 @@ struct _SlotMap {
 	Vector cells;
 	Vector cell_data;
 
-	Vector slot_data;
+	Vector slots;
 	Vector holes;
 
 	size_t element_width;
