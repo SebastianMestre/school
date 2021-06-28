@@ -28,7 +28,7 @@ void
 storage_release(Storage* storage);
 
 Contact*
-storage_at(Storage storage, ContactId id);
+storage_at(Storage* storage, ContactId id);
 
 // toma ownership de name, surname, age, y phone_number
 ContactId

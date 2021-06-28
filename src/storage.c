@@ -28,8 +28,8 @@ storage_release(Storage* storage) {
 }
 
 Contact*
-storage_at(Storage storage, ContactId id) {
-	return (Contact*)slot_map_at(&storage.slot_map, id).begin;
+storage_at(Storage* storage, ContactId id) {
+	return (Contact*)slot_map_at(&storage->slot_map, id).begin;
 }
 
 ContactId

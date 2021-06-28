@@ -12,8 +12,8 @@ cmp_impl(void const* arg0, void const* arg1, void* metadata) {
 	ContactId rhs_id = *(ContactId const*)arg1;
 	Storage* storage = metadata;
 
-	Contact* lhs = storage_at(*storage, lhs_id);
-	Contact* rhs = storage_at(*storage, rhs_id);
+	Contact* lhs = storage_at(storage, lhs_id);
+	Contact* rhs = storage_at(storage, rhs_id);
 
 	assert(lhs);
 	assert(rhs);
@@ -34,6 +34,7 @@ dtor_impl(void* arg0, void* metadata) {
 	ContactId id = *(ContactId*)arg0;
 	Storage* storage = metadata;
 
+	storage_at(storage, id)->indexed = false;
 	storage_decrease_refcount(storage, id);
 }
 
@@ -56,9 +57,14 @@ index_release(Index* index) {
 
 bool
 index_insert(Index* index, ContactId id) {
+	assert(!storage_at(index->storage, id)->indexed);
+
 	storage_increase_refcount(index->storage, id);
+	storage_at(index->storage, id)->indexed = true;
+
 	BstInsertResult insert_result = bst_insert(&index->bst, SPANOF(id));
 	if (!insert_result.success) {
+		storage_at(index->storage, id)->indexed = false;
 		storage_decrease_refcount(index->storage, id);
 	}
 	return insert_result.success;
