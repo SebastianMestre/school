@@ -14,7 +14,7 @@ test_0(int arg) {
 
 	LT_ASSERT(result.size == 1);
 
-	size_t idx; span_write(&idx, vector_at(result, 0));
+	size_t idx; span_write(&idx, vector_at(&result, 0));
 	LT_ASSERT(idx == 1);
 
 	vector_release(&result);
@@ -30,7 +30,7 @@ test_1(int arg) {
 
 	LT_ASSERT(result.size == 1);
 
-	size_t idx; span_write(&idx, vector_at(result, 0));
+	size_t idx; span_write(&idx, vector_at(&result, 0));
 	LT_ASSERT(idx == 0);
 
 	vector_release(&result);

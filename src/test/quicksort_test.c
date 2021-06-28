@@ -20,15 +20,6 @@ test_0(int arg) {
 
 	quicksort(SPANOF(data), sizeof(int), (Comparator){int_cmp_fn, nullptr});
 
-	{
-		char const* sep = "";
-		for (size_t i = 0; i < DATA_LEN; ++i) {
-			printf("%s%d", sep, data[i]);
-			sep = ", ";
-		}
-		printf("\n");
-	}
-
 	for (size_t i = 1; i < DATA_LEN; ++i) {
 		LT_ASSERT(data[i-1] <= data[i]);
 	}

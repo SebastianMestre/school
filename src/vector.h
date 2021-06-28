@@ -1,16 +1,14 @@
 #pragma once
 
+#include "array.h"
 #include "span.h"
 
 #include <stddef.h>
 
 // Un vector guarda secuencias de bytes, cada una del mismo ancho.
 struct _Vector {
-	Span data;
-
-	size_t const element_width;
+	Array buffer;
 	size_t size;
-	size_t capacity;
 };
 typedef struct _Vector Vector;
 
@@ -18,10 +16,10 @@ Vector
 vector_create(size_t element_width);
 
 Span
-vector_at(Vector v, size_t i);
+vector_at(Vector const* v, size_t i);
 
 Span
-vector_last(Vector v);
+vector_last(Vector const* v);
 
 void
 vector_put_at(Vector* v, size_t i, Span data);

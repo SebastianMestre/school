@@ -171,19 +171,19 @@ void buscar_por_suma_de_edades(Database* database) {
 
 	Vector ages = vector_create(sizeof(uint32_t));
 	for (size_t i = 0; i < contact_ids.size; ++i) {
-		ContactId id; span_write(&id, vector_at(contact_ids, i));
+		ContactId id; span_write(&id, vector_at(&contact_ids, i));
 		uint32_t age = storage_at(database->storage, id)->age;
 		vector_push(&ages, SPANOF(age));
 	}
 
-	Vector result = search_by_sum(ages.data.begin, ages.size, sum);
+	Vector result = search_by_sum(ages.buffer.data.begin, ages.size, sum);
 
 	if (result.size == 0) {
 		printf("No existe un conjunto de contactos que sumen %u\n", sum);
 	} else {
 		for (size_t i = 0; i < result.size; ++i) {
-			size_t j; span_write(&j, vector_at(result, i));
-			ContactId id; span_write(&id, vector_at(contact_ids, j));
+			size_t j; span_write(&j, vector_at(&result, i));
+			ContactId id; span_write(&id, vector_at(&contact_ids, j));
 			Contact* contact = storage_at(database->storage, id);
 			print_contact(contact);
 		}

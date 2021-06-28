@@ -31,7 +31,7 @@ slot_map_create(size_t element_width, Destructor dtor) {
 void
 slot_map_release(SlotMap* slot_map) {
 	while (slot_map->cells.size != 0) {
-		call_dtor(slot_map->dtor, vector_last(slot_map->cells).begin);
+		call_dtor(slot_map->dtor, vector_last(&slot_map->cells).begin);
 		vector_pop(&slot_map->cells);
 	}
 
@@ -43,17 +43,17 @@ slot_map_release(SlotMap* slot_map) {
 
 static Span
 get_cell(SlotMap* map, size_t cell) {
-	return vector_at(map->cells, cell);
+	return vector_at(&map->cells, cell);
 }
 
 static CellData*
 get_cell_data(SlotMap* map, size_t cell) {
-	return (CellData*)vector_at(map->cell_data, cell).begin;
+	return (CellData*)vector_at(&map->cell_data, cell).begin;
 }
 
 static Slot*
 get_slot(SlotMap* map, size_t id) {
-	return (Slot*)vector_at(map->slots, id).begin;
+	return (Slot*)vector_at(&map->slots, id).begin;
 }
 
 Span
@@ -65,7 +65,7 @@ static size_t
 pop_hole(SlotMap* map) {
 	assert(map->holes.size > 0);
 	size_t result = 0;
-	span_write(&result, vector_last(map->holes));
+	span_write(&result, vector_last(&map->holes));
 	vector_pop(&map->holes);
 	return result;
 }
@@ -115,13 +115,13 @@ delete(SlotMap* map, size_t i) {
 	assert(get_slot(map, i)->refcount == 0);
 
 	size_t i_cell = get_slot(map, i)->cell;
-	call_dtor(map->dtor, vector_at(map->cells, i_cell).begin);
+	call_dtor(map->dtor, vector_at(&map->cells, i_cell).begin);
 	get_slot(map, i)->active = false;
 	vector_push(&map->holes, SPANOF(i));
 
 	if(map->cells.size != 1) {
 		size_t j_cell = map->cells.size - 1;
-		vector_put_at(&map->cells, i_cell, vector_at(map->cells, j_cell));
+		vector_put_at(&map->cells, i_cell, vector_at(&map->cells, j_cell));
 		size_t j = get_cell_data(map, j_cell)->slot;
 
 		get_slot(map, j)->cell = i_cell;
@@ -160,7 +160,7 @@ slot_map_decrease_refcount(SlotMap* map, size_t id) {
 void
 slot_map_for_each(SlotMap* map, Callback cb) {
 	for (size_t i = 0; i < map->cells.size; ++i) {
-		Span cell = vector_at(map->cells, i);
+		Span cell = vector_at(&map->cells, i);
 		call_cb(cb, &cell);
 	}
 }

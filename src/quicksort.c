@@ -22,7 +22,7 @@ static Iter
 partition(Iter i, Iter j, Iter pivot, Comparator cmp) {
 	Iter k = i;
 	for (; !iter_eq(i, j); iter_advance(&i)) {
-		if (call_cmp(cmp, pivot.pos, i.pos) < 0) {
+		if (call_cmp(cmp, i.pos, pivot.pos) < 0) {
 			iter_swap(i, k);
 			iter_advance(&k);
 		}

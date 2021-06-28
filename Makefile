@@ -12,7 +12,7 @@ build/string.o              \
                             \
 build/iter.o                \
 build/span.o                \
-                            \
+build/array.o               \
 build/vector.o              \
 build/circular_buffer.o     \
 build/bst.o                 \
@@ -46,7 +46,8 @@ build/test/quicksort_test.o
 build/types.o: src/types.c
 
 build/span.o: src/span.c src/span.h
-build/vector.o: src/vector.c src/vector.h src/span.h
+build/array.o: src/array.c src/span.h
+build/vector.o: src/vector.c src/vector.h src/array.h src/span.h
 build/circular_buffer.o: src/circular_buffer.c src/circular_buffer.h src/span.h
 build/bst.o: src/bst.c src/bst.h src/span.h
 build/slot_map.o: src/slot_map.c src/slot_map.h src/vector.h src/span.h
