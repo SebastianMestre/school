@@ -99,15 +99,17 @@ nunca habia implementado un AVL correctamente.
 
 Un slot map es un contenedor que soporta insercion, acceso aleatorio, y borrado
 en tiempo constante. A diferencia de otros diccionarios, las claves son numericas
-y determinadas por la estructura misma al insertar un elemento. Aparte, la clave
-no depende del valor que se guarda.
+y las determina la estructura misma al insertar un elemento, sin dependencia en
+el valor que se guarda. Aparte, todos los datos se guardan contiguamente en
+memoria.
 
-Esto resulta util ya que el uso que se le da es ser un almacenamiento de datos
-con posibles repetidos. Otra caracteristica que llevo a su uso es que la
-implementacion es bastante sencilla.
+Las razones de uso son:
+- Soporta almacenamiento de datos repetidos trivialmente.
+- Es comodo que la memoria sea contigua, ya que permite iterar por todos los
+registros con un bucle comun y corriente.
+- La implementacion es bastante sencilla.
 
 # Algoritmos
-
 
 ## deshacer/rehacer
 
@@ -118,13 +120,22 @@ Si la operacion fue de creacion, se ejecuta el borrado, y viceversa.
 
 ## guardar ordenado
 
-Use quicksort sobre un array.
+Primero, pase todos los registros a un array. Luego, use quicksort sobre el array.
 
 ## buscar por suma de edades
 
 Use programacion dinamica. El problema es muy parecido al conocido 'subset sum'.
 
 # Compilacion/Invocacion
+
+Con la raiz del proyecto como working directory, invocar make. Esto producira dos
+ejecutables en la raiz del proyecto: `test` y `app`.
+
+- `test` ejecuta los tests.
+- `app` ejecuta el programa.
+
+Tanto el programa como los tests pueden correrse bajo Valgrind para verificar que
+no exhiben errores de memoria.
 
 # Bibliografia
 
