@@ -156,3 +156,16 @@ slot_map_decrease_refcount(SlotMap* map, size_t id) {
 		delete(map, id);
 	}
 }
+
+void
+slot_map_for_each(SlotMap* map, Callback cb) {
+	for (size_t i = 0; i < map->cells.size; ++i) {
+		Span cell = vector_at(map->cells, i);
+		call_cb(cb, &cell);
+	}
+}
+
+size_t
+slot_map_get_cell_slot(SlotMap* map, size_t cell) {
+	return get_cell_data(map, cell)->slot;
+}

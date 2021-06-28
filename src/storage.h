@@ -45,3 +45,7 @@ storage_increase_refcount(Storage* storage, ContactId id);
 // no toma ownership
 void
 storage_decrease_refcount(Storage* storage, ContactId id);
+
+// aplica el callback a cada contacto
+void
+storage_for_each(Storage* storage, Callback cb);

@@ -3,6 +3,7 @@
 #include "contact.h"
 #include "index.h"
 #include "history.h"
+#include "vector.h"
 
 typedef struct _Storage Storage;
 
@@ -48,11 +49,22 @@ void
 database_clear_history(Database* database);
 
 // no toma ownership
+// deshace el ultimo evento
 // devuelve false sii no hay eventos para deshacer
 bool
 database_rewind(Database* database);
 
 // no toma ownership
-// devuelve false sii no hay eventos para reshacer
+// rehace el ultimo evento que fue deshecho
+// devuelve false sii no hay eventos para rehacer
 bool
 database_advance(Database* database);
+
+// no toma ownership
+// aplica el callback a cada contacto
+void
+database_for_each(Database* database, Callback cb);
+
+// devuelve todos los Ids de todos los contactos activos
+Vector
+database_contacts(Database* database);

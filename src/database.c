@@ -121,3 +121,30 @@ database_advance(Database* database) {
 
 	return true;
 }
+
+static void
+call_if_indexed(void* arg, void* metadata) {
+	Contact* contact = arg;
+	Callback* cb = metadata;
+
+	if (contact->indexed) {
+		call_cb(*cb, contact);
+	}
+}
+
+void
+database_for_each(Database* database, Callback cb) {
+	storage_for_each(database->storage, (Callback){call_if_indexed, &cb});
+}
+
+Vector
+database_contacts(Database* database) {
+	Vector result = vector_create(sizeof(ContactId));
+	for (size_t i = 0; i < database->storage->slot_map.cells.size; ++i) {
+		ContactId slot = slot_map_get_cell_slot(&database->storage->slot_map, i);
+		if (storage_at(database->storage, slot)->indexed) {
+			vector_push(&result, SPANOF(slot));
+		}
+	}
+	return result;
+}

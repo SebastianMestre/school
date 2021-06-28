@@ -68,3 +68,15 @@ void
 storage_decrease_refcount(Storage* storage, ContactId id) {
 	slot_map_decrease_refcount(&storage->slot_map, id);
 }
+
+static void
+call_with_span_ptr(void* arg, void* metadata) {
+	Callback* cb = metadata;
+	Span* span = arg;
+	call_cb(*cb, span->begin);
+}
+
+void
+storage_for_each(Storage* storage, Callback cb) {
+	slot_map_for_each(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
+}

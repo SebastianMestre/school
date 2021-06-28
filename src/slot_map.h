@@ -36,3 +36,11 @@ slot_map_increase_refcount(SlotMap* map, size_t id);
 
 void
 slot_map_decrease_refcount(SlotMap* map, size_t id);
+
+// aplica el callback a cada celda
+void
+slot_map_for_each(SlotMap* map, Callback cb);
+
+// devuelve el slot que le corresponde a una celda
+size_t
+slot_map_get_cell_slot(SlotMap* map, size_t cell);
