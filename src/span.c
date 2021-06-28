@@ -18,6 +18,12 @@ span_malloc(size_t width) {
 }
 
 Span
+span_at(Span span, size_t element_width, size_t i) {
+	assert(span_width(span) >= element_width*(i+1));
+	return span_create(span.begin + element_width * i, element_width);
+}
+
+Span
 span_slice(Span span, size_t offset, size_t width) {
 	assert(offset + width <= span_width(span));
 	return (Span){

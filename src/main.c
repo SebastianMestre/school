@@ -153,11 +153,6 @@ void disjuncion(Database* database) {
 void guardar_ordenado(Database* database) {
 }
 
-struct _TwoVectors {
-	Vector first;
-	Vector second;
-};
-
 void buscar_por_suma_de_edades(Database* database) {
 	char buf0[BUF_SIZE];
 

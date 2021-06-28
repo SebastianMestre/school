@@ -32,7 +32,7 @@ vector_at_ptr(Vector v, size_t i) {
 Span
 vector_at(Vector v, size_t i) {
 	assert(i < v.size);
-	return span_slice(v.data, v.element_width * i, v.element_width);
+	return span_at(v.data, v.element_width, i);
 }
 
 Span
