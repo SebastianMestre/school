@@ -11,9 +11,14 @@ struct _Span {
 };
 typedef struct _Span Span;
 
-// reserva un espacio de memoria, y devuelve un span que aputa a el
+// reserva un espacio de memoria, y devuelve su Span
 Span
 span_malloc(size_t width);
+
+// toma un span y pasa begin a malloc
+// luego, anula los punteros
+void
+span_free(Span* span);
 
 // dado un puntero a un espacio de memoria y un tamano, devuelve su Span
 Span

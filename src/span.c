@@ -17,6 +17,13 @@ span_malloc(size_t width) {
 	return span_create(malloc(width), width);
 }
 
+void
+span_free(Span* span) {
+	free(span->begin);
+	span->begin = nullptr;
+	span->end = nullptr;
+}
+
 Span
 span_at(Span span, size_t element_width, size_t i) {
 	assert(span_width(span) >= element_width*(i+1));
