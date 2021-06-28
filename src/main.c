@@ -70,8 +70,7 @@ void agregar(Database* database) {
 	puts("Ingrese edad");
 	printf(">");
 	unsigned age;
-	ok = get_line_as_uint(buf2, BUF_SIZE, &age, stdin);
-	assert(ok);
+	get_line_as_uint_retry(buf2, BUF_SIZE, &age, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
 
 	puts("Ingrese telefono");
 	printf(">");
