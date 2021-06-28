@@ -33,7 +33,6 @@ database_insert(
 	unsigned age,
 	char* phone_number
 ) {
-	// TODO: what if it's already there?
 	ContactId id = storage_insert(database->storage, name, surname, age, phone_number);
 	OptionalContactId found = index_find(database->index, id);
 	if (found.active) {
@@ -69,12 +68,48 @@ database_delete(Database* database, char* name, char* surname) {
 	return true;
 }
 
+bool
+database_update(
+	Database* database,
+	char* name,
+	char* surname,
+	unsigned age,
+	char* phone_number
+) {
+
+	ContactId new_id = storage_insert(database->storage, name, surname, 0, nullptr);
+	OptionalContactId found = index_find(database->index, new_id);
+
+	if (!found.active) {
+		storage_delete(database->storage, new_id);
+		return false;
+	}
+
+	ContactId old_id = found.id;
+
+	history_clear_future(&database->history);
+	history_record_updated(&database->history, old_id, new_id);
+
+	index_delete(&database->index, old_id);
+	bool success = index_insert(&database->index, new_id);
+	assert(success);
+	history_advance_cursor(&database->history);
+
+	return true;
+}
+
 OptionalContactId
 database_find(Database* database, char* name, char* surname) {
 	ContactId temp_id = storage_insert(database->storage, name, surname, 0, nullptr);
 	OptionalContactId found = index_find(database->index, temp_id);
 	storage_delete(database->storage, temp_id);
 	return found;
+}
+
+bool
+database_has(Database* database, char* name, char* surname) {
+	OptionalContactId found = database_find(database, name, surname);
+	return found.active;
 }
 
 void

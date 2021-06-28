@@ -121,7 +121,55 @@ void eliminar(Database* database) {
 	}
 }
 
-void editar(Database* database) {}
+void editar(Database* database) {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+
+	bool ok;
+	puts("Ingrese nombre");
+	ok = get_line(buf0, BUF_SIZE, stdin);
+	assert(ok);
+
+	puts("Ingrese apellido");
+	ok = get_line(buf1, BUF_SIZE, stdin);
+	assert(ok);
+
+	string_tolower(buf0);
+	string_trim(buf0);
+
+	string_tolower(buf1);
+	string_trim(buf1);
+	
+	{
+		char* name = string_dup(buf0);
+		char* surname = string_dup(buf1);
+
+		if (!database_has(database, name, surname)) {
+			puts("No existe un contacto con ese nombre y apellido");
+			return;
+		}
+	}
+
+	char buf2[BUF_SIZE];
+	char buf3[BUF_SIZE];
+
+	puts("Ingrese edad");
+	printf(">");
+	uint32_t age;
+	get_line_as_u32_retry(buf2, BUF_SIZE, &age, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
+
+	puts("Ingrese telefono");
+	printf(">");
+	ok = get_line(buf3, BUF_SIZE, stdin);
+	assert(ok);
+
+	char* name = string_dup(buf0);
+	char* surname = string_dup(buf1);
+	char* phone_number = string_dup(buf3);
+
+	bool success = database_update(database, name, surname, age, phone_number);
+	assert(success);
+}
 
 void cargar(Database* database) {}
 void guardar(Database* database) {}

@@ -29,7 +29,7 @@ database_find(Database* database, char* name, char* surname);
 
 // toma ownership de name y surname
 bool
-database_has(Database* database_has, char* name, char* surname);
+database_has(Database* database, char* name, char* surname);
 
 // toma ownership sobre, name, surname, age, y phone_number
 bool
@@ -40,8 +40,8 @@ database_insert(Database* database, char* name, char* surname, unsigned age, cha
 bool
 database_delete(Database* database, char* name, char* surname);
 
-// toma ownership sobre age, y phone number
-void
+// toma ownership sobre name, surname, age, y phone number
+bool
 database_update(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
 // no toma ownership
