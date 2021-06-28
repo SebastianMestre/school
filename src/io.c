@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include "string.h"
+
 bool
 get_line(char* buf, size_t n, FILE* f) {
 	while (--n != 0) {
@@ -18,7 +20,8 @@ get_line(char* buf, size_t n, FILE* f) {
 	return false;
 }
 
-bool get_line_as_int(char* buf, size_t n, int* out, FILE* f) {
+bool
+get_line_as_int(char* buf, size_t n, int* out, FILE* f) {
 	if (!get_line(buf, n, f))
 		return false;
 
@@ -56,7 +59,8 @@ bool get_line_as_int(char* buf, size_t n, int* out, FILE* f) {
 	return true;
 }
 
-bool get_line_as_uint(char* buf, size_t n, unsigned int* out, FILE* f) {
+bool
+get_line_as_uint(char* buf, size_t n, unsigned int* out, FILE* f) {
 	if (!get_line(buf, n, f))
 		return false;
 
@@ -85,8 +89,16 @@ bool get_line_as_uint(char* buf, size_t n, unsigned int* out, FILE* f) {
 	return true;
 }
 
-char file_peek(FILE* f) {
-	char c = fgetc(f);
-	ungetc(c, f);
-	return c;
+void
+print_title_case(char const* str, FILE* f) {
+	if (!str) return;
+	bool last_was_whitespace = true;
+	for (; *str != '\0'; ++str) {
+		char c = *str;
+		if (last_was_whitespace) {
+			c = toupper(c);
+		}
+		fputc(c, f);
+		last_was_whitespace = is_whitespace(*str);
+	}
 }

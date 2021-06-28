@@ -9,28 +9,43 @@
 
 #define BUF_SIZE 128
 
+void print_contact(Contact* contact) {
+	printf("{");
+	print_title_case(contact->name, stdout);
+	printf(",");
+	print_title_case(contact->surname, stdout);
+	printf(",%u,%s}", contact->age, contact->phone_number);
+}
+
 void buscar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
+	bool ok;
 	puts("Ingrese nombre");
 	printf(">");
-	assert(get_line(buf0, BUF_SIZE, stdin));
+	ok = get_line(buf0, BUF_SIZE, stdin);
+	assert(ok);
 
 	puts("Ingrese apellido");
 	printf(">");
-	assert(get_line(buf1, BUF_SIZE, stdin));
+	ok = get_line(buf1, BUF_SIZE, stdin);
+	assert(ok);
 
-	// TODO: validate strings
-	// TODO: trim strings
+	string_tolower(buf0);
+	string_trim(buf0);
 	char* name = string_dup(buf0);
+
+	string_tolower(buf1);
+	string_trim(buf1);
 	char* surname = string_dup(buf1);
 
 	OptionalContactId contact = database_find(database, name, surname);
 	if (!contact.active) {
 		puts("No existe un contacto con ese nombre y apellido");
 	} else {
-		printf("Id de contacto: %lu (TODO: implement print)\n", contact.id);
+		print_contact(storage_at(database->storage, contact.id));
+		printf("\n");
 	}
 }
 
@@ -40,27 +55,39 @@ void agregar(Database* database) {
 	char buf2[BUF_SIZE];
 	char buf3[BUF_SIZE];
 
+	bool ok;
+
 	puts("Ingrese nombre");
 	printf(">");
-	assert(get_line(buf0, BUF_SIZE, stdin));
+	ok = get_line(buf0, BUF_SIZE, stdin);
+	assert(ok);
 
 	puts("Ingrese apellido");
 	printf(">");
-	assert(get_line(buf1, BUF_SIZE, stdin));
+	ok = get_line(buf1, BUF_SIZE, stdin);
+	assert(ok);
 
 	puts("Ingrese edad");
 	printf(">");
 	unsigned age;
-	assert(get_line_as_uint(buf2, BUF_SIZE, &age, stdin));
+	ok = get_line_as_uint(buf2, BUF_SIZE, &age, stdin);
+	assert(ok);
 
 	puts("Ingrese telefono");
 	printf(">");
-	assert(get_line(buf3, BUF_SIZE, stdin));
+	ok = get_line(buf3, BUF_SIZE, stdin);
+	assert(ok);
 
-	// TODO: validate strings
-	// TODO: trim strings
+	string_tolower(buf0);
+	string_trim(buf0);
 	char* name = string_dup(buf0);
+
+	string_tolower(buf1);
+	string_trim(buf1);
 	char* surname = string_dup(buf1);
+
+	// TODO: validate phone number
+	string_trim(buf3);
 	char* phone_number = string_dup(buf3);
 
 	bool success = database_insert(database, name, surname, age, phone_number);
@@ -79,9 +106,13 @@ void eliminar(Database* database) {
 	puts("Ingrese apellido");
 	assert(get_line(buf1, BUF_SIZE, stdin));
 
-	// TODO: validate strings
-	// TODO: trim strings
+
+	string_tolower(buf0);
+	string_trim(buf0);
 	char* name = string_dup(buf0);
+
+	string_tolower(buf1);
+	string_trim(buf1);
 	char* surname = string_dup(buf1);
 
 	bool success = database_delete(database, name, surname);

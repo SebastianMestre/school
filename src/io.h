@@ -14,5 +14,6 @@ bool get_line_as_int(char* buf, size_t n, int* out, FILE* f);
 // lo mismo que get_line_as_int pero unsigned
 bool get_line_as_uint(char* buf, size_t n, unsigned int* out, FILE* f);
 
-// devuelve el proximo caracter en un archivo, sin consumirlo
-char file_peek(FILE* f);
+// imprime un string en modo titulo
+void
+print_title_case(char const* str, FILE* f);
