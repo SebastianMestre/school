@@ -11,7 +11,8 @@
 
 #define BUF_SIZE 128
 
-void print_contact(Contact* contact) {
+static void
+print_contact(Contact* contact) {
 	printf("{");
 	print_title_case(contact->name, stdout);
 	printf(",");
@@ -30,6 +31,67 @@ read_u32_with_retry_message(char* buf, size_t n) {
 	get_line_as_u32_retry(buf, n, &value, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
 	return value;
 }
+
+static QueryData
+read_query_parameters() {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+	char buf2[BUF_SIZE];
+	char buf3[BUF_SIZE];
+
+	printf("Ingrese nombre:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
+
+	printf("Ingrese apellido:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
+
+	printf("Ingrese edad:\n>");
+	bool has_age = false;
+	uint32_t age = 0;
+	while (1) {
+		read_a_line_with_retry_message(buf2, BUF_SIZE);
+		string_trim(buf2);
+		if (strlen(buf2) == 0) {
+			break;
+		}
+		bool ok = parse_u32(buf2, &age);
+		if (!ok) {
+			printf("Edad invalida. Ingrese una edad valida:\n>");
+			continue;
+		}
+		has_age = true;
+		break;
+	}
+
+	printf("Ingrese telefono:\n>");
+	read_a_line_with_retry_message(buf3, BUF_SIZE);
+
+	string_trim(buf0);
+	string_trim(buf1);
+	string_trim(buf3);
+
+	char* name = strlen(buf0) == 0 ? nullptr : string_dup(buf0);
+	char* surname = strlen(buf1) == 0 ? nullptr : string_dup(buf1);
+	char* phone_number = strlen(buf3) == 0 ? nullptr : string_dup(buf3);
+
+	return (QueryData) {
+		.name = name,
+		.surname = surname,
+		.has_age = has_age,
+		.age = age,
+		.phone_number = phone_number,
+	};
+}
+
+static void
+print_vector_of_contacts(Database* database, Vector const* contacts) {
+	for (size_t i = 0; i < contacts->size; ++i) {
+		ContactId id; span_write(&id, vector_at(contacts, i));
+		Contact* contact = storage_at(database->storage, id);
+		print_contact(contact);
+	}
+}
+
 
 void buscar(Database* database) {
 	char buf0[BUF_SIZE];
@@ -161,8 +223,24 @@ void editar(Database* database) {
 	assert(success);
 }
 
-void cargar(Database* database) { database = database; }
-void guardar(Database* database) { database = database; }
+void cargar(Database* database) {
+	database = database;
+}
+
+void guardar(Database* database) {
+	char buf0[BUF_SIZE];
+
+	printf("Ingrese ruta de salida:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
+
+	Vector contacts = database_contacts(database);
+
+	for (size_t i = 0; i < contacts.size; ++i) {
+
+	}
+
+	vector_release(&contacts);
+}
 
 void deshacer(Database* database) {
 	bool success = database_rewind(database);
@@ -179,66 +257,6 @@ void rehacer(Database* database) {
 		puts("Se rehizo la ultima operacion");
 	} else {
 		puts("No hay operaciones para rehacer");
-	}
-}
-
-static QueryData
-read_query_parameters() {
-	char buf0[BUF_SIZE];
-	char buf1[BUF_SIZE];
-	char buf2[BUF_SIZE];
-	char buf3[BUF_SIZE];
-
-	printf("Ingrese nombre:\n>");
-	read_a_line_with_retry_message(buf0, BUF_SIZE);
-
-	printf("Ingrese apellido:\n>");
-	read_a_line_with_retry_message(buf1, BUF_SIZE);
-
-	printf("Ingrese edad:\n>");
-	bool has_age = false;
-	uint32_t age = 0;
-	while (1) {
-		read_a_line_with_retry_message(buf2, BUF_SIZE);
-		string_trim(buf2);
-		if (strlen(buf2) == 0) {
-			break;
-		}
-		bool ok = parse_u32(buf2, &age);
-		if (!ok) {
-			printf("Edad invalida. Ingrese una edad valida:\n>");
-			continue;
-		}
-		has_age = true;
-		break;
-	}
-
-	printf("Ingrese telefono:\n>");
-	read_a_line_with_retry_message(buf3, BUF_SIZE);
-
-	string_trim(buf0);
-	string_trim(buf1);
-	string_trim(buf3);
-
-	char* name = strlen(buf0) == 0 ? nullptr : string_dup(buf0);
-	char* surname = strlen(buf1) == 0 ? nullptr : string_dup(buf1);
-	char* phone_number = strlen(buf3) == 0 ? nullptr : string_dup(buf3);
-
-	return (QueryData) {
-		.name = name,
-		.surname = surname,
-		.has_age = has_age,
-		.age = age,
-		.phone_number = phone_number,
-	};
-}
-
-void
-print_vector_of_contacts(Database* database, Vector const* contacts) {
-	for (size_t i = 0; i < contacts->size; ++i) {
-		ContactId id; span_write(&id, vector_at(contacts, i));
-		Contact* contact = storage_at(database->storage, id);
-		print_contact(contact);
 	}
 }
 
@@ -334,11 +352,11 @@ void buscar_por_suma_de_edades(Database* database) {
 	vector_release(&contact_ids);
 }
 
-typedef void (*ProgramAction)(Database*);
+typedef void (*MenuAction)(Database*);
 
 struct _MenuEntry {
 	char const* name;
-	ProgramAction action;
+	MenuAction action;
 };
 typedef struct _MenuEntry MenuEntry;
 
