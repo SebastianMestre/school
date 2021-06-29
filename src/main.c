@@ -9,15 +9,21 @@
 #include "string.h"
 #include "search_by_sum.h"
 
-#define BUF_SIZE 128
+#define BUF_SIZE 256
+
+static void
+print_contact_fields(Contact* contact, FILE* f) {
+	print_title_case(contact->name, f);
+	fprintf(f, ",");
+	print_title_case(contact->surname, f);
+	fprintf(f, ",%u,%s", contact->age, contact->phone_number);
+}
 
 static void
 print_contact(Contact* contact) {
 	printf("{");
-	print_title_case(contact->name, stdout);
-	printf(",");
-	print_title_case(contact->surname, stdout);
-	printf(",%u,%s}", contact->age, contact->phone_number);
+	print_contact_fields(contact, stdout);
+	printf("}");
 }
 
 static void
@@ -93,7 +99,8 @@ print_vector_of_contacts(Database* database, Vector const* contacts) {
 }
 
 
-void buscar(Database* database) {
+void
+buscar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
@@ -120,7 +127,8 @@ void buscar(Database* database) {
 	}
 }
 
-void agregar(Database* database) {
+void
+agregar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 	char buf2[BUF_SIZE];
@@ -156,7 +164,8 @@ void agregar(Database* database) {
 	}
 }
 
-void eliminar(Database* database) {
+void
+eliminar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
@@ -180,7 +189,8 @@ void eliminar(Database* database) {
 	}
 }
 
-void editar(Database* database) {
+void
+editar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
@@ -223,26 +233,36 @@ void editar(Database* database) {
 	assert(success);
 }
 
-void cargar(Database* database) {
+void
+cargar(Database* database) {
 	database = database;
 }
 
-void guardar(Database* database) {
+void
+guardar(Database* database) {
 	char buf0[BUF_SIZE];
 
 	printf("Ingrese ruta de salida:\n>");
 	read_a_line_with_retry_message(buf0, BUF_SIZE);
+	string_trim(buf0);
 
 	Vector contacts = database_contacts(database);
 
+	FILE* f = fopen(buf0, "w");
+	fprintf(f, "nombre,apellido,edad,telefono\n");
 	for (size_t i = 0; i < contacts.size; ++i) {
-
+		ContactId id; span_write(&id, vector_at(&contacts, i));
+		Contact* contact = storage_at(database->storage, id);
+		print_contact_fields(contact, f);
+		fprintf(f, "\n");
 	}
+	fclose(f);
 
 	vector_release(&contacts);
 }
 
-void deshacer(Database* database) {
+void
+deshacer(Database* database) {
 	bool success = database_rewind(database);
 	if (success) {
 		puts("Se deshizo la ultima operacion");
@@ -251,7 +271,8 @@ void deshacer(Database* database) {
 	}
 }
 
-void rehacer(Database* database) {
+void
+rehacer(Database* database) {
 	bool success = database_advance(database);
 	if (success) {
 		puts("Se rehizo la ultima operacion");
@@ -284,7 +305,8 @@ conjuncion(Database* database) {
 	free(query_data.phone_number);
 }
 
-void disjuncion(Database* database) {
+void
+disjuncion(Database* database) {
 	QueryData query_data = read_query_parameters();
 
 	if (
@@ -307,11 +329,13 @@ void disjuncion(Database* database) {
 	free(query_data.phone_number);
 }
 
-void guardar_ordenado(Database* database) {
+void
+guardar_ordenado(Database* database) {
 	database = database;
 }
 
-void buscar_por_suma_de_edades(Database* database) {
+void
+buscar_por_suma_de_edades(Database* database) {
 	char buf0[BUF_SIZE];
 
 	printf("Ingrese un natural:\n>");
@@ -376,7 +400,8 @@ action_id_prompt(int max_value) {
 		}
 }
 
-int main() {
+int
+main() {
 
 	Storage storage = storage_create();
 	Database database = database_create(&storage);
