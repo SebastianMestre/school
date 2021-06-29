@@ -264,8 +264,7 @@ cargar(Database* database) {
 		goto cleanup0;
 	}
 
-	Storage new_storage = storage_create();
-	Database new_database = database_create(&new_storage);
+	Database new_database = database_create(database->storage);
 	for (size_t line_idx = 1; 1; ++line_idx) {
 		success = get_line(line_buf, LINE_BUF_SIZE, f);
 
@@ -277,8 +276,6 @@ cargar(Database* database) {
 			printf("Linea demasiado larga (linea %lu), no se puede cargar.\n", line_idx);
 			goto cleanup1;
 		}
-
-		fprintf(stderr, "%s", line_buf);
 
 		char* name = line_buf;
 
@@ -336,17 +333,11 @@ cargar(Database* database) {
 
 	// pisamos la database que nos pasaron con una nueva
 	database_release(database);
-	storage_release(database->storage);
-
-	*database->storage = new_storage;
-
-	new_database.storage = database->storage;
 	*database = new_database;
 	return;
 
 cleanup1:
 	database_release(&new_database);
-	storage_release(&new_storage);
 cleanup0:
 	fclose(f);
 	printf("Los datos anteriores quedaron intactos.\n");
