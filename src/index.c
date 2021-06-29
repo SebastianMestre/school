@@ -43,7 +43,6 @@ index_create(Storage* storage) {
 	return (Index){
 		.storage = storage,
 		.bst = bst_create(
-			sizeof(ContactId),
 			(Comparator){ cmp_impl, storage },
 			(Destructor){ dtor_impl, storage }
 		),
@@ -62,7 +61,7 @@ index_insert(Index* index, ContactId id) {
 	storage_increase_refcount(index->storage, id);
 	storage_at(index->storage, id)->indexed = true;
 
-	BstInsertResult insert_result = bst_insert(&index->bst, SPANOF(id));
+	BstInsertResult insert_result = bst_insert(&index->bst, id);
 	if (!insert_result.success) {
 		storage_at(index->storage, id)->indexed = false;
 		storage_decrease_refcount(index->storage, id);
@@ -72,16 +71,15 @@ index_insert(Index* index, ContactId id) {
 
 void
 index_delete(Index* index, ContactId id) {
-	bst_erase(&index->bst, SPANOF(id));
+	bst_erase(&index->bst, id);
 }
 
 OptionalContactId
 index_find(Index index, ContactId id) {
-	BstNode* node = bst_find(index.bst, SPANOF(id));
+	BstNode* node = bst_find(index.bst, id);
 	if (node == nullptr) {
 		return (OptionalContactId){false, 0};
 	}
-	ContactId result;
-	span_write(&result, node->datum);
+	ContactId result = node->data;
 	return (OptionalContactId){true, result};
 }

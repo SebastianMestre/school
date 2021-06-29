@@ -8,30 +8,20 @@ typedef struct _BstNode Node;
 static int height(Node* node);
 
 static Node*
-create(Node* lhs, Node* rhs, Span datum) {
-	Span buffer = span_malloc(sizeof(Node) + span_width(datum));
-
-	Span node_location = span_slice(buffer, 0, sizeof(Node));
-	Span data_location = remove_prefix(buffer, sizeof(Node));
-
-	assert(node_location.end == data_location.begin);
-
-	Node node = {
+create(Node* lhs, Node* rhs, ContactId data) {
+	Node* ptr = malloc(sizeof(Node));
+	*ptr = (Node) {
 		.lhs = lhs,
 		.rhs = rhs,
-		.height = 0,
-		.datum = data_location,
+		.height = 1,
+		.data = data,
 	};
-
-	span_write(node_location.begin, SPANOF(node));
-	span_write(data_location.begin, datum);
-
-	return buffer.begin;
+	return ptr;
 }
 
 static void
 free_node(Node* node, Destructor dtor) {
-	call_dtor(dtor, node->datum.begin);
+	call_dtor(dtor, &node->data);
 	free(node);
 }
 
@@ -122,18 +112,18 @@ rebalance(Node** node) {
 
 
 static BstInsertResult
-insert(Node** node, Span datum, Comparator cmp) {
+insert(Node** node, ContactId data, Comparator cmp) {
 	assert(node);
 
 	if (*node == nullptr) {
-		*node = create(nullptr, nullptr, datum);
+		*node = create(nullptr, nullptr, data);
 		return (BstInsertResult) {
 			.success = true,
 			.position = *node,
 		};
 	}
 
-	int const cmp_result = call_cmp(cmp, datum.begin, (*node)->datum.begin);
+	int const cmp_result = call_cmp(cmp, &data, &(*node)->data);
 
 	if (cmp_result == 0) {
 		return (BstInsertResult) {
@@ -144,7 +134,7 @@ insert(Node** node, Span datum, Comparator cmp) {
 
 	Node** next = cmp_result < 0 ? &(*node)->lhs : &(*node)->rhs;
 
-	BstInsertResult result = insert(next, datum, cmp);
+	BstInsertResult result = insert(next, data, cmp);
 
 	if (!result.success) {
 		return result;
@@ -157,12 +147,12 @@ insert(Node** node, Span datum, Comparator cmp) {
 }
 
 static Node*
-find(Node* node, Span datum, Comparator cmp) {
+find(Node* node, ContactId data, Comparator cmp) {
 	if (node == nullptr) {
 		return nullptr;
 	}
 
-	int cmp_result = call_cmp(cmp, datum.begin, node->datum.begin);
+	int cmp_result = call_cmp(cmp, &data, &node->data);
 
 	if (cmp_result == 0) {
 		return node;
@@ -170,7 +160,7 @@ find(Node* node, Span datum, Comparator cmp) {
 
 	Node* next = cmp_result < 0 ? node->lhs : node->rhs;
 
-	return find(next, datum, cmp);
+	return find(next, data, cmp);
 }
 
 static Node*
@@ -195,14 +185,14 @@ steal_leftmost(Node** p) {
 }
 
 static void
-erase(Node** p, Span datum, Comparator cmp, Destructor dtor) {
+erase(Node** p, ContactId data, Comparator cmp, Destructor dtor) {
 	assert(p != nullptr);
 
 	// no permitimos que se borren cosas que no estan el el arbol
 	Node* node = *p;
 	assert(node != nullptr);
 
-	int const cmp_result = call_cmp(cmp, datum.begin, node->datum.begin);
+	int const cmp_result = call_cmp(cmp, &data, &node->data);
 
 	if (cmp_result == 0) {
 		Node* lhs = node->lhs;
@@ -228,9 +218,9 @@ erase(Node** p, Span datum, Comparator cmp, Destructor dtor) {
 
 		free_node(node, dtor);
 	} else if (cmp_result < 0) {
-		erase(&node->lhs, datum, cmp, dtor);
+		erase(&node->lhs, data, cmp, dtor);
 	} else {
-		erase(&node->rhs, datum, cmp, dtor);
+		erase(&node->rhs, data, cmp, dtor);
 	}
 
 	if (*p != nullptr) {
@@ -266,35 +256,31 @@ release(Node* node, Destructor dtor) {
 }
 
 Bst
-bst_create(size_t element_width, Comparator cmp, Destructor dtor) {
+bst_create(Comparator cmp, Destructor dtor) {
 	assert(cmp.call != nullptr);
 	assert(dtor.call != nullptr);
 	return (Bst) {
 		.root = nullptr,
-		.element_width = element_width,
 		.cmp = cmp,
 		.dtor = dtor,
 	};
 }
 
 BstInsertResult
-bst_insert(Bst* bst, Span datum) {
+bst_insert(Bst* bst, ContactId data) {
 	assert(bst != nullptr);
-	assert(bst->element_width == span_width(datum));
-	return insert(&bst->root, datum, bst->cmp);
+	return insert(&bst->root, data, bst->cmp);
 }
 
 Node*
-bst_find(Bst const bst, Span datum) {
-	assert(bst.element_width == span_width(datum));
-	return find(bst.root, datum, bst.cmp);
+bst_find(Bst const bst, ContactId data) {
+	return find(bst.root, data, bst.cmp);
 }
 
 void
-bst_erase(Bst* bst, Span datum) {
+bst_erase(Bst* bst, ContactId data) {
 	assert(bst != nullptr);
-	assert(bst->element_width == span_width(datum));
-	return erase(&bst->root, datum, bst->cmp, bst->dtor);
+	return erase(&bst->root, data, bst->cmp, bst->dtor);
 }
 
 void
