@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <assert.h>
 
 bool
 is_whitespace(char c) {
@@ -38,4 +39,66 @@ string_tolower(char* str) {
 	for (; *str != '\0'; ++str) {
 		*str = tolower(*str);
 	}
+}
+
+bool
+parse_u32(char* buf, unsigned int* out) {
+	for (; *buf == ' ' || *buf == '\t' || *buf == '\n'; ++buf) {}
+	if (*buf == '\0')
+		return false;
+
+	char* begin = buf;
+	for (; isdigit(*buf); ++buf) {}
+	char* end = buf;
+	if (begin == end)
+		return false;
+
+	for (; *buf != '\0'; ++buf) {
+		if (*buf != ' ' && *buf != '\t' && *buf != '\n')
+			return false;
+	}
+
+	*out = 0;
+	for (; end != begin; ++begin) {
+		*out *= 10;
+		*out += *begin - '0';
+	}
+
+	return true;
+}
+
+bool
+parse_int(char* buf, int* out) {
+	for (; *buf == ' ' || *buf == '\t'; ++buf) {}
+	if (*buf == '\0')
+		return false;
+
+	bool minus = false;
+	if (*buf == '-') {
+		minus = true;
+		buf += 1;
+	}
+
+	char* begin = buf;
+	for (; isdigit(*buf); ++buf) {}
+	char* end = buf;
+	if (begin == end)
+		return false;
+
+	for (; *buf != '\n'; ++buf) {
+		if (*buf != ' ' && *buf != '\t')
+			return false;
+	}
+	assert(buf[1] == '\0');
+
+	*out = 0;
+	for (; end != begin; ++begin) {
+		*out *= 10;
+		*out += *begin - '0';
+	}
+
+	if (minus)
+		*out = -*out;
+
+	return true;
 }

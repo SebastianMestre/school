@@ -107,11 +107,9 @@ buscar(Database* database) {
 	printf("Ingrese apellido:\n>");
 	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
-	string_tolower(buf0);
 	string_trim(buf0);
 	char* name = string_dup(buf0);
 
-	string_tolower(buf1);
 	string_trim(buf1);
 	char* surname = string_dup(buf1);
 
@@ -143,11 +141,9 @@ agregar(Database* database) {
 	printf("Ingrese telefono:\n>");
 	read_a_line_with_retry_message(buf3, BUF_SIZE);
 
-	string_tolower(buf0);
 	string_trim(buf0);
 	char* name = string_dup(buf0);
 
-	string_tolower(buf1);
 	string_trim(buf1);
 	char* surname = string_dup(buf1);
 
@@ -172,11 +168,9 @@ eliminar(Database* database) {
 	printf("Ingrese apellido:\n>");
 	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
-	string_tolower(buf0);
 	string_trim(buf0);
 	char* name = string_dup(buf0);
 
-	string_tolower(buf1);
 	string_trim(buf1);
 	char* surname = string_dup(buf1);
 
@@ -197,10 +191,8 @@ editar(Database* database) {
 	printf("Ingrese apellido:\n>");
 	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
-	string_tolower(buf0);
 	string_trim(buf0);
 
-	string_tolower(buf1);
 	string_trim(buf1);
 
 	{
@@ -307,16 +299,9 @@ cargar(Database* database) {
 		*phone_number++ = '\0'; // age terminator
 
 		string_trim(name);
-		string_tolower(name);
-
 		string_trim(surname);
-		string_tolower(surname);
-
 		string_trim(age_str);
-		string_tolower(age_str);
-
 		string_trim(phone_number);
-		string_tolower(phone_number);
 
 		uint32_t age;
 		success = parse_u32(age_str, &age);

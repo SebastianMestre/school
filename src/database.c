@@ -1,6 +1,7 @@
 #include "database.h"
 
 #include "storage.h"
+#include "string.h"
 
 #include <string.h>
 #include <assert.h>
@@ -34,6 +35,14 @@ database_insert(
 	unsigned age,
 	char* phone_number
 ) {
+	string_trim(name);
+	string_tolower(name);
+
+	string_trim(surname);
+	string_tolower(surname);
+
+	string_trim(phone_number);
+
 	ContactId id = storage_insert(database->storage, name, surname, age, phone_number);
 	OptionalContactId found = index_find(database->index, id);
 	if (found.active) {
@@ -53,6 +62,12 @@ database_insert(
 
 bool
 database_delete(Database* database, char* name, char* surname) {
+	string_trim(name);
+	string_tolower(name);
+
+	string_trim(surname);
+	string_tolower(surname);
+
 	OptionalContactId found = database_find(database, name, surname);
 	if (!found.active) {
 		return false;
@@ -77,6 +92,13 @@ database_update(
 	unsigned age,
 	char* phone_number
 ) {
+	string_trim(name);
+	string_tolower(name);
+
+	string_trim(surname);
+	string_tolower(surname);
+
+	string_trim(phone_number);
 
 	ContactId new_id = storage_insert(database->storage, name, surname, age, phone_number);
 	OptionalContactId found = index_find(database->index, new_id);
@@ -101,6 +123,12 @@ database_update(
 
 OptionalContactId
 database_find(Database* database, char* name, char* surname) {
+	string_trim(name);
+	string_tolower(name);
+
+	string_trim(surname);
+	string_tolower(surname);
+
 	ContactId temp_id = storage_insert(database->storage, name, surname, 0, nullptr);
 	OptionalContactId found = index_find(database->index, temp_id);
 	storage_delete(database->storage, temp_id);
@@ -109,6 +137,12 @@ database_find(Database* database, char* name, char* surname) {
 
 bool
 database_has(Database* database, char* name, char* surname) {
+	string_trim(name);
+	string_tolower(name);
+
+	string_trim(surname);
+	string_tolower(surname);
+
 	OptionalContactId found = database_find(database, name, surname);
 	return found.active;
 }

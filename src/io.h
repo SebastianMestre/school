@@ -36,8 +36,3 @@ get_line_as_u32_retry(char* buf, size_t n, uint32_t* out, char const* line_error
 // imprime un string en modo titulo
 void
 print_title_case(char const* str, FILE* f);
-
-// parsea un unsigned in y lo guarda en out.
-// si el input no es valido, devuelve false.
-bool
-parse_u32(char* buf, unsigned int* out);
