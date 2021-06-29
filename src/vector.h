@@ -44,3 +44,7 @@ vector_push_incomplete(Vector* v, Span data);
 
 void
 vector_release(Vector* v);
+
+// devuelve un array que apunta a la porcion llena del vector.
+Array
+vector_full_segment(Vector* v);

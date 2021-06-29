@@ -8,6 +8,7 @@
 #include "storage.h"
 #include "string.h"
 #include "search_by_sum.h"
+#include "quicksort.h"
 
 #define BUF_SIZE 256
 
@@ -321,9 +322,85 @@ disjuncion(Database* database) {
 	free(query_data.phone_number);
 }
 
+static int
+by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId const* lhs = arg0;
+	ContactId const* rhs = arg1;
+	Database* database = metadata;
+	Storage* storage = database->storage;
+	return strcmp(storage_at(storage, *lhs)->name, storage_at(storage, *rhs)->name);
+}
+
+static int
+by_surname_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId const* lhs = arg0;
+	ContactId const* rhs = arg1;
+	Database* database = metadata;
+	Storage* storage = database->storage;
+	return strcmp(storage_at(storage, *lhs)->surname, storage_at(storage, *rhs)->surname);
+}
+
+static int
+by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId const* lhs = arg0;
+	ContactId const* rhs = arg1;
+	Database* database = metadata;
+	Storage* storage = database->storage;
+
+	uint32_t lhs_age = storage_at(storage, *lhs)->age;
+	uint32_t rhs_age = storage_at(storage, *rhs)->age;
+
+	if (lhs_age < rhs_age)
+		return -1;
+	return rhs_age < lhs_age;
+}
+
+static int
+by_phone_number_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId const* lhs = arg0;
+	ContactId const* rhs = arg1;
+	Database* database = metadata;
+	Storage* storage = database->storage;
+	return strcmp(storage_at(storage, *lhs)->phone_number, storage_at(storage, *rhs)->phone_number);
+}
+
 void
 guardar_ordenado(Database* database) {
-	database = database;
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+
+	printf("Ingrese ruta de salida:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
+	string_trim(buf0);
+
+	printf("Ingrese nombre de atributo:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
+	string_trim(buf1);
+	string_tolower(buf1);
+
+	Comparator cmp;
+	if (strcmp(buf1, "nombre") == 0) {
+		cmp = (Comparator){ by_name_cmp, database };
+	} else if (strcmp(buf1, "apellido") == 0) {
+		cmp = (Comparator){ by_surname_cmp, database };
+	} else if (strcmp(buf1, "edad") == 0) {
+		cmp = (Comparator){ by_age_cmp, database };
+	} else if (strcmp(buf1, "telefono") == 0) {
+		cmp = (Comparator){ by_phone_number_cmp, database };
+	} else {
+		printf("No existe ese atributo.\n");
+		return;
+	}
+
+	Vector contacts = database_contacts(database);
+	quicksort(vector_full_segment(&contacts), cmp);
+
+	FILE* f = fopen(buf0, "w");
+	fprintf(f, "nombre,apellido,edad,telefono\n");
+	print_vector_of_contacts(database, &contacts, false, f);
+
+	fclose(f);
+	vector_release(&contacts);
 }
 
 void

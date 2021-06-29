@@ -1,3 +1,5 @@
+#include "quicksort.h"
+
 #include "span.h"
 
 #include "iter.h"
@@ -41,9 +43,6 @@ quicksort_impl(Iter l, Iter r, Comparator cmp) {
 }
 
 void
-quicksort(Span data, size_t element_width, Comparator cmp) {
-	quicksort_impl(
-		(Iter){data.begin, element_width},
-		(Iter){data.end, element_width},
-		cmp);
+quicksort(Array arr, Comparator cmp) {
+	quicksort_impl(array_begin(&arr), array_end(&arr), cmp);
 }

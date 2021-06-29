@@ -58,7 +58,9 @@ get_slot(SlotMap* map, size_t id) {
 
 Span
 slot_map_at(SlotMap* map, size_t id) {
-	return get_cell(map, get_slot(map, id)->cell);
+	Slot* slot = get_slot(map, id);
+	assert(slot->active);
+	return get_cell(map, slot->cell);
 }
 
 static size_t

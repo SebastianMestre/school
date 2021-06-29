@@ -1,6 +1,6 @@
 #pragma once
 
-#include "span.h"
+#include "array.h"
 
 void
-quicksort(Span span, size_t element_width, Comparator cmp);
+quicksort(Array arr, Comparator cmp);
