@@ -8,7 +8,7 @@
 bool
 get_line(char* buf, size_t n, FILE* f) {
 	while (--n != 0) {
-		char c = getchar();
+		char c = fgetc(f);
 		*buf++ = c;
 		if (c == '\n') {
 			*buf = '\0';
@@ -18,6 +18,18 @@ get_line(char* buf, size_t n, FILE* f) {
 
 	*buf = '\0';
 	return false;
+}
+
+void
+get_line_retry(char* buf, size_t n, char const* error_msg, FILE* f) {
+	while (1) {
+		bool ok = get_line(buf, n, f);
+		if (!ok) {
+			printf("%s", error_msg);
+			continue;
+		}
+		break;
+	}
 }
 
 static bool
@@ -83,7 +95,7 @@ get_line_as_int_retry(char* buf, size_t n, int* out, char const* line_error_msg,
 }
 
 
-static bool
+bool
 parse_u32(char* buf, unsigned int* out) {
 	for (; *buf == ' ' || *buf == '\t'; ++buf) {}
 	if (*buf == '\0')

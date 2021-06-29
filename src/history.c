@@ -34,6 +34,7 @@ history_create(Storage* storage) {
 				storage
 			}
 		),
+		.next_action = nullptr,
 	};
 	result.next_action = result.actions.begin;
 	return result;
@@ -64,6 +65,7 @@ history_record_inserted(History* history, ContactId id) {
 	storage_increase_refcount(history->storage, id);
 	Event action = {
 		.forwards = (OptionalContactId){true, id},
+		.backwards = {},
 	};
 	circular_buffer_push_back(&history->actions, SPANOF(action));
 }

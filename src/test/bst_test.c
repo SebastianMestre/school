@@ -3,6 +3,7 @@
 #include "lt.h"
 
 static int int_cmp_impl(int const* lhs, int const* rhs, void* metadata) {
+	metadata = metadata;
 	return *lhs - *rhs;
 }
 
@@ -12,7 +13,7 @@ static int cmp_span_int(Span datum, int value) {
 
 static ComparatorFunction int_cmp = (ComparatorFunction)int_cmp_impl;
 
-#define CREATE_BST() bst_create(sizeof(int), (Comparator){int_cmp}, nop_dtor)
+#define CREATE_BST() bst_create(sizeof(int), (Comparator){int_cmp, nullptr}, nop_dtor)
 
 static void test_find_empty(int data) {
 	LT_TEST

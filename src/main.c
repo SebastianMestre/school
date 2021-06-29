@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "database.h"
 #include "io.h"
@@ -18,20 +19,27 @@ void print_contact(Contact* contact) {
 	printf(",%u,%s}", contact->age, contact->phone_number);
 }
 
+static void
+read_a_line_with_retry_message(char* buf, size_t n) {
+	get_line_retry(buf, n, "Linea demasiado larga. Vuelva a intentar:\n>", stdin);
+}
+
+static uint32_t
+read_u32_with_retry_message(char* buf, size_t n) {
+	uint32_t value;
+	get_line_as_u32_retry(buf, n, &value, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
+	return value;
+}
+
 void buscar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
-	bool ok;
-	puts("Ingrese nombre");
-	printf(">");
-	ok = get_line(buf0, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese nombre:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
 
-	puts("Ingrese apellido");
-	printf(">");
-	ok = get_line(buf1, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese apellido:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
 	string_tolower(buf0);
 	string_trim(buf0);
@@ -56,27 +64,17 @@ void agregar(Database* database) {
 	char buf2[BUF_SIZE];
 	char buf3[BUF_SIZE];
 
-	bool ok;
+	printf("Ingrese nombre:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
 
-	puts("Ingrese nombre");
-	printf(">");
-	ok = get_line(buf0, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese apellido:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
-	puts("Ingrese apellido");
-	printf(">");
-	ok = get_line(buf1, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese edad:\n>");
+	uint32_t age = read_u32_with_retry_message(buf2, BUF_SIZE);
 
-	puts("Ingrese edad");
-	printf(">");
-	uint32_t age;
-	get_line_as_u32_retry(buf2, BUF_SIZE, &age, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
-
-	puts("Ingrese telefono");
-	printf(">");
-	ok = get_line(buf3, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese telefono:\n>");
+	read_a_line_with_retry_message(buf3, BUF_SIZE);
 
 	string_tolower(buf0);
 	string_trim(buf0);
@@ -86,7 +84,7 @@ void agregar(Database* database) {
 	string_trim(buf1);
 	char* surname = string_dup(buf1);
 
-	// TODO: validate phone number
+	// TODO: validate phone number?
 	string_trim(buf3);
 	char* phone_number = string_dup(buf3);
 
@@ -100,12 +98,11 @@ void eliminar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
-	puts("Ingrese nombre");
-	assert(get_line(buf0, BUF_SIZE, stdin));
+	printf("Ingrese nombre:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
 
-	puts("Ingrese apellido");
-	assert(get_line(buf1, BUF_SIZE, stdin));
-
+	printf("Ingrese apellido:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
 	string_tolower(buf0);
 	string_trim(buf0);
@@ -125,14 +122,11 @@ void editar(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
-	bool ok;
-	puts("Ingrese nombre");
-	ok = get_line(buf0, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese nombre:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
 
-	puts("Ingrese apellido");
-	ok = get_line(buf1, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese apellido:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
 
 	string_tolower(buf0);
 	string_trim(buf0);
@@ -153,15 +147,11 @@ void editar(Database* database) {
 	char buf2[BUF_SIZE];
 	char buf3[BUF_SIZE];
 
-	puts("Ingrese edad");
-	printf(">");
-	uint32_t age;
-	get_line_as_u32_retry(buf2, BUF_SIZE, &age, "Linea demasiado larga, vuelva a intentar\n>", "Ingrese un numero valido\n>", stdin);
+	printf("Ingrese edad:\n>");
+	uint32_t age = read_u32_with_retry_message(buf2, BUF_SIZE);
 
-	puts("Ingrese telefono");
-	printf(">");
-	ok = get_line(buf3, BUF_SIZE, stdin);
-	assert(ok);
+	printf("Ingrese telefono:\n>");
+	read_a_line_with_retry_message(buf3, BUF_SIZE);
 
 	char* name = string_dup(buf0);
 	char* surname = string_dup(buf1);
@@ -171,8 +161,8 @@ void editar(Database* database) {
 	assert(success);
 }
 
-void cargar(Database* database) {}
-void guardar(Database* database) {}
+void cargar(Database* database) { database = database; }
+void guardar(Database* database) { database = database; }
 
 void deshacer(Database* database) {
 	bool success = database_rewind(database);
@@ -192,13 +182,115 @@ void rehacer(Database* database) {
 	}
 }
 
-void conjuncion(Database* database) {
+static QueryData
+read_query_parameters() {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+	char buf2[BUF_SIZE];
+	char buf3[BUF_SIZE];
+
+	printf("Ingrese nombre:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
+
+	printf("Ingrese apellido:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
+
+	printf("Ingrese edad:\n>");
+	bool has_age = false;
+	uint32_t age = 0;
+	while (1) {
+		read_a_line_with_retry_message(buf2, BUF_SIZE);
+		string_trim(buf2);
+		if (strlen(buf2) == 0) {
+			break;
+		}
+		bool ok = parse_u32(buf2, &age);
+		if (!ok) {
+			printf("Edad invalida. Ingrese una edad valida:\n>");
+			continue;
+		}
+		has_age = true;
+		break;
+	}
+
+	printf("Ingrese telefono:\n>");
+	read_a_line_with_retry_message(buf3, BUF_SIZE);
+
+	string_trim(buf0);
+	string_trim(buf1);
+	string_trim(buf3);
+
+	char* name = strlen(buf0) == 0 ? nullptr : string_dup(buf0);
+	char* surname = strlen(buf1) == 0 ? nullptr : string_dup(buf1);
+	char* phone_number = strlen(buf3) == 0 ? nullptr : string_dup(buf3);
+
+	return (QueryData) {
+		.name = name,
+		.surname = surname,
+		.has_age = has_age,
+		.age = age,
+		.phone_number = phone_number,
+	};
+}
+
+void
+print_vector_of_contacts(Database* database, Vector const* contacts) {
+	for (size_t i = 0; i < contacts->size; ++i) {
+		ContactId id; span_write(&id, vector_at(contacts, i));
+		Contact* contact = storage_at(database->storage, id);
+		print_contact(contact);
+	}
+}
+
+void
+conjuncion(Database* database) {
+	QueryData query_data = read_query_parameters();
+
+	if (
+		query_data.name == nullptr &&
+		query_data.surname == nullptr &&
+		!query_data.has_age &&
+		query_data.phone_number == nullptr
+	) {
+		printf("No se puede realizar una consulta OR vacia\n");
+		return;
+	}
+
+	Vector result = database_query_and(database, query_data);
+
+	print_vector_of_contacts(database, &result);
+
+	vector_release(&result);
+	free(query_data.name);
+	free(query_data.surname);
+	free(query_data.phone_number);
 }
 
 void disjuncion(Database* database) {
+	QueryData query_data = read_query_parameters();
+
+	if (
+		query_data.name == nullptr &&
+		query_data.surname == nullptr &&
+		!query_data.has_age &&
+		query_data.phone_number == nullptr
+	) {
+		printf("No se puede realizar una consulta OR vacia\n");
+		return;
+	}
+
+	Vector result = database_query_or(database, query_data);
+
+	print_vector_of_contacts(database, &result);
+
+	vector_release(&result);
+	free(query_data.name);
+	free(query_data.surname);
+	free(query_data.phone_number);
 }
 
 void guardar_ordenado(Database* database) {
+	database = database;
 }
 
 void buscar_por_suma_de_edades(Database* database) {

@@ -8,6 +8,7 @@
 static void
 random_test(int arg) {
 	LT_TEST_ONCE
+	arg = arg;
 
 #define N 100
 #define M 10

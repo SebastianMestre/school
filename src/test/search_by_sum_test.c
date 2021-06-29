@@ -6,6 +6,7 @@
 
 static void
 test_0(int arg) {
+	arg = arg;
 	LT_TEST_ONCE
 
 	uint32_t data[] = {10, 15};
@@ -22,6 +23,7 @@ test_0(int arg) {
 
 static void
 test_1(int arg) {
+	arg = arg;
 	LT_TEST_ONCE
 
 	uint32_t data[] = {10, 15};
@@ -38,6 +40,7 @@ test_1(int arg) {
 
 static void
 test_2(int arg) {
+	arg = arg;
 	LT_TEST_ONCE
 
 	uint32_t data[] = {10, 15};

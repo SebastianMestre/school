@@ -1,5 +1,5 @@
 
-CFLAGS := -Wall -Werror -g # -fsanitize=address
+CFLAGS := -Wall -Werror -Wextra -g # -fsanitize=address
 INCLUDE := -include src/types.h
 LIBS := # -lasan
 

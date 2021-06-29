@@ -6,6 +6,7 @@
 
 static int
 int_cmp_fn(void const* arg0, void const* arg1, void* metadata) {
+	metadata = metadata;
 	int const* lhs = arg0;
 	int const* rhs = arg1;
 	return *lhs - *rhs;
@@ -13,6 +14,7 @@ int_cmp_fn(void const* arg0, void const* arg1, void* metadata) {
 
 static void
 test_0(int arg) {
+	arg = arg;
 	LT_TEST_ONCE
 
 	#define DATA_LEN 11

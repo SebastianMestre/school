@@ -7,8 +7,10 @@
 void length_test(int value) {
 	LT_TEST
 
+	if (value < 0) value = -value;
+
 	Span span = span_create(nullptr, value);
-	LT_ASSERT(span_width(span) == value);
+	LT_ASSERT(span_width(span) == (size_t)value);
 }
 
 void run_tests(int value) {
