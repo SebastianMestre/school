@@ -230,13 +230,6 @@ editar(Database* database) {
 	assert(success);
 }
 
-static void
-release_db_and_storage(Database* database) {
-	printf("Los datos anteriores quedaron intactos.\n");
-	database_release(database);
-	storage_release(database->storage);
-}
-
 void
 cargar(Database* database) {
 	char buf0[BUF_SIZE];
@@ -248,8 +241,10 @@ cargar(Database* database) {
 
 	FILE* f = fopen(buf0, "r");
 
-	Storage new_storage = storage_create();
-	Database new_database = database_create(&new_storage);
+	if (!f) {
+		printf("No se pudo abrir el archivo, no se puede cargar.\n");
+		goto cleanup0;
+	}
 
 	#define LINE_BUF_SIZE 1024
 	char line_buf[LINE_BUF_SIZE];
@@ -260,26 +255,38 @@ cargar(Database* database) {
 
 	if (!success) {
 		printf("Cabecera demasiado larga, no se puede cargar.\n");
-		return release_db_and_storage(&new_database);
+		goto cleanup0;
 	}
 
-	for (size_t line_idx = 1; !feof(f); ++line_idx) {
-		get_line(line_buf, LINE_BUF_SIZE, f);
+	string_trim(line_buf);
+	if (strcmp(line_buf, "nombre,apellido,edad,telefono") != 0) {
+		printf("Cabecera invalida, no se puede cargar.\n");
+		goto cleanup0;
+	}
 
+	Storage new_storage = storage_create();
+	Database new_database = database_create(&new_storage);
+	for (size_t line_idx = 1; 1; ++line_idx) {
 		success = get_line(line_buf, LINE_BUF_SIZE, f);
 
 		if (!success) {
+			if (feof(f)) {
+				break;
+			}
+
 			printf("Linea demasiado larga (linea %lu), no se puede cargar.\n", line_idx);
-			return release_db_and_storage(&new_database);
+			goto cleanup1;
 		}
 
-		char* name = buf0;
+		fprintf(stderr, "%s", line_buf);
+
+		char* name = line_buf;
 
 		char* surname = name;
 		for (; *surname != ','; ++surname) {
 			if (*surname == '\0') {
-				printf("Final de linea inesperado (linea %lu), no se puede cargar.\n", line_idx);
-				return release_db_and_storage(&new_database);
+				printf("Final de linea inesperado leyendo el nombre (linea %lu), no se puede cargar.\n", line_idx);
+				goto cleanup1;
 			}
 		}
 		*surname++ = '\0'; // name terminator
@@ -287,8 +294,8 @@ cargar(Database* database) {
 		char* age_str = surname;
 		for (; *age_str != ','; ++age_str) {
 			if (*age_str == '\0') {
-				printf("Final de linea inesperado (linea %lu), no se puede cargar.\n", line_idx);
-				return release_db_and_storage(&new_database);
+				printf("Final de linea inesperado leyendo el apellido (linea %lu), no se puede cargar.\n", line_idx);
+				goto cleanup1;
 			}
 		}
 		*age_str++ = '\0'; // surname terminator
@@ -296,8 +303,8 @@ cargar(Database* database) {
 		char* phone_number = age_str;
 		for (; *phone_number != ','; ++phone_number) {
 			if (*phone_number == '\0') {
-				printf("Final de linea inesperado (linea %lu), no se puede cargar.\n", line_idx);
-				return release_db_and_storage(&new_database);
+				printf("Final de linea inesperado leyendo la edad (linea %lu), no se puede cargar.\n", line_idx);
+				goto cleanup1;
 			}
 		}
 		*phone_number++ = '\0'; // age terminator
@@ -319,12 +326,15 @@ cargar(Database* database) {
 
 		if (!success) {
 			printf("La edad no es un natural valido (linea %lu), no se puede cargar.\n", line_idx);
-			return release_db_and_storage(&new_database);
+			goto cleanup1;
 		}
 
 		database_insert(&new_database, string_dup(name), string_dup(surname), age, string_dup(phone_number));
 	}
 
+	fclose(f);
+
+	// pisamos la database que nos pasaron con una nueva
 	database_release(database);
 	storage_release(database->storage);
 
@@ -332,6 +342,16 @@ cargar(Database* database) {
 
 	new_database.storage = database->storage;
 	*database = new_database;
+	return;
+
+cleanup1:
+	database_release(&new_database);
+	storage_release(&new_storage);
+cleanup0:
+	fclose(f);
+	printf("Los datos anteriores quedaron intactos.\n");
+
+#undef LINE_BUF_SIZE
 }
 
 void
