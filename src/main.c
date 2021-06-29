@@ -12,21 +12,6 @@
 #define BUF_SIZE 256
 
 static void
-print_contact_fields(Contact* contact, FILE* f) {
-	print_title_case(contact->name, f);
-	fprintf(f, ",");
-	print_title_case(contact->surname, f);
-	fprintf(f, ",%u,%s", contact->age, contact->phone_number);
-}
-
-static void
-print_contact(Contact* contact) {
-	printf("{");
-	print_contact_fields(contact, stdout);
-	printf("}");
-}
-
-static void
 read_a_line_with_retry_message(char* buf, size_t n) {
 	get_line_retry(buf, n, "Linea demasiado larga. Vuelva a intentar:\n>", stdin);
 }
@@ -90,11 +75,22 @@ read_query_parameters() {
 }
 
 static void
-print_vector_of_contacts(Database* database, Vector const* contacts) {
+print_contact(Contact* contact, bool braces, FILE* f) {
+	if (braces) printf("{");
+	print_title_case(contact->name, f);
+	fprintf(f, ",");
+	print_title_case(contact->surname, f);
+	fprintf(f, ",%u,%s", contact->age, contact->phone_number);
+	if (braces) printf("}");
+}
+
+static void
+print_vector_of_contacts(Database* database, Vector const* contacts, bool braces, FILE* f) {
 	for (size_t i = 0; i < contacts->size; ++i) {
 		ContactId id; span_write(&id, vector_at(contacts, i));
 		Contact* contact = storage_at(database->storage, id);
-		print_contact(contact);
+		print_contact(contact, braces, f);
+		fprintf(f, "\n");
 	}
 }
 
@@ -122,7 +118,7 @@ buscar(Database* database) {
 	if (!contact.active) {
 		puts("No existe un contacto con ese nombre y apellido");
 	} else {
-		print_contact(storage_at(database->storage, contact.id));
+		print_contact(storage_at(database->storage, contact.id), true, stdout);
 		printf("\n");
 	}
 }
@@ -249,15 +245,11 @@ guardar(Database* database) {
 	Vector contacts = database_contacts(database);
 
 	FILE* f = fopen(buf0, "w");
-	fprintf(f, "nombre,apellido,edad,telefono\n");
-	for (size_t i = 0; i < contacts.size; ++i) {
-		ContactId id; span_write(&id, vector_at(&contacts, i));
-		Contact* contact = storage_at(database->storage, id);
-		print_contact_fields(contact, f);
-		fprintf(f, "\n");
-	}
-	fclose(f);
 
+	fprintf(f, "nombre,apellido,edad,telefono\n");
+	print_vector_of_contacts(database, &contacts, false, f);
+
+	fclose(f);
 	vector_release(&contacts);
 }
 
@@ -297,7 +289,7 @@ conjuncion(Database* database) {
 
 	Vector result = database_query_and(database, query_data);
 
-	print_vector_of_contacts(database, &result);
+	print_vector_of_contacts(database, &result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -321,7 +313,7 @@ disjuncion(Database* database) {
 
 	Vector result = database_query_or(database, query_data);
 
-	print_vector_of_contacts(database, &result);
+	print_vector_of_contacts(database, &result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -363,12 +355,13 @@ buscar_por_suma_de_edades(Database* database) {
 	if (result.size == 0) {
 		printf("No existe un conjunto de contactos que sumen %u\n", sum);
 	} else {
+		Vector to_print = vector_create(sizeof(ContactId));
 		for (size_t i = 0; i < result.size; ++i) {
 			size_t j; span_write(&j, vector_at(&result, i));
-			ContactId id; span_write(&id, vector_at(&contact_ids, j));
-			Contact* contact = storage_at(database->storage, id);
-			print_contact(contact);
+			vector_push(&to_print, vector_push(&contact_ids, SPANOF(j)));
 		}
+		print_vector_of_contacts(database, &to_print, true, stdout);
+		vector_release(&to_print);
 	}
 
 	vector_release(&result);

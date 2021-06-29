@@ -97,7 +97,7 @@ get_line_as_int_retry(char* buf, size_t n, int* out, char const* line_error_msg,
 
 bool
 parse_u32(char* buf, unsigned int* out) {
-	for (; *buf == ' ' || *buf == '\t'; ++buf) {}
+	for (; *buf == ' ' || *buf == '\t' || *buf == '\n'; ++buf) {}
 	if (*buf == '\0')
 		return false;
 
@@ -107,11 +107,10 @@ parse_u32(char* buf, unsigned int* out) {
 	if (begin == end)
 		return false;
 
-	for (; *buf != '\n'; ++buf) {
-		if (*buf != ' ' && *buf != '\t')
+	for (; *buf != '\0'; ++buf) {
+		if (*buf != ' ' && *buf != '\t' && *buf != '\n')
 			return false;
 	}
-	assert(buf[1] == '\0');
 
 	*out = 0;
 	for (; end != begin; ++begin) {
