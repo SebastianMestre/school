@@ -12,9 +12,9 @@ typedef struct _BstNode BstNode;
 
 struct _Bst {
 	struct _BstNode* root;
-	size_t const element_width;
-	Comparator const cmp;
-	Destructor const dtor;
+	size_t element_width;
+	Comparator cmp;
+	Destructor dtor;
 };
 typedef struct _Bst Bst;
 
