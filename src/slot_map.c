@@ -1,5 +1,7 @@
 #include "slot_map.h"
 
+#include "string.h"
+
 #include <assert.h>
 #include <stdint.h>
 
@@ -111,26 +113,40 @@ slot_map_insert(SlotMap* map, Span data) {
 }
 
 static void
+swap_cells(SlotMap* map, size_t i_cell, size_t j_cell) {
+	size_t i = get_cell_data(map, i_cell)->slot;
+	size_t j = get_cell_data(map, j_cell)->slot;
+
+	get_slot(map, i)->cell = j_cell;
+	get_cell_data(map, j_cell)->slot = i;
+
+	get_slot(map, j)->cell = i_cell;
+	get_cell_data(map, i_cell)->slot = j;
+
+	mem_swap(
+		get_cell(map, i_cell).begin,
+		get_cell(map, j_cell).begin,
+		vector_element_width(&map->cells));
+}
+
+static void
 delete(SlotMap* map, size_t i) {
 	assert(i < map->slots.size);
 	assert(get_slot(map, i)->active);
 	assert(get_slot(map, i)->refcount == 0);
 
 	size_t i_cell = get_slot(map, i)->cell;
-	call_dtor(map->dtor, vector_at(&map->cells, i_cell).begin);
-	get_slot(map, i)->active = false;
-	vector_push(&map->holes, SPANOF(i));
 
-	if(map->cells.size != 1) {
-		size_t j_cell = map->cells.size - 1;
-		vector_put_at(&map->cells, i_cell, vector_at(&map->cells, j_cell));
-		size_t j = get_cell_data(map, j_cell)->slot;
-
-		get_slot(map, j)->cell = i_cell;
-		get_cell_data(map, i_cell)->slot = j;
+	if (map->cells.size > 1) {
+		swap_cells(map, i_cell, map->cells.size - 1);
+		i_cell = map->cells.size - 1;
 	}
 
+	call_dtor(map->dtor, get_cell(map, i_cell).begin);
 	vector_pop(&map->cells);
+
+	get_slot(map, i)->active = false;
+	vector_push(&map->holes, SPANOF(i));
 }
 
 void
