@@ -41,6 +41,12 @@ read_contact(char* buf, size_t n, IncompleteContact* out, FILE* f) {
 ReadContactStatus
 deserialize_contact(char* buf, IncompleteContact* out) {
 
+		out->name = nullptr;
+		out->surname = nullptr;
+		out->has_age = false;
+		out->age = 0;
+		out->phone_number = nullptr;
+
 		out->name = buf;
 
 		for (; *buf != ','; ++buf)
@@ -80,6 +86,9 @@ deserialize_contact(char* buf, IncompleteContact* out) {
 		bool success = parse_u32(age_str, &age);
 		if (!success)
 			return RCS_E_INVALID_AGE;
+
+		out->age = age;
+		out->has_age = true;
 
 		return RCS_OK;
 }

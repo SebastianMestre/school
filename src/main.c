@@ -239,7 +239,7 @@ cargar(Database* database) {
 	Database new_database = database_create(database->storage);
 	for (size_t line_idx = 1; 1; ++line_idx) {
 
-		IncompleteContact query;
+		IncompleteContact query = {};
 		ReadContactStatus status =
 			read_contact(line_buf, LINE_BUF_SIZE, &query, f);
 
@@ -276,7 +276,7 @@ cargar(Database* database) {
 
 	fclose(f);
 
-	// pisamos la database que nos pasaron con una nueva
+	// pisamos la database que nos pasaron con la nueva
 	database_release(database);
 	*database = new_database;
 	return;
