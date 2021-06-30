@@ -272,13 +272,13 @@ load_from_fs(Database* database) {
 
 	if (!success) {
 		printf("Cabecera demasiado larga, no se puede cargar.\n");
-		goto cleanup0;
+		goto cleanup1;
 	}
 
 	string_trim(line_buf);
 	if (strcmp(line_buf, "nombre,apellido,edad,telefono") != 0) {
 		printf("Cabecera invalida, no se puede cargar.\n");
-		goto cleanup0;
+		goto cleanup1;
 	}
 
 	Database new_database = database_create(database->storage);
@@ -316,7 +316,7 @@ load_from_fs(Database* database) {
 		case RCS_OK:
 			assert(0);
 		}
-		goto cleanup1;
+		goto cleanup2;
 	}
 
 	fclose(f);
@@ -326,10 +326,11 @@ load_from_fs(Database* database) {
 	*database = new_database;
 	return;
 
-cleanup1:
+cleanup2:
 	database_release(&new_database);
-cleanup0:
+cleanup1:
 	fclose(f);
+cleanup0:
 	printf("Los datos anteriores quedaron intactos.\n");
 
 #undef LINE_BUF_SIZE
