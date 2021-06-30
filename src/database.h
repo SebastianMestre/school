@@ -60,11 +60,6 @@ database_rewind(Database* database);
 bool
 database_advance(Database* database);
 
-// no toma ownership
-// aplica el callback a cada contacto
-void
-database_for_each(Database* database, Callback cb);
-
 // devuelve los Ids de todos los contactos activos
 Vector
 database_contacts(Database* database);
