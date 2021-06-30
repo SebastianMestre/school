@@ -17,6 +17,8 @@ OptionalContactId, Comparator, etc).
 - Las estructuras de datos guardan sus datos por valor. Eso es, no se guarda un
 puntero a los datos, se guardan los bytes que componen el valor. (A no ser que se
 considere al puntero mismo como un valor).
+- En cada archivo, implicitamente se incluye `types.h`, esto esta codificado en
+el Makefile
 
 # Dificultades
 
@@ -130,6 +132,10 @@ Las razones de uso son:
 registros con un bucle comun y corriente.
 - La implementacion es bastante sencilla.
 
+> Si interesa, [0] ofrece una descripcion mas completa de esta estructura
+
+[0] https://www.youtube.com/watch?v=SHaAR7XPtNU
+
 # Algoritmos
 
 ## deshacer/rehacer
@@ -156,6 +162,13 @@ ejecutables en la raiz del proyecto: `test` y `app`.
 
 Tanto el programa como los tests pueden correrse bajo Valgrind para verificar que
 no exhiben errores de memoria.
+
+Aparte, hay un script `roundtrip.sh` que ejercita `app` haciendo que cargue un
+csv predeterminado (`roundtrip.csv`), y luego haciendo que guarde lo que haya
+cargado. Finalmente, compara los contenidos de los archivos. La expectativa es
+que esos archivos sean iguales (sin incluir mayusculas y espacios).
+
+> `roundtrip.sh` se debe invocar despues de compilar el proyecto
 
 # Bibliografia
 
