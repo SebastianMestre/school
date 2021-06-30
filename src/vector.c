@@ -69,12 +69,6 @@ vector_push(Vector* v, Span data) {
 	return push(v, data);
 }
 
-Span
-vector_push_incomplete(Vector* v, Span data) {
-	assert(span_width(data) <= v->buffer.element_width );
-	return push(v, data);
-}
-
 void
 vector_pop(Vector* v) {
 	v->size -= 1;

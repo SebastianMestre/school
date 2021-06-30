@@ -36,12 +36,6 @@ vector_push(Vector* v, Span data);
 void
 vector_pop(Vector* v);
 
-// inserta data al final del vector
-// devuelve el espacio de memoria donde quedaron los datos
-// tolera que data sea menos ancho que un elemento
-Span
-vector_push_incomplete(Vector* v, Span data);
-
 void
 vector_release(Vector* v);
 
