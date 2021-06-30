@@ -1,8 +1,5 @@
 #include "quicksort.h"
 
-#include "span.h"
-
-#include "iter.h"
 #include <assert.h>
 
 static void
@@ -41,5 +38,5 @@ quicksort_impl(void* l, void* r, size_t size, Comparator cmp) {
 
 void
 quicksort(Array arr, Comparator cmp) {
-	quicksort_impl(array_begin(&arr).pos, array_end(&arr).pos, arr.element_width, cmp);
+	quicksort_impl(arr.data.begin, arr.data.end, arr.element_width, cmp);
 }

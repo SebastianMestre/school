@@ -11,7 +11,6 @@ build/types.o               \
 build/string.o              \
 build/io.o                  \
                             \
-build/iter.o                \
 build/span.o                \
 build/array.o               \
 build/vector.o              \
@@ -46,8 +45,7 @@ build/test/quicksort_test.o
 
 build/types.o: src/types.c
 build/span.o: src/span.c src/span.h
-build/iter.o: src/iter.c src/iter.h
-build/array.o: src/array.c src/span.h src/iter.h
+build/array.o: src/array.c src/span.h
 build/vector.o: src/vector.c src/vector.h src/array.h src/span.h
 build/circular_buffer.o: src/circular_buffer.c src/circular_buffer.h src/span.h
 build/bst.o: src/bst.c src/bst.h src/span.h
@@ -65,7 +63,7 @@ build/index.o: src/index.c src/index.h src/storage.h src/bst.h src/vector.h src/
 build/database.o: src/database.c src/database.h src/index.h src/history.h src/storage.h            \
 src/slot_map.h src/circular_buffer.h src/bst.h src/vector.h src/span.h src/string.h
 build/search_by_sum.o: src/search_by_sum.c src/search_by_sum.h src/vector.h src/span.h
-build/quicksort.o: src/quicksort.c src/quicksort.h src/array.h src/span.h src/iter.h
+build/quicksort.o: src/quicksort.c src/quicksort.h src/array.h src/span.h
 
 build/io.o: src/io.c src/io.h
 build/main.o: src/main.c src/io.h src/string.h src/database.h src/index.h src/history.h            \

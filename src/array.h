@@ -1,7 +1,6 @@
 #pragma once
 
 #include "span.h"
-#include "iter.h"
 
 struct _Array {
 	Span data;
@@ -18,9 +17,3 @@ array_free(Array* arr);
 
 Span
 array_at(Array const* arr, size_t i);
-
-Iter
-array_begin(Array const* arr);
-
-Iter
-array_end(Array const* arr);
