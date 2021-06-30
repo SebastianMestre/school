@@ -78,3 +78,18 @@ vector_full_segment(Vector* v) {
 		v->size,
 	};
 }
+
+void*
+vector_begin(Vector const* v) {
+	return v->buffer.data.begin;
+}
+
+void*
+vector_end(Vector const* v) {
+	return v->buffer.data.begin + v->size * v->buffer.element_width;
+}
+
+size_t
+vector_element_width(Vector const* v) {
+	return v->buffer.element_width;
+}
