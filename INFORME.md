@@ -79,11 +79,11 @@ mas compleja.
 
 ## CircularBuffer
 
-Una (casi doble) cola circular. En el trabajo se utiliza para implementar la
-funcionalidad de deshacer/rehacer.
+Una cola circular. En el trabajo se utiliza para implementar la funcionalidad de
+deshacer/rehacer.
 
 Use una cola circular ya que se alineaba muy bien con los requisitos del trabajo:
-recordar una cantidad maxima de operaciones, y olvidar las mas viejas si esta
+recuerda una cantidad maxima de operaciones, y olvida las mas viejas si esta
 cantidad se supera.
 
 ## Bst
@@ -95,6 +95,12 @@ La principal razon de su uso (en vez de usar una tabla hash) fue desafiarme a mi
 mismo. He implementado tablas hash de distintos tipos en varias ocasiones, pero
 nunca habia implementado un AVL correctamente.
 
+> Al principio, Bst era generico, y guardaba el dato en la misma reservacion de
+> memoria que el nodo. Mas adelante en el trabajo, lo especialice para que
+> funcione solamente con ContactId.
+> Tome esa desicion porque la implementacion generica era mas compleja de lo
+> necesario y era mas molesta de usar.
+
 ## SlotMap
 
 Un slot map es un contenedor que soporta insercion, acceso aleatorio, y borrado
@@ -102,6 +108,10 @@ en tiempo constante. A diferencia de otros diccionarios, las claves son numerica
 y las determina la estructura misma al insertar un elemento, sin dependencia en
 el valor que se guarda. Aparte, todos los datos se guardan contiguamente en
 memoria.
+
+La variante implementada en este trabajo tiene conteo de referencias: se lleva
+la cuenta de cuantas zonas del programa tienen una referencia a a cada valor de
+la estructura y, cuando la cantidad llega a 0, se elimina el valor.
 
 Las razones de uso son:
 - Soporta almacenamiento de datos repetidos trivialmente.
@@ -113,18 +123,17 @@ registros con un bucle comun y corriente.
 
 ## deshacer/rehacer
 
-Use una cola circular, que guarda las operaciones que se realizaron. Al deshacer,
-se ejecuta la operacion inversa.
-
-Si la operacion fue de creacion, se ejecuta el borrado, y viceversa.
+Use una cola circular que guarda las operaciones que se realizaron. Al deshacer,
+se ejecuta la operacion inversa: Si la operacion fue de creacion, se ejecuta el
+borrado, y viceversa.
 
 ## guardar ordenado
 
-Primero, pase todos los registros a un array. Luego, use quicksort sobre el array.
+Primero, pase todos los registros a un vector. Luego, use quicksort sobre el array.
 
 ## buscar por suma de edades
 
-Use programacion dinamica. El problema es muy parecido al conocido 'subset sum'.
+Use programacion dinamica. El problema es analogo al conocido 'subset sum'.
 
 # Compilacion/Invocacion
 
