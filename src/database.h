@@ -65,11 +65,11 @@ Vector
 database_contacts(Database* database);
 
 // no toma ownership
-// devuelve los Ids de todos los contactos que cumplen todas las condiciones
+// devuelve punteros a todos los contactos que cumplen todas las condiciones
 Vector
 database_query_and(Database* database, IncompleteContact query);
 
 // no toma ownership
-// devuelve los Ids de todos los contactos que cumplen alguna de las condiciones
+// devuelve punteros a todos los contactos que cumplen alguna de las condiciones
 Vector
 database_query_or(Database* database, IncompleteContact query);

@@ -298,15 +298,16 @@ guardar(Database* database) {
 	read_a_line_with_retry_message(buf0, BUF_SIZE);
 	string_trim(buf0);
 
-	Vector contacts = database_contacts(database);
-
 	FILE* f = fopen(buf0, "w");
-
 	fprintf(f, "nombre,apellido,edad,telefono\n");
-	write_vector_of_contacts_by_id(database->storage, &contacts, false, f);
+	write_contacts(
+		storage_begin(database->storage),
+		storage_end(database->storage),
+		false,
+		f
+	);
 
 	fclose(f);
-	vector_release(&contacts);
 }
 
 void
@@ -345,7 +346,7 @@ conjuncion(Database* database) {
 
 	Vector result = database_query_and(database, query_data);
 
-	write_vector_of_contacts(&result, true, stdout);
+	write_vector_of_contacts_by_ptr(&result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -369,7 +370,7 @@ disjuncion(Database* database) {
 
 	Vector result = database_query_or(database, query_data);
 
-	write_vector_of_contacts(&result, true, stdout);
+	write_vector_of_contacts_by_ptr(&result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -453,19 +454,19 @@ guardar_ordenado(Database* database) {
 		return;
 	}
 
-	Vector contacts = database_contacts(database);
+	Vector contact_ids = database_contacts(database);
 	quicksort(
-		vector_begin(&contacts),
-		vector_end(&contacts),
-		vector_element_width(&contacts),
+		vector_begin(&contact_ids),
+		vector_end(&contact_ids),
+		vector_element_width(&contact_ids),
 		cmp);
 
 	FILE* f = fopen(buf0, "w");
 	fprintf(f, "nombre,apellido,edad,telefono\n");
-	write_vector_of_contacts_by_id(database->storage, &contacts, false, f);
+	write_vector_of_contacts_by_id(database->storage, &contact_ids, false, f);
 
 	fclose(f);
-	vector_release(&contacts);
+	vector_release(&contact_ids);
 }
 
 void

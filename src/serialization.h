@@ -8,10 +8,13 @@ typedef struct _Storage Storage;
 typedef struct _Vector Vector;
 
 void
-write_contact(Contact* contact, bool braces, FILE* f);
+write_contact(Contact const* contact, bool braces, FILE* f);
 
 void
-write_vector_of_contacts(Vector const* contacts, bool braces, FILE* f);
+write_contacts(Contact const* begin, Contact const* end, bool braces, FILE* f);
+
+void
+write_vector_of_contacts_by_ptr(Vector const* contacts, bool braces, FILE* f);
 
 void
 write_vector_of_contacts_by_id(Storage* storage, Vector const* contacts, bool braces, FILE* f);

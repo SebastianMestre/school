@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 void
-write_contact(Contact* contact, bool braces, FILE* f) {
+write_contact(Contact const* contact, bool braces, FILE* f) {
 	if (braces) fprintf(f, "{");
 	print_title_case(contact->name, f);
 	fprintf(f, ",");
@@ -19,7 +19,15 @@ write_contact(Contact* contact, bool braces, FILE* f) {
 }
 
 void
-write_vector_of_contacts(Vector const* contacts, bool braces, FILE* f) {
+write_contacts(Contact const* begin, Contact const* end, bool braces, FILE* f) {
+	for (; begin < end; ++begin) {
+		write_contact(begin, braces, f);
+		fprintf(f, "\n");
+	}
+}
+
+void
+write_vector_of_contacts_by_ptr(Vector const* contacts, bool braces, FILE* f) {
 	for (size_t i = 0; i < contacts->size; ++i) {
 		Contact* contact; span_write(&contact, vector_at(contacts, i));
 		write_contact(contact, braces, f);
