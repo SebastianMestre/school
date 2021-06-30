@@ -9,6 +9,9 @@
 #include "../string.h"
 #include "../quicksort.h"
 
+// A lo largo de este archivo, los valores que se insertan en database son
+// completamente arbitrarios
+
 static int
 by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
 	ContactId const* lhs = arg0;
@@ -21,8 +24,11 @@ by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
 }
 
 static void
-test_leak1(int arg) {
+test_regr0(int arg) {
 	LT_TEST_ONCE;
+
+	// Este test de regresion no llama assert, la idea es correrlo en valgrind
+	// para verificar que no tiene memory leaks 
 
 	arg = arg;
 
@@ -76,10 +82,45 @@ test0(int arg) {
 }
 
 static void
+test1(int arg) {
+	LT_TEST_ONCE
+	arg = arg;
+
+	Storage st = storage_create();
+	Database db = database_create(&st);
+
+	database_insert(&db, string_dup("asd"), string_dup("asd"), 123, string_dup("123"));
+	database_insert(&db, string_dup("qwe"), string_dup("qwe"), 123, string_dup("543"));
+
+	LT_ASSERT(database_find(&db, string_dup("asd"), string_dup("asd")).active);
+	LT_ASSERT(database_find(&db, string_dup("qwe"), string_dup("qwe")).active);
+
+	database_rewind(&db);
+
+	LT_ASSERT(!database_find(&db, string_dup("qwe"), string_dup("qwe")).active);
+
+	database_insert(&db, string_dup("dfg"), string_dup("dfg"), 25,  string_dup("321"));
+
+	LT_ASSERT(database_find(&db, string_dup("dfg"), string_dup("dfg")).active);
+
+	database_rewind(&db);
+
+	LT_ASSERT(!database_find(&db, string_dup("dfg"), string_dup("dfg")).active);
+
+	database_advance(&db);
+
+	LT_ASSERT(database_find(&db, string_dup("dfg"), string_dup("dfg")).active);
+
+	database_release(&db);
+	storage_release(&st);
+}
+
+static void
 test_all(int arg) {
 	lt_reset();
-	test_leak1(arg);
+	test_regr0(arg);
 	test0(arg);
+	test1(arg);
 }
 
 void
