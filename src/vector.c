@@ -50,8 +50,9 @@ vector_resize_storage(Vector* v, size_t n) {
 	v->buffer = new_buffer;
 }
 
-static Span
-push(Vector* v, Span data) {
+void
+vector_push(Vector* v, Span data) {
+	assert(span_width(data) == v->buffer.element_width );
 	if (v->size == v->buffer.size) {
 		vector_resize_storage(v, v->buffer.size * 2);
 	}
@@ -59,14 +60,6 @@ push(Vector* v, Span data) {
 	void* location = vector_at_ptr(v, v->size);
 	span_write(location, data);
 	v->size += 1;
-
-	return span_create(location, v->buffer.element_width);
-}
-
-Span
-vector_push(Vector* v, Span data) {
-	assert(span_width(data) == v->buffer.element_width );
-	return push(v, data);
 }
 
 void

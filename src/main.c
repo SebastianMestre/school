@@ -490,7 +490,7 @@ buscar_por_suma_de_edades(Database* database) {
 		Vector to_print = vector_create(sizeof(ContactId));
 		for (size_t i = 0; i < result.size; ++i) {
 			size_t j; span_write(&j, vector_at(&result, i));
-			vector_push(&to_print, vector_push(&contact_ids, SPANOF(j)));
+			vector_push(&to_print, vector_at(&contact_ids, j));
 		}
 		write_vector_of_contacts(database->storage, &to_print, true, stdout);
 		vector_release(&to_print);
