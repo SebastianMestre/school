@@ -20,7 +20,7 @@ test_0(int arg) {
 	#define DATA_LEN 11
 	int data[11] = { 3, 8, 4, 6, 3, 8, 9, 2, 5, 8, 1 };
 
-	quicksort((Array){ SPANOF(data), sizeof(int), DATA_LEN }, (Comparator){int_cmp_fn, nullptr});
+	quicksort(data, data + DATA_LEN, sizeof(*data), (Comparator){int_cmp_fn, nullptr});
 
 	for (size_t i = 1; i < DATA_LEN; ++i) {
 		LT_ASSERT(data[i-1] <= data[i]);

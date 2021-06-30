@@ -448,7 +448,11 @@ guardar_ordenado(Database* database) {
 	}
 
 	Vector contacts = database_contacts(database);
-	quicksort(vector_full_segment(&contacts), cmp);
+	quicksort(
+		vector_begin(&contacts),
+		vector_end(&contacts),
+		vector_element_width(&contacts),
+		cmp);
 
 	FILE* f = fopen(buf0, "w");
 	fprintf(f, "nombre,apellido,edad,telefono\n");

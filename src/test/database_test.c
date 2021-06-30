@@ -56,7 +56,11 @@ test0(int arg) {
 	Vector contacts = database_contacts(&db);
 
 	Comparator cmp = { by_name_cmp, &db };
-	quicksort(vector_full_segment(&contacts), cmp);
+	quicksort(
+		vector_begin(&contacts),
+		vector_end(&contacts),
+		vector_element_width(&contacts),
+		cmp);
 
 	for (size_t i = 1; i < contacts.size; ++i) {
 		void* lhs = vector_at(&contacts, i-1).begin;

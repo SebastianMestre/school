@@ -1,6 +1,8 @@
 #pragma once
 
-#include "array.h"
+#include <stddef.h>
 
+// ordena el rango desde l hasta r, segun el orden definido por cmp
+// size es el tamano de cada elemento
 void
-quicksort(Array arr, Comparator cmp);
+quicksort(void* l, void* r, size_t size, Comparator cmp);

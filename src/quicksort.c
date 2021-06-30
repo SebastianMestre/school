@@ -25,18 +25,14 @@ partition(void* i, void* j, void* pivot, size_t size, Comparator cmp) {
 	return k;
 }
 
-static void
-quicksort_impl(void* l, void* r, size_t size, Comparator cmp) {
+void
+quicksort(void* l, void* r, size_t size, Comparator cmp) {
 	assert(l <= r);
+	assert((r - l) % size == 0);
 	if ((size_t)(r - l) <= size)
 		return;
 	void* cut = partition(l + size, r, l, size, cmp);
 	mem_swap(l, cut - size, size);
-	quicksort_impl(l, cut - size, size, cmp);
-	quicksort_impl(cut, r, size, cmp);
-}
-
-void
-quicksort(Array arr, Comparator cmp) {
-	quicksort_impl(arr.data.begin, arr.data.end, arr.element_width, cmp);
+	quicksort(l, cut - size, size, cmp);
+	quicksort(cut, r, size, cmp);
 }
