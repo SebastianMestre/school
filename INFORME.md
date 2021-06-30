@@ -1,8 +1,7 @@
 # Observaciones
 
 
-A lo largo del trabajo, se establecieron estas normas para aportar consistencia
-al codigo:
+A lo largo del trabajo, segui estas normas para aportar consistencia al codigo:
 
 - Las funciones documentan si toman ownership sobre alguno de sus argumentos (a
 falta de documentacion, se debe suponer que NO toman ownership).
@@ -12,7 +11,7 @@ argumento, es responsabilidad de quien llama.
 componen a un nuevo lugar, y no volviendo a usar el objeto original.
 - Algunas estructuras pequennas se pasan por valor (en particular, si no hay una
 buena razon para pasar por puntero, Span se pasa por valor, lo mismo para
-OptionalContactId, etc).
+OptionalContactId, Comparator, etc).
 - Las estructuras de datos guardan sus datos por valor. Eso es, no se guarda un
 puntero a los datos, se guardan los bytes que componen el valor. (A no ser que se
 considere al puntero mismo como un valor).
@@ -45,6 +44,7 @@ handles opcionales)
 - io: helpers para entrada/salida por consola
 - string: helpers para el uso de strings
 - types: tipos utiles, por ejemplo para simplificar el uso de punteros a funcion
+- serialization: funciones para la lectura/escritura de datos de/al file system
 - contact: la definicion del tipo de dato Contact
 - history: un contenedor de operaciones, se usa para implementar deshacer/rehacer
 - index: una estructura de datos para la busqueda eficiente por nombre y apellido
@@ -95,10 +95,13 @@ La principal razon de su uso (en vez de usar una tabla hash) fue desafiarme a mi
 mismo. He implementado tablas hash de distintos tipos en varias ocasiones, pero
 nunca habia implementado un AVL correctamente.
 
-> Al principio, Bst era generico, y guardaba el dato en la misma reservacion de
-> memoria que el nodo. Mas adelante en el trabajo, lo especialice para que
-> funcione solamente con ContactId.
-> Tome esa desicion porque la implementacion generica era mas compleja de lo
+Aparte, la idea era aprovechar el AVL para optimizar las queries AND sobre
+nombre, nombre y apellido, o algun superconjunto de esos campos. Al final no hice
+eso por falta de motivacion.
+
+> Al principio, Bst era generico. Mas adelante en el trabajo, lo especialice para
+> que funcione solamente con ContactId.
+> Tome esa decision porque la implementacion generica era mas compleja de lo
 > necesario y era mas molesta de usar.
 
 ## SlotMap
