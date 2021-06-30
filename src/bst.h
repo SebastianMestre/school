@@ -9,7 +9,7 @@ struct _BstNode {
 	struct _BstNode* lhs;
 	struct _BstNode* rhs;
 	int height;
-	
+
 	ContactId data;
 };
 typedef struct _BstNode BstNode;

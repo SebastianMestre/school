@@ -7,9 +7,6 @@ struct _Contact {
 	char* surname;
 	uint32_t age;
 	char* phone_number;
-
-	// TODO: take this flag out of this structure
-	bool indexed;
 };
 typedef struct _Contact Contact;
 

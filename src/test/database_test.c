@@ -25,7 +25,7 @@ test_leak1(int arg) {
 	LT_TEST_ONCE;
 
 	arg = arg;
-	
+
 	Storage st = storage_create();
 	Database db = database_create(&st);
 

@@ -192,21 +192,6 @@ database_advance(Database* database) {
 	return true;
 }
 
-static void
-call_if_indexed(void* arg, void* metadata) {
-	Contact* contact = arg;
-	Callback* cb = metadata;
-
-	if (contact->indexed) {
-		call_cb(*cb, contact);
-	}
-}
-
-void
-database_for_each(Database* database, Callback cb) {
-	storage_for_each(database->storage, (Callback){call_if_indexed, &cb});
-}
-
 Vector
 database_contacts(Database* database) {
 	Vector result = vector_create(sizeof(ContactId));
@@ -228,11 +213,6 @@ static void
 query_and_cb(void* arg, void* metadata) {
 	Contact* contact = arg;
 	QueryHelper* helper = metadata;
-
-	if (!contact->indexed) {
-		return;
-	}
-
 
 	bool c0 = helper->query_data.name == nullptr ||
 		strcmp(helper->query_data.name, contact->name) == 0;
@@ -257,7 +237,7 @@ database_query_and(Database* database, IncompleteContact query_data) {
 		.out = vector_create(sizeof(Contact*)),
 		.query_data = query_data,
 	};
-	storage_for_each(database->storage, (Callback){ query_and_cb, &helper });
+	storage_for_each_indexed(database->storage, (Callback){ query_and_cb, &helper });
 	return helper.out;
 }
 
@@ -265,10 +245,6 @@ static void
 query_or_cb(void* arg, void* metadata) {
 	Contact* contact = arg;
 	QueryHelper* helper = metadata;
-
-	if (!contact->indexed) {
-		return;
-	}
 
 	bool c0 = helper->query_data.name != nullptr &&
 		strcmp(helper->query_data.name, contact->name) == 0;
@@ -293,6 +269,6 @@ database_query_or(Database* database, IncompleteContact query_data) {
 		.out = vector_create(sizeof(Contact*)),
 		.query_data = query_data,
 	};
-	storage_for_each(database->storage, (Callback){ query_or_cb, &helper });
+	storage_for_each_indexed(database->storage, (Callback){ query_or_cb, &helper });
 	return helper.out;
 }

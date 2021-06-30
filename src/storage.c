@@ -33,7 +33,7 @@ storage_release(Storage* storage) {
 
 Contact*
 storage_at(Storage* storage, ContactId id) {
-	return (Contact*)slot_map_at(&storage->slot_map, id).begin;
+	return slot_map_at(&storage->slot_map, id).begin;
 }
 
 ContactId
@@ -69,19 +69,6 @@ storage_decrease_refcount(Storage* storage, ContactId id) {
 	slot_map_decrease_refcount(&storage->slot_map, id);
 }
 
-static void
-call_with_span_ptr(void* arg, void* metadata) {
-	Callback* cb = metadata;
-	Span* span = arg;
-	call_cb(*cb, span->begin);
-}
-
-void
-storage_for_each(Storage* storage, Callback cb) {
-	slot_map_for_each(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
-}
-
-
 char const*
 storage_get_name(Storage* storage, ContactId id) {
 	return storage_at(storage, id)->name;
@@ -104,15 +91,39 @@ storage_get_age(Storage* storage, ContactId id) {
 
 bool
 storage_is_indexed(Storage* storage, ContactId id) {
-	return storage_at(storage, id)->indexed;
+	return slot_map_is_highlighted(&storage->slot_map, id);
 }
 
 void
 storage_mark_indexed(Storage* storage, ContactId id) {
-	storage_at(storage, id)->indexed = true;
+	slot_map_highlight(&storage->slot_map, id);
 }
 
 void
 storage_mark_not_indexed(Storage* storage, ContactId id) {
-	storage_at(storage, id)->indexed = false;
+	slot_map_unhighlight(&storage->slot_map, id);
 }
+
+size_t
+storage_indexed_count(Storage const* storage) {
+	return storage->slot_map.highlighted_count;
+}
+
+
+static void
+call_with_span_ptr(void* arg, void* metadata) {
+	Callback* cb = metadata;
+	Span* span = arg;
+	call_cb(*cb, span->begin);
+}
+
+void
+storage_for_each(Storage const* storage, Callback cb) {
+	slot_map_for_each(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
+}
+
+void
+storage_for_each_indexed(Storage const* storage, Callback cb) {
+	slot_map_for_each_highlighted(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
+}
+

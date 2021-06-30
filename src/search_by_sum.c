@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 Vector search_by_sum(uint32_t* arr, size_t n, uint32_t sum) {
-	Vector result = vector_create(sizeof(size_t));	
+	Vector result = vector_create(sizeof(size_t));
 
 	if (sum == 0)
 		return result;

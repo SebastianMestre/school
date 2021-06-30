@@ -26,6 +26,7 @@ slot_map_create(size_t element_width, Destructor dtor) {
 		.holes = vector_create(sizeof(size_t)),
 
 		.element_width = element_width,
+		.highlighted_count = 0,
 		.dtor = dtor,
 	};
 }
@@ -114,6 +115,9 @@ slot_map_insert(SlotMap* map, Span data) {
 
 static void
 swap_cells(SlotMap* map, size_t i_cell, size_t j_cell) {
+	if (i_cell == j_cell)
+		return;
+
 	size_t i = get_cell_data(map, i_cell)->slot;
 	size_t j = get_cell_data(map, j_cell)->slot;
 
@@ -138,6 +142,10 @@ delete(SlotMap* map, size_t i) {
 	size_t i_cell = get_slot(map, i)->cell;
 
 	if (map->cells.size > 1) {
+		if (slot_map_is_highlighted(map, i)) {
+			slot_map_unhighlight(map, i);
+			i_cell = get_slot(map, i)->cell;
+		}
 		swap_cells(map, i_cell, map->cells.size - 1);
 		i_cell = map->cells.size - 1;
 	}
@@ -175,15 +183,50 @@ slot_map_decrease_refcount(SlotMap* map, size_t id) {
 	}
 }
 
-void
-slot_map_for_each(SlotMap* map, Callback cb) {
-	for (size_t i = 0; i < map->cells.size; ++i) {
-		Span cell = vector_at(&map->cells, i);
-		call_cb(cb, &cell);
-	}
-}
-
 size_t
 slot_map_get_cell_slot(SlotMap* map, size_t cell) {
 	return get_cell_data(map, cell)->slot;
+}
+
+void
+slot_map_highlight(SlotMap* map, size_t i) {
+	assert(!slot_map_is_highlighted(map, i));
+
+	size_t i_cell = get_slot(map, i)->cell;
+	swap_cells(map, map->highlighted_count, i_cell);
+	map->highlighted_count += 1;
+}
+
+void
+slot_map_unhighlight(SlotMap* map, size_t i) {
+	assert(slot_map_is_highlighted(map, i));
+
+	size_t i_cell = get_slot(map, i)->cell;
+	swap_cells(map, map->highlighted_count - 1, i_cell);
+	map->highlighted_count -= 1;
+}
+
+bool
+slot_map_is_highlighted(SlotMap* map, size_t i) {
+	size_t i_cell = get_slot(map, i)->cell;
+	return i_cell < map->highlighted_count;
+}
+
+
+void
+slot_map_for_each(SlotMap const* map, Callback cb) {
+	size_t stride = vector_element_width(&map->cells);
+	void* l = vector_begin(&map->cells);
+	void* r = vector_end(&map->cells);
+	for (void* it = l; it < r; it += stride)
+		call_cb(cb, it);
+}
+
+void
+slot_map_for_each_highlighted(SlotMap const* map, Callback cb) {
+	size_t stride = vector_element_width(&map->cells);
+	void* l = vector_begin(&map->cells);
+	void* r = vector_begin(&map->cells) + stride * map->highlighted_count;
+	for (void* it = l; it < r; it += stride)
+		call_cb(cb, it);
 }

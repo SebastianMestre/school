@@ -10,6 +10,7 @@ struct _SlotMap {
 	Vector slots;
 	Vector holes;
 
+	size_t highlighted_count;
 	size_t element_width;
 	Destructor dtor;
 };
@@ -37,10 +38,26 @@ slot_map_increase_refcount(SlotMap* map, size_t id);
 void
 slot_map_decrease_refcount(SlotMap* map, size_t id);
 
-// aplica el callback a cada celda
-void
-slot_map_for_each(SlotMap* map, Callback cb);
-
 // devuelve el slot que le corresponde a una celda
 size_t
 slot_map_get_cell_slot(SlotMap* map, size_t cell);
+
+// 'resalta' un elemento
+void
+slot_map_highlight(SlotMap* map, size_t i);
+
+// 'des-resalta' un elemento
+void
+slot_map_unhighlight(SlotMap* map, size_t i);
+
+// devuelve true sii el elemento esta 'resaltado'
+bool
+slot_map_is_highlighted(SlotMap* map, size_t i);
+
+// aplica el callback a cada celda
+void
+slot_map_for_each(SlotMap const* map, Callback cb);
+
+// aplica el callback a cada celda resaltada
+void
+slot_map_for_each_highlighted(SlotMap const* map, Callback cb);

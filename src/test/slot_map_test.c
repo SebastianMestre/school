@@ -40,6 +40,13 @@ random_test(int arg) {
 
 	for (int i = 0; i < M; ++i) {
 		int idx = erased[i];
+		if (rand() % 3 == 0) {
+			slot_map_highlight(&m, id[idx]);
+		}
+	}
+
+	for (int i = 0; i < M; ++i) {
+		int idx = erased[i];
 		slot_map_delete(&m, id[idx]);
 	}
 
