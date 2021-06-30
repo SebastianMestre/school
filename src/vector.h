@@ -39,10 +39,6 @@ vector_pop(Vector* v);
 void
 vector_release(Vector* v);
 
-// devuelve un array que apunta a la porcion llena del vector.
-Array
-vector_full_segment(Vector* v);
-
 // devuelve un puntero al primer elemento de v
 void*
 vector_begin(Vector const* v);

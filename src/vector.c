@@ -67,18 +67,6 @@ vector_pop(Vector* v) {
 	v->size -= 1;
 }
 
-Array
-vector_full_segment(Vector* v) {
-	return (Array){
-		.data = {
-			v->buffer.data.begin,
-			vector_last(v).end,
-		},
-		v->buffer.element_width,
-		v->size,
-	};
-}
-
 void*
 vector_begin(Vector const* v) {
 	return v->buffer.data.begin;
