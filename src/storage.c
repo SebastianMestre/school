@@ -110,23 +110,6 @@ storage_indexed_count(Storage const* storage) {
 }
 
 
-static void
-call_with_span_ptr(void* arg, void* metadata) {
-	Callback* cb = metadata;
-	Span* span = arg;
-	call_cb(*cb, span->begin);
-}
-
-void
-storage_for_each(Storage const* storage, Callback cb) {
-	slot_map_for_each(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
-}
-
-void
-storage_for_each_indexed(Storage const* storage, Callback cb) {
-	slot_map_for_each_highlighted(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
-}
-
 Contact*
 storage_begin(Storage* storage) {
 	return vector_begin(&storage->slot_map.cells);
