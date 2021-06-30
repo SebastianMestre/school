@@ -76,8 +76,8 @@ read_query_parameters() {
 	};
 }
 
-void
-buscar(Database* database) {
+static void
+find_contact(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
@@ -102,8 +102,8 @@ buscar(Database* database) {
 	}
 }
 
-void
-agregar(Database* database) {
+static void
+create_contact(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 	char buf2[BUF_SIZE];
@@ -137,8 +137,8 @@ agregar(Database* database) {
 	}
 }
 
-void
-eliminar(Database* database) {
+static void
+delete_contact(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
@@ -160,8 +160,8 @@ eliminar(Database* database) {
 	}
 }
 
-void
-editar(Database* database) {
+static void
+update_contact(Database* database) {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
 
@@ -202,8 +202,8 @@ editar(Database* database) {
 	assert(success);
 }
 
-void
-cargar(Database* database) {
+static void
+load_from_fs(Database* database) {
 	char buf0[BUF_SIZE];
 
 	printf("Advertencia: se sobreescribiran los datos actuales\n");
@@ -290,8 +290,8 @@ cleanup0:
 #undef LINE_BUF_SIZE
 }
 
-void
-guardar(Database* database) {
+static void
+store_to_fs(Database* database) {
 	char buf0[BUF_SIZE];
 
 	printf("Ingrese ruta de salida:\n>");
@@ -310,8 +310,95 @@ guardar(Database* database) {
 	fclose(f);
 }
 
-void
-deshacer(Database* database) {
+static int
+by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+	return strcmp(
+		storage_get_name(storage, lhs),
+		storage_get_name(storage, rhs));
+}
+
+static int
+by_surname_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+	return strcmp(
+		storage_get_surname(storage, lhs),
+		storage_get_surname(storage, rhs));
+}
+
+static int
+by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+
+	uint32_t lhs_age = storage_get_age(storage, lhs);
+	uint32_t rhs_age = storage_get_age(storage, rhs);
+
+	if (lhs_age < rhs_age)
+		return -1;
+	return rhs_age < lhs_age;
+}
+
+static int
+by_phone_number_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+	return strcmp(
+		storage_get_phone_number(storage, lhs),
+		storage_get_phone_number(storage, rhs));
+}
+
+static void
+store_to_fs_sorted(Database* database) {
+	char buf0[BUF_SIZE];
+	char buf1[BUF_SIZE];
+
+	printf("Ingrese ruta de salida:\n>");
+	read_a_line_with_retry_message(buf0, BUF_SIZE);
+	string_trim(buf0);
+
+	printf("Ingrese nombre de atributo:\n>");
+	read_a_line_with_retry_message(buf1, BUF_SIZE);
+	string_trim(buf1);
+	string_tolower(buf1);
+
+	Comparator cmp;
+	if (strcmp(buf1, "nombre") == 0) {
+		cmp = (Comparator){ by_name_cmp, database->storage };
+	} else if (strcmp(buf1, "apellido") == 0) {
+		cmp = (Comparator){ by_surname_cmp, database->storage };
+	} else if (strcmp(buf1, "edad") == 0) {
+		cmp = (Comparator){ by_age_cmp, database->storage };
+	} else if (strcmp(buf1, "telefono") == 0) {
+		cmp = (Comparator){ by_phone_number_cmp, database->storage };
+	} else {
+		printf("No existe ese atributo.\n");
+		return;
+	}
+
+	Vector contact_ids = database_contacts(database);
+	quicksort(
+		vector_begin(&contact_ids),
+		vector_end(&contact_ids),
+		vector_element_width(&contact_ids),
+		cmp);
+
+	FILE* f = fopen(buf0, "w");
+	fprintf(f, "nombre,apellido,edad,telefono\n");
+	write_vector_of_contacts_by_id(database->storage, &contact_ids, false, f);
+
+	fclose(f);
+	vector_release(&contact_ids);
+}
+
+static void
+undo(Database* database) {
 	bool success = database_rewind(database);
 	if (success) {
 		puts("Se deshizo la ultima operacion");
@@ -320,8 +407,8 @@ deshacer(Database* database) {
 	}
 }
 
-void
-rehacer(Database* database) {
+static void
+redo(Database* database) {
 	bool success = database_advance(database);
 	if (success) {
 		puts("Se rehizo la ultima operacion");
@@ -330,8 +417,8 @@ rehacer(Database* database) {
 	}
 }
 
-void
-conjuncion(Database* database) {
+static void
+conjunction_query(Database* database) {
 	IncompleteContact query_data = read_query_parameters();
 
 	if (
@@ -354,8 +441,8 @@ conjuncion(Database* database) {
 	free(query_data.phone_number);
 }
 
-void
-disjuncion(Database* database) {
+static void
+disjunction_query(Database* database) {
 	IncompleteContact query_data = read_query_parameters();
 
 	if (
@@ -378,99 +465,8 @@ disjuncion(Database* database) {
 	free(query_data.phone_number);
 }
 
-static int
-by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Database* database = metadata;
-	Storage* storage = database->storage;
-	return strcmp(
-		storage_get_name(storage, lhs),
-		storage_get_name(storage, rhs));
-}
-
-static int
-by_surname_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Database* database = metadata;
-	Storage* storage = database->storage;
-	return strcmp(
-		storage_get_surname(storage, lhs),
-		storage_get_surname(storage, rhs));
-}
-
-static int
-by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Database* database = metadata;
-	Storage* storage = database->storage;
-
-	uint32_t lhs_age = storage_get_age(storage, lhs);
-	uint32_t rhs_age = storage_get_age(storage, rhs);
-
-	if (lhs_age < rhs_age)
-		return -1;
-	return rhs_age < lhs_age;
-}
-
-static int
-by_phone_number_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Database* database = metadata;
-	Storage* storage = database->storage;
-	return strcmp(
-		storage_get_phone_number(storage, lhs),
-		storage_get_phone_number(storage, rhs));
-}
-
-void
-guardar_ordenado(Database* database) {
-	char buf0[BUF_SIZE];
-	char buf1[BUF_SIZE];
-
-	printf("Ingrese ruta de salida:\n>");
-	read_a_line_with_retry_message(buf0, BUF_SIZE);
-	string_trim(buf0);
-
-	printf("Ingrese nombre de atributo:\n>");
-	read_a_line_with_retry_message(buf1, BUF_SIZE);
-	string_trim(buf1);
-	string_tolower(buf1);
-
-	Comparator cmp;
-	if (strcmp(buf1, "nombre") == 0) {
-		cmp = (Comparator){ by_name_cmp, database };
-	} else if (strcmp(buf1, "apellido") == 0) {
-		cmp = (Comparator){ by_surname_cmp, database };
-	} else if (strcmp(buf1, "edad") == 0) {
-		cmp = (Comparator){ by_age_cmp, database };
-	} else if (strcmp(buf1, "telefono") == 0) {
-		cmp = (Comparator){ by_phone_number_cmp, database };
-	} else {
-		printf("No existe ese atributo.\n");
-		return;
-	}
-
-	Vector contact_ids = database_contacts(database);
-	quicksort(
-		vector_begin(&contact_ids),
-		vector_end(&contact_ids),
-		vector_element_width(&contact_ids),
-		cmp);
-
-	FILE* f = fopen(buf0, "w");
-	fprintf(f, "nombre,apellido,edad,telefono\n");
-	write_vector_of_contacts_by_id(database->storage, &contact_ids, false, f);
-
-	fclose(f);
-	vector_release(&contact_ids);
-}
-
-void
-buscar_por_suma_de_edades(Database* database) {
+static void
+age_sum_query(Database* database) {
 	char buf0[BUF_SIZE];
 
 	printf("Ingrese un natural:\n>");
@@ -544,18 +540,18 @@ main() {
 
 #define MENU_LEN 13
 	MenuEntry entries[MENU_LEN] = {
-		{"Buscar", buscar},
-		{"Agregar", agregar},
-		{"Eliminar", eliminar},
-		{"Editar", editar},
-		{"Cargar", cargar},
-		{"Guardar", guardar},
-		{"Deshacer", deshacer},
-		{"Rehacer", rehacer},
-		{"AND", conjuncion},
-		{"OR", disjuncion},
-		{"Guardar ordenado", guardar_ordenado},
-		{"Buscar por suma de edades", buscar_por_suma_de_edades},
+		{"Buscar", find_contact},
+		{"Agregar", create_contact},
+		{"Eliminar", delete_contact},
+		{"Editar", update_contact},
+		{"Cargar", load_from_fs},
+		{"Guardar", store_to_fs},
+		{"Deshacer", undo},
+		{"Rehacer", redo},
+		{"AND", conjunction_query},
+		{"OR", disjunction_query},
+		{"Guardar ordenado", store_to_fs_sorted},
+		{"Buscar por suma de edades", age_sum_query},
 		{"Salir", nullptr},
 	};
 
