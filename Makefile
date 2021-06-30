@@ -9,6 +9,7 @@ all: app test
 common_objects :=           \
 build/types.o               \
 build/string.o              \
+build/io.o                  \
                             \
 build/iter.o                \
 build/span.o                \
@@ -20,6 +21,7 @@ build/slot_map.o            \
                             \
 build/contact.o             \
                             \
+build/serialization.o       \
 build/storage.o             \
 build/history.o             \
 build/index.o               \
@@ -28,7 +30,6 @@ build/search_by_sum.o       \
 build/quicksort.o           \
 
 app: $(common_objects)      \
-build/io.o                  \
 build/main.o
 	$(CC) -o $@ $^ $(LIBS)
 
@@ -54,6 +55,8 @@ build/slot_map.o: src/slot_map.c src/slot_map.h src/vector.h src/span.h
 
 build/contact.o: src/contact.c src/contact.h
 
+build/serialization.o: src/serialization.c src/serialization.h src/contact.h src/storage.h         \
+src/slot_map.h src/vector.h src/span.h
 build/storage.o: src/storage.c src/storage.h src/contact.h src/slot_map.h src/vector.h src/span.h
 build/history.o: src/history.c src/history.h src/storage.h src/circular_buffer.h src/vector.h      \
 src/span.h

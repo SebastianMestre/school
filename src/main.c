@@ -9,6 +9,7 @@
 #include "string.h"
 #include "search_by_sum.h"
 #include "quicksort.h"
+#include "serialization.h"
 
 #define BUF_SIZE 256
 
@@ -24,7 +25,7 @@ read_u32_with_retry_message(char* buf, size_t n) {
 	return value;
 }
 
-static QueryData
+static IncompleteContact
 read_query_parameters() {
 	char buf0[BUF_SIZE];
 	char buf1[BUF_SIZE];
@@ -66,7 +67,7 @@ read_query_parameters() {
 	char* surname = strlen(buf1) == 0 ? nullptr : string_dup(buf1);
 	char* phone_number = strlen(buf3) == 0 ? nullptr : string_dup(buf3);
 
-	return (QueryData) {
+	return (IncompleteContact) {
 		.name = name,
 		.surname = surname,
 		.has_age = has_age,
@@ -74,27 +75,6 @@ read_query_parameters() {
 		.phone_number = phone_number,
 	};
 }
-
-static void
-print_contact(Contact* contact, bool braces, FILE* f) {
-	if (braces) printf("{");
-	print_title_case(contact->name, f);
-	fprintf(f, ",");
-	print_title_case(contact->surname, f);
-	fprintf(f, ",%u,%s", contact->age, contact->phone_number);
-	if (braces) printf("}");
-}
-
-static void
-print_vector_of_contacts(Database* database, Vector const* contacts, bool braces, FILE* f) {
-	for (size_t i = 0; i < contacts->size; ++i) {
-		ContactId id; span_write(&id, vector_at(contacts, i));
-		Contact* contact = storage_at(database->storage, id);
-		print_contact(contact, braces, f);
-		fprintf(f, "\n");
-	}
-}
-
 
 void
 buscar(Database* database) {
@@ -117,7 +97,7 @@ buscar(Database* database) {
 	if (!contact.active) {
 		puts("No existe un contacto con ese nombre y apellido");
 	} else {
-		print_contact(storage_at(database->storage, contact.id), true, stdout);
+		write_contact(storage_at(database->storage, contact.id), true, stdout);
 		printf("\n");
 	}
 }
@@ -258,60 +238,40 @@ cargar(Database* database) {
 
 	Database new_database = database_create(database->storage);
 	for (size_t line_idx = 1; 1; ++line_idx) {
-		success = get_line(line_buf, LINE_BUF_SIZE, f);
 
-		if (!success) {
-			if (feof(f)) {
-				break;
-			}
+		IncompleteContact query;
+		ReadContactStatus status =
+			read_contact(line_buf, LINE_BUF_SIZE, &query, f);
 
+		if (status == RCS_OK) {
+			assert(query.has_age);
+			database_insert(
+				&new_database,
+				string_dup(query.name),
+				string_dup(query.surname),
+				query.age,
+				string_dup(query.phone_number));
+
+			continue;
+		}
+
+		if (status == RCS_E_BAD_LINE && feof(f))
+			break;
+
+		switch(status) {
+		case RCS_E_BAD_LINE:
 			printf("Linea demasiado larga (linea %lu), no se puede cargar.\n", line_idx);
-			goto cleanup1;
-		}
-
-		char* name = line_buf;
-
-		char* surname = name;
-		for (; *surname != ','; ++surname) {
-			if (*surname == '\0') {
-				printf("Final de linea inesperado leyendo el nombre (linea %lu), no se puede cargar.\n", line_idx);
-				goto cleanup1;
-			}
-		}
-		*surname++ = '\0'; // name terminator
-
-		char* age_str = surname;
-		for (; *age_str != ','; ++age_str) {
-			if (*age_str == '\0') {
-				printf("Final de linea inesperado leyendo el apellido (linea %lu), no se puede cargar.\n", line_idx);
-				goto cleanup1;
-			}
-		}
-		*age_str++ = '\0'; // surname terminator
-
-		char* phone_number = age_str;
-		for (; *phone_number != ','; ++phone_number) {
-			if (*phone_number == '\0') {
-				printf("Final de linea inesperado leyendo la edad (linea %lu), no se puede cargar.\n", line_idx);
-				goto cleanup1;
-			}
-		}
-		*phone_number++ = '\0'; // age terminator
-
-		string_trim(name);
-		string_trim(surname);
-		string_trim(age_str);
-		string_trim(phone_number);
-
-		uint32_t age;
-		success = parse_u32(age_str, &age);
-
-		if (!success) {
+			break;
+		case RCS_E_FIELD_COUNT:
+			printf("Cantidad incorrecta de valores (linea %lu), no se puede cargar.\n", line_idx);
+			break;
+		case RCS_E_INVALID_AGE:
 			printf("La edad no es un natural valido (linea %lu), no se puede cargar.\n", line_idx);
-			goto cleanup1;
+			break;
+		case RCS_OK:
+			assert(0);
 		}
-
-		database_insert(&new_database, string_dup(name), string_dup(surname), age, string_dup(phone_number));
+		goto cleanup1;
 	}
 
 	fclose(f);
@@ -343,7 +303,7 @@ guardar(Database* database) {
 	FILE* f = fopen(buf0, "w");
 
 	fprintf(f, "nombre,apellido,edad,telefono\n");
-	print_vector_of_contacts(database, &contacts, false, f);
+	write_vector_of_contacts(database->storage, &contacts, false, f);
 
 	fclose(f);
 	vector_release(&contacts);
@@ -371,7 +331,7 @@ rehacer(Database* database) {
 
 void
 conjuncion(Database* database) {
-	QueryData query_data = read_query_parameters();
+	IncompleteContact query_data = read_query_parameters();
 
 	if (
 		query_data.name == nullptr &&
@@ -385,7 +345,7 @@ conjuncion(Database* database) {
 
 	Vector result = database_query_and(database, query_data);
 
-	print_vector_of_contacts(database, &result, true, stdout);
+	write_vector_of_contacts(database->storage, &result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -395,7 +355,7 @@ conjuncion(Database* database) {
 
 void
 disjuncion(Database* database) {
-	QueryData query_data = read_query_parameters();
+	IncompleteContact query_data = read_query_parameters();
 
 	if (
 		query_data.name == nullptr &&
@@ -409,7 +369,7 @@ disjuncion(Database* database) {
 
 	Vector result = database_query_or(database, query_data);
 
-	print_vector_of_contacts(database, &result, true, stdout);
+	write_vector_of_contacts(database->storage, &result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -492,7 +452,7 @@ guardar_ordenado(Database* database) {
 
 	FILE* f = fopen(buf0, "w");
 	fprintf(f, "nombre,apellido,edad,telefono\n");
-	print_vector_of_contacts(database, &contacts, false, f);
+	write_vector_of_contacts(database->storage, &contacts, false, f);
 
 	fclose(f);
 	vector_release(&contacts);
@@ -532,7 +492,7 @@ buscar_por_suma_de_edades(Database* database) {
 			size_t j; span_write(&j, vector_at(&result, i));
 			vector_push(&to_print, vector_push(&contact_ids, SPANOF(j)));
 		}
-		print_vector_of_contacts(database, &to_print, true, stdout);
+		write_vector_of_contacts(database->storage, &to_print, true, stdout);
 		vector_release(&to_print);
 	}
 

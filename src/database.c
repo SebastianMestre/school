@@ -221,7 +221,7 @@ database_contacts(Database* database) {
 
 typedef struct {
 	Vector out;
-	QueryData query_data;
+	IncompleteContact query_data;
 } QueryHelper;
 
 static void
@@ -252,7 +252,7 @@ query_and_cb(void* arg, void* metadata) {
 }
 
 Vector
-database_query_and(Database* database, QueryData query_data) {
+database_query_and(Database* database, IncompleteContact query_data) {
 	QueryHelper helper = {
 		.out = vector_create(sizeof(Contact*)),
 		.query_data = query_data,
@@ -288,7 +288,7 @@ query_or_cb(void* arg, void* metadata) {
 }
 
 Vector
-database_query_or(Database* database, QueryData query_data) {
+database_query_or(Database* database, IncompleteContact query_data) {
 	QueryHelper helper = {
 		.out = vector_create(sizeof(Contact*)),
 		.query_data = query_data,

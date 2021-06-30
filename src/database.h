@@ -5,15 +5,6 @@
 #include "history.h"
 #include "vector.h"
 
-struct _QueryData {
-	char* name;
-	char* surname;
-	bool has_age;
-	uint32_t age;
-	char* phone_number;
-};
-typedef struct _QueryData QueryData;
-
 typedef struct _Storage Storage;
 
 struct _Database {
@@ -81,9 +72,9 @@ database_contacts(Database* database);
 // no toma ownership
 // devuelve los Ids de todos los contactos que cumplen todas las condiciones
 Vector
-database_query_and(Database* database, QueryData query);
+database_query_and(Database* database, IncompleteContact query);
 
 // no toma ownership
 // devuelve los Ids de todos los contactos que cumplen alguna de las condiciones
 Vector
-database_query_or(Database* database, QueryData query);
+database_query_or(Database* database, IncompleteContact query);
