@@ -76,7 +76,7 @@ storage_get_name(Storage* storage, ContactId id) {
 
 char const*
 storage_get_surname(Storage* storage, ContactId id) {
-	return storage_at(storage, id)->name;
+	return storage_at(storage, id)->surname;
 }
 
 char const*
@@ -127,3 +127,17 @@ storage_for_each_indexed(Storage const* storage, Callback cb) {
 	slot_map_for_each_highlighted(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
 }
 
+Contact*
+storage_begin(Storage* storage) {
+	return vector_begin(&storage->slot_map.cells);
+}
+
+Contact*
+storage_end(Storage* storage) {
+	return storage_begin(storage) + storage->slot_map.highlighted_count;
+}
+
+Contact*
+storage_true_end(Storage* storage) {
+	return vector_end(&storage->slot_map.cells);
+}

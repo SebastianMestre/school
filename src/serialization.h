@@ -11,7 +11,10 @@ void
 write_contact(Contact* contact, bool braces, FILE* f);
 
 void
-write_vector_of_contacts(Storage* storage, Vector const* contacts, bool braces, FILE* f);
+write_vector_of_contacts(Vector const* contacts, bool braces, FILE* f);
+
+void
+write_vector_of_contacts_by_id(Storage* storage, Vector const* contacts, bool braces, FILE* f);
 
 enum _ReadContactStatus {
 	RCS_OK = 0,

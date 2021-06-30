@@ -76,3 +76,15 @@ storage_for_each(Storage const* storage, Callback cb);
 
 void
 storage_for_each_indexed(Storage const* storage, Callback cb);
+
+// devuelve un puntero al primer contacto indizado
+Contact*
+storage_begin(Storage* storage);
+
+// devuelve un puntero a despues del ultimo contacto indizado
+Contact*
+storage_end(Storage* storage);
+
+// devuelve un puntero a despues del ultimo contacto no indizado
+Contact*
+storage_true_end(Storage* storage);

@@ -10,16 +10,25 @@
 
 void
 write_contact(Contact* contact, bool braces, FILE* f) {
-	if (braces) printf("{");
+	if (braces) fprintf(f, "{");
 	print_title_case(contact->name, f);
 	fprintf(f, ",");
 	print_title_case(contact->surname, f);
 	fprintf(f, ",%u,%s", contact->age, contact->phone_number);
-	if (braces) printf("}");
+	if (braces) fprintf(f, "}");
 }
 
 void
-write_vector_of_contacts(Storage* storage, Vector const* contacts, bool braces, FILE* f) {
+write_vector_of_contacts(Vector const* contacts, bool braces, FILE* f) {
+	for (size_t i = 0; i < contacts->size; ++i) {
+		Contact* contact; span_write(&contact, vector_at(contacts, i));
+		write_contact(contact, braces, f);
+		fprintf(f, "\n");
+	}
+}
+
+void
+write_vector_of_contacts_by_id(Storage* storage, Vector const* contacts, bool braces, FILE* f) {
 	for (size_t i = 0; i < contacts->size; ++i) {
 		ContactId id; span_write(&id, vector_at(contacts, i));
 		Contact* contact = storage_at(storage, id);

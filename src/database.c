@@ -204,71 +204,50 @@ database_contacts(Database* database) {
 	return result;
 }
 
-typedef struct {
-	Vector out;
-	IncompleteContact query_data;
-} QueryHelper;
-
-static void
-query_and_cb(void* arg, void* metadata) {
-	Contact* contact = arg;
-	QueryHelper* helper = metadata;
-
-	bool c0 = helper->query_data.name == nullptr ||
-		strcmp(helper->query_data.name, contact->name) == 0;
-
-	bool c1 = helper->query_data.surname == nullptr ||
-		strcmp(helper->query_data.surname, contact->surname) == 0;
-
-	bool c2 = !helper->query_data.has_age ||
-		helper->query_data.age == contact->age;
-
-	bool c3 = helper->query_data.phone_number == nullptr ||
-		strcmp(helper->query_data.phone_number, contact->phone_number) == 0;
-
-	if (c0 && c1 && c2 && c3) {
-		vector_push(&helper->out, SPANOF(contact));
-	}
-}
-
 Vector
 database_query_and(Database* database, IncompleteContact query_data) {
-	QueryHelper helper = {
-		.out = vector_create(sizeof(Contact*)),
-		.query_data = query_data,
-	};
-	storage_for_each_indexed(database->storage, (Callback){ query_and_cb, &helper });
-	return helper.out;
-}
+	Vector result = vector_create(sizeof(Contact*));
+	Contact* const l = storage_begin(database->storage);
+	Contact* const r = storage_end(database->storage);
+	for (Contact* it = l; it < r; ++it) {
+		bool c0 = query_data.name == nullptr ||
+			strcmp(query_data.name, it->name) == 0;
 
-static void
-query_or_cb(void* arg, void* metadata) {
-	Contact* contact = arg;
-	QueryHelper* helper = metadata;
+		bool c1 = query_data.surname == nullptr ||
+			strcmp(query_data.surname, it->surname) == 0;
 
-	bool c0 = helper->query_data.name != nullptr &&
-		strcmp(helper->query_data.name, contact->name) == 0;
+		bool c2 = !query_data.has_age ||
+			query_data.age == it->age;
 
-	bool c1 = helper->query_data.surname != nullptr &&
-		strcmp(helper->query_data.surname, contact->surname) == 0;
+		bool c3 = query_data.phone_number == nullptr ||
+			strcmp(query_data.phone_number, it->phone_number) == 0;
 
-	bool c2 = helper->query_data.has_age &&
-		helper->query_data.age == contact->age;
-
-	bool c3 = helper->query_data.phone_number != nullptr &&
-		strcmp(helper->query_data.phone_number, contact->phone_number) == 0;
-
-	if (c0 || c1 || c2 || c3) {
-		vector_push(&helper->out, SPANOF(contact));
+		if (c0 && c1 && c2 && c3)
+			vector_push(&result, SPANOF(it));
 	}
+	return result;
 }
 
 Vector
 database_query_or(Database* database, IncompleteContact query_data) {
-	QueryHelper helper = {
-		.out = vector_create(sizeof(Contact*)),
-		.query_data = query_data,
-	};
-	storage_for_each_indexed(database->storage, (Callback){ query_or_cb, &helper });
-	return helper.out;
+	Vector result = vector_create(sizeof(Contact*));
+	Contact* const l = storage_begin(database->storage);
+	Contact* const r = storage_end(database->storage);
+	for (Contact* it = l; it < r; ++it) {
+		bool c0 = query_data.name != nullptr &&
+			strcmp(query_data.name, it->name) == 0;
+
+		bool c1 = query_data.surname != nullptr &&
+			strcmp(query_data.surname, it->surname) == 0;
+
+		bool c2 = query_data.has_age &&
+			query_data.age == it->age;
+
+		bool c3 = query_data.phone_number != nullptr &&
+			strcmp(query_data.phone_number, it->phone_number) == 0;
+
+		if (c0 || c1 || c2 || c3)
+			vector_push(&result, SPANOF(it));
+	}
+	return result;
 }

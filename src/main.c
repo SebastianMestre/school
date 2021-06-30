@@ -303,7 +303,7 @@ guardar(Database* database) {
 	FILE* f = fopen(buf0, "w");
 
 	fprintf(f, "nombre,apellido,edad,telefono\n");
-	write_vector_of_contacts(database->storage, &contacts, false, f);
+	write_vector_of_contacts_by_id(database->storage, &contacts, false, f);
 
 	fclose(f);
 	vector_release(&contacts);
@@ -345,7 +345,7 @@ conjuncion(Database* database) {
 
 	Vector result = database_query_and(database, query_data);
 
-	write_vector_of_contacts(database->storage, &result, true, stdout);
+	write_vector_of_contacts(&result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -369,7 +369,7 @@ disjuncion(Database* database) {
 
 	Vector result = database_query_or(database, query_data);
 
-	write_vector_of_contacts(database->storage, &result, true, stdout);
+	write_vector_of_contacts(&result, true, stdout);
 
 	vector_release(&result);
 	free(query_data.name);
@@ -462,7 +462,7 @@ guardar_ordenado(Database* database) {
 
 	FILE* f = fopen(buf0, "w");
 	fprintf(f, "nombre,apellido,edad,telefono\n");
-	write_vector_of_contacts(database->storage, &contacts, false, f);
+	write_vector_of_contacts_by_id(database->storage, &contacts, false, f);
 
 	fclose(f);
 	vector_release(&contacts);
@@ -502,7 +502,7 @@ buscar_por_suma_de_edades(Database* database) {
 			size_t j; span_write(&j, vector_at(&result, i));
 			vector_push(&to_print, vector_at(&contact_ids, j));
 		}
-		write_vector_of_contacts(database->storage, &to_print, true, stdout);
+		write_vector_of_contacts_by_id(database->storage, &to_print, true, stdout);
 		vector_release(&to_print);
 	}
 
