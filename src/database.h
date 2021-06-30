@@ -45,10 +45,6 @@ bool
 database_update(Database* database, char* name, char* surname, unsigned age, char* phone_number);
 
 // no toma ownership
-void
-database_clear_history(Database* database);
-
-// no toma ownership
 // deshace el ultimo evento
 // devuelve false sii no hay eventos para deshacer
 bool

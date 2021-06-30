@@ -5,11 +5,11 @@
 
 #include "database.h"
 #include "io.h"
+#include "quicksort.h"
+#include "search_by_sum.h"
+#include "serialization.h"
 #include "storage.h"
 #include "string.h"
-#include "search_by_sum.h"
-#include "quicksort.h"
-#include "serialization.h"
 
 #define BUF_SIZE 256
 
@@ -75,6 +75,51 @@ read_query_parameters() {
 		.phone_number = phone_number,
 	};
 }
+
+static int
+by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+	return strcmp(
+		storage_get_name(storage, lhs),
+		storage_get_name(storage, rhs));
+}
+
+static int
+by_surname_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+	return strcmp(
+		storage_get_surname(storage, lhs),
+		storage_get_surname(storage, rhs));
+}
+
+static int
+by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+
+	uint32_t lhs_age = storage_get_age(storage, lhs);
+	uint32_t rhs_age = storage_get_age(storage, rhs);
+
+	if (lhs_age < rhs_age)
+		return -1;
+	return rhs_age < lhs_age;
+}
+
+static int
+by_phone_number_cmp(void const* arg0, void const* arg1, void* metadata) {
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
+	Storage* storage = metadata;
+	return strcmp(
+		storage_get_phone_number(storage, lhs),
+		storage_get_phone_number(storage, rhs));
+}
+
 
 static void
 find_contact(Database* database) {
@@ -308,50 +353,6 @@ store_to_fs(Database* database) {
 	);
 
 	fclose(f);
-}
-
-static int
-by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Storage* storage = metadata;
-	return strcmp(
-		storage_get_name(storage, lhs),
-		storage_get_name(storage, rhs));
-}
-
-static int
-by_surname_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Storage* storage = metadata;
-	return strcmp(
-		storage_get_surname(storage, lhs),
-		storage_get_surname(storage, rhs));
-}
-
-static int
-by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Storage* storage = metadata;
-
-	uint32_t lhs_age = storage_get_age(storage, lhs);
-	uint32_t rhs_age = storage_get_age(storage, rhs);
-
-	if (lhs_age < rhs_age)
-		return -1;
-	return rhs_age < lhs_age;
-}
-
-static int
-by_phone_number_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId lhs = *(ContactId const*)arg0;
-	ContactId rhs = *(ContactId const*)arg1;
-	Storage* storage = metadata;
-	return strcmp(
-		storage_get_phone_number(storage, lhs),
-		storage_get_phone_number(storage, rhs));
 }
 
 static void
