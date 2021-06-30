@@ -190,11 +190,9 @@ database_advance(Database* database) {
 Vector
 database_contacts(Database* database) {
 	Vector result = vector_create(sizeof(ContactId));
-	for (size_t i = 0; i < database->storage->slot_map.cells.size; ++i) {
+	for (size_t i = 0; i < storage_indexed_count(database->storage); ++i) {
 		ContactId slot = slot_map_get_cell_slot(&database->storage->slot_map, i);
-		if (storage_is_indexed(database->storage, slot)) {
-			vector_push(&result, SPANOF(slot));
-		}
+		vector_push(&result, SPANOF(slot));
 	}
 	return result;
 }

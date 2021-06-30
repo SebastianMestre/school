@@ -40,7 +40,7 @@ vector_put_at(Vector* v, size_t i, Span data) {
 	span_write(vector_at(v, i).begin, data);
 }
 
-void
+static void
 vector_resize_storage(Vector* v, size_t n) {
 	assert(v->size <= n);
 	Array new_buffer = array_malloc(v->buffer.element_width, n);
