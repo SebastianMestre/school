@@ -53,11 +53,3 @@ slot_map_unhighlight(SlotMap* map, size_t i);
 // devuelve true sii el elemento esta 'resaltado'
 bool
 slot_map_is_highlighted(SlotMap* map, size_t i);
-
-// aplica el callback a cada celda
-void
-slot_map_for_each(SlotMap const* map, Callback cb);
-
-// aplica el callback a cada celda resaltada
-void
-slot_map_for_each_highlighted(SlotMap const* map, Callback cb);

@@ -211,22 +211,3 @@ slot_map_is_highlighted(SlotMap* map, size_t i) {
 	size_t i_cell = get_slot(map, i)->cell;
 	return i_cell < map->highlighted_count;
 }
-
-
-void
-slot_map_for_each(SlotMap const* map, Callback cb) {
-	size_t stride = vector_element_width(&map->cells);
-	void* l = vector_begin(&map->cells);
-	void* r = vector_end(&map->cells);
-	for (void* it = l; it < r; it += stride)
-		call_cb(cb, it);
-}
-
-void
-slot_map_for_each_highlighted(SlotMap const* map, Callback cb) {
-	size_t stride = vector_element_width(&map->cells);
-	void* l = vector_begin(&map->cells);
-	void* r = vector_begin(&map->cells) + stride * map->highlighted_count;
-	for (void* it = l; it < r; it += stride)
-		call_cb(cb, it);
-}
