@@ -3,10 +3,12 @@
 
 A lo largo del trabajo, segui estas normas para aportar consistencia al codigo:
 
-- Las funciones documentan si toman ownership sobre alguno de sus argumentos (a
-falta de documentacion, se debe suponer que NO toman ownership).
-- Por lo tanto, si es necesario, generar copias de valores que se pasan como
-argumento, es responsabilidad de quien llama.
+- Las funciones documentan si toman ownership sobre alguno de sus argumentos. Si
+se toma ownership de un objeto, luego se liberara llamando free() sobre ese
+objeto y, donde tiene sentido, invocando un destructor (a falta de documentacion,
+se debe suponer que NO toman ownership).
+- Si es necesario, generar copias de valores que se pasan como argumento, es
+responsabilidad de quien llama.
 - Se considera que cualquier objeto se puede 'mover' copiando los bytes que lo
 componen a un nuevo lugar, y no volviendo a usar el objeto original.
 - Algunas estructuras pequennas se pasan por valor (en particular, si no hay una
@@ -115,6 +117,12 @@ memoria.
 La variante implementada en este trabajo tiene conteo de referencias: se lleva
 la cuenta de cuantas zonas del programa tienen una referencia a a cada valor de
 la estructura y, cuando la cantidad llega a 0, se elimina el valor.
+
+Aparte, implementa una operacion llamada 'resaltar' (highlight en el codigo),
+que conceptualmente marca una entrada y luego permite distinguirla de las
+entradas no marcadas (por ejemplo para iterar por las entradas resaltadas).
+Esto se usa en el trabajo para iterar por los contactos, evitando los que estan
+eliminados, pero siguen referenciados en 'rehacer/deshacer'.
 
 Las razones de uso son:
 - Soporta almacenamiento de datos repetidos trivialmente.
