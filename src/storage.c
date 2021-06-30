@@ -80,3 +80,39 @@ void
 storage_for_each(Storage* storage, Callback cb) {
 	slot_map_for_each(&storage->slot_map, (Callback){call_with_span_ptr, &cb});
 }
+
+
+char const*
+storage_get_name(Storage* storage, ContactId id) {
+	return storage_at(storage, id)->name;
+}
+
+char const*
+storage_get_surname(Storage* storage, ContactId id) {
+	return storage_at(storage, id)->name;
+}
+
+char const*
+storage_get_phone_number(Storage* storage, ContactId id) {
+	return storage_at(storage, id)->phone_number;
+}
+
+uint32_t
+storage_get_age(Storage* storage, ContactId id) {
+	return storage_at(storage, id)->age;
+}
+
+bool
+storage_is_indexed(Storage* storage, ContactId id) {
+	return storage_at(storage, id)->indexed;
+}
+
+void
+storage_mark_indexed(Storage* storage, ContactId id) {
+	storage_at(storage, id)->indexed = true;
+}
+
+void
+storage_mark_not_indexed(Storage* storage, ContactId id) {
+	storage_at(storage, id)->indexed = false;
+}

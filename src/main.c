@@ -379,31 +379,35 @@ disjuncion(Database* database) {
 
 static int
 by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId const* lhs = arg0;
-	ContactId const* rhs = arg1;
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
 	Database* database = metadata;
 	Storage* storage = database->storage;
-	return strcmp(storage_at(storage, *lhs)->name, storage_at(storage, *rhs)->name);
+	return strcmp(
+		storage_get_name(storage, lhs),
+		storage_get_name(storage, rhs));
 }
 
 static int
 by_surname_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId const* lhs = arg0;
-	ContactId const* rhs = arg1;
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
 	Database* database = metadata;
 	Storage* storage = database->storage;
-	return strcmp(storage_at(storage, *lhs)->surname, storage_at(storage, *rhs)->surname);
+	return strcmp(
+		storage_get_surname(storage, lhs),
+		storage_get_surname(storage, rhs));
 }
 
 static int
 by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId const* lhs = arg0;
-	ContactId const* rhs = arg1;
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
 	Database* database = metadata;
 	Storage* storage = database->storage;
 
-	uint32_t lhs_age = storage_at(storage, *lhs)->age;
-	uint32_t rhs_age = storage_at(storage, *rhs)->age;
+	uint32_t lhs_age = storage_get_age(storage, lhs);
+	uint32_t rhs_age = storage_get_age(storage, rhs);
 
 	if (lhs_age < rhs_age)
 		return -1;
@@ -412,11 +416,13 @@ by_age_cmp(void const* arg0, void const* arg1, void* metadata) {
 
 static int
 by_phone_number_cmp(void const* arg0, void const* arg1, void* metadata) {
-	ContactId const* lhs = arg0;
-	ContactId const* rhs = arg1;
+	ContactId lhs = *(ContactId const*)arg0;
+	ContactId rhs = *(ContactId const*)arg1;
 	Database* database = metadata;
 	Storage* storage = database->storage;
-	return strcmp(storage_at(storage, *lhs)->phone_number, storage_at(storage, *rhs)->phone_number);
+	return strcmp(
+		storage_get_phone_number(storage, lhs),
+		storage_get_phone_number(storage, rhs));
 }
 
 void
@@ -482,7 +488,7 @@ buscar_por_suma_de_edades(Database* database) {
 	Vector ages = vector_create(sizeof(uint32_t));
 	for (size_t i = 0; i < contact_ids.size; ++i) {
 		ContactId id; span_write(&id, vector_at(&contact_ids, i));
-		uint32_t age = storage_at(database->storage, id)->age;
+		uint32_t age = storage_get_age(database->storage, id);
 		vector_push(&ages, SPANOF(age));
 	}
 

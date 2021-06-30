@@ -49,3 +49,24 @@ storage_decrease_refcount(Storage* storage, ContactId id);
 // aplica el callback a cada contacto
 void
 storage_for_each(Storage* storage, Callback cb);
+
+char const*
+storage_get_name(Storage* storage, ContactId id);
+
+char const*
+storage_get_surname(Storage* storage, ContactId id);
+
+char const*
+storage_get_phone_number(Storage* storage, ContactId id);
+
+uint32_t
+storage_get_age(Storage* storage, ContactId id);
+
+bool
+storage_is_indexed(Storage* storage, ContactId id);
+
+void
+storage_mark_indexed(Storage* storage, ContactId id);
+
+void
+storage_mark_not_indexed(Storage* storage, ContactId id);

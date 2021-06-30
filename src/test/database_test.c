@@ -15,7 +15,9 @@ by_name_cmp(void const* arg0, void const* arg1, void* metadata) {
 	ContactId const* rhs = arg1;
 	Database* database = metadata;
 	Storage* storage = database->storage;
-	return strcmp(storage_at(storage, *lhs)->name, storage_at(storage, *rhs)->name);
+	return strcmp(
+		storage_get_name(storage, *lhs),
+		storage_get_name(storage, *rhs));
 }
 
 static void
