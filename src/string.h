@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 bool
 is_whitespace(char c);
 
@@ -24,3 +26,7 @@ parse_u32(char* buf, unsigned int* out);
 // si el input no es valido, devuelve false.
 bool
 parse_int(char* buf, int* out);
+
+// intercambia los datos entre dos bloques de memoria
+void
+mem_swap(void* lhs, void* rhs, size_t n);

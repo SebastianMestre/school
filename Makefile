@@ -63,7 +63,7 @@ build/index.o: src/index.c src/index.h src/storage.h src/bst.h src/vector.h src/
 build/database.o: src/database.c src/database.h src/index.h src/history.h src/storage.h            \
 src/slot_map.h src/circular_buffer.h src/bst.h src/vector.h src/span.h src/string.h
 build/search_by_sum.o: src/search_by_sum.c src/search_by_sum.h src/vector.h src/span.h
-build/quicksort.o: src/quicksort.c src/quicksort.h
+build/quicksort.o: src/quicksort.c src/quicksort.h src/string.h
 
 build/io.o: src/io.c src/io.h
 build/main.o: src/main.c src/io.h src/string.h src/database.h src/index.h src/history.h            \
@@ -78,7 +78,8 @@ src/index.h src/history.h src/storage.h src/vector.h src/circular_buffer.h src/b
 src/span.h
 build/test/search_by_sum_test.o: src/test/search_by_sum_test.c src/test/search_by_sum_test.h       \
 src/vector.h src/span.h
-build/test/quicksort_test.o: src/test/quicksort_test.c src/test/quicksort_test.h src/quicksort.h
+build/test/quicksort_test.o: src/test/quicksort_test.c src/test/quicksort_test.h src/quicksort.h   \
+src/string.h
 build/test/main.o: src/test/main.c src/test/bst_test.h src/test/span_test.h src/test/vector_test.h \
 src/test/slot_map_test.h src/test/search_by_sum_test.h
 

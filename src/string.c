@@ -102,3 +102,14 @@ parse_int(char* buf, int* out) {
 
 	return true;
 }
+
+void
+mem_swap(void* lhs, void* rhs, size_t n) {
+	if (lhs == rhs)
+		return;
+	for (size_t i = 0; i != n; ++i) {
+		((uint8_t*)lhs)[i] ^= ((uint8_t*)rhs)[i];
+		((uint8_t*)rhs)[i] ^= ((uint8_t*)lhs)[i];
+		((uint8_t*)lhs)[i] ^= ((uint8_t*)rhs)[i];
+	}
+}
