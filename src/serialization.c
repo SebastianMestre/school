@@ -4,7 +4,6 @@
 #include "string.h"
 #include "contact.h"
 #include "storage.h"
-#include "vector.h"
 
 #include <stdio.h>
 
@@ -27,18 +26,17 @@ write_contacts(Contact const* begin, Contact const* end, bool braces, FILE* f) {
 }
 
 void
-write_vector_of_contacts_by_ptr(Vector const* contacts, bool braces, FILE* f) {
-	for (size_t i = 0; i < contacts->size; ++i) {
-		Contact* contact; span_write(&contact, vector_at(contacts, i));
-		write_contact(contact, braces, f);
+write_contacts_by_ptr(Contact const** begin, Contact const** end, bool braces, FILE* f) {
+	for (; begin < end; ++begin) {
+		write_contact(*begin, braces, f);
 		fprintf(f, "\n");
 	}
 }
 
 void
-write_vector_of_contacts_by_id(Storage* storage, Vector const* contacts, bool braces, FILE* f) {
-	for (size_t i = 0; i < contacts->size; ++i) {
-		ContactId id; span_write(&id, vector_at(contacts, i));
+write_contacts_by_id(ContactId const* begin, ContactId const* end, Storage* storage, bool braces, FILE* f) {
+	for (; begin < end; ++begin) {
+		ContactId id = *begin;
 		Contact* contact = storage_at(storage, id);
 		write_contact(contact, braces, f);
 		fprintf(f, "\n");

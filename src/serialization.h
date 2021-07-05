@@ -5,7 +5,7 @@
 typedef struct _IncompleteContact IncompleteContact;
 typedef struct _Contact Contact;
 typedef struct _Storage Storage;
-typedef struct _Vector Vector;
+typedef size_t ContactId;
 
 void
 write_contact(Contact const* contact, bool braces, FILE* f);
@@ -14,10 +14,10 @@ void
 write_contacts(Contact const* begin, Contact const* end, bool braces, FILE* f);
 
 void
-write_vector_of_contacts_by_ptr(Vector const* contacts, bool braces, FILE* f);
+write_contacts_by_ptr(Contact const** begin, Contact const** end, bool braces, FILE* f);
 
 void
-write_vector_of_contacts_by_id(Storage* storage, Vector const* contacts, bool braces, FILE* f);
+write_contacts_by_id(ContactId const* begin, ContactId const* end, Storage* storage, bool braces, FILE* f);
 
 enum _ReadContactStatus {
 	RCS_OK = 0,
