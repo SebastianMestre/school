@@ -273,8 +273,8 @@ bst_insert(Bst* bst, ContactId data) {
 }
 
 Node*
-bst_find(Bst const bst, ContactId data) {
-	return find(bst.root, data, bst.cmp);
+bst_find(Bst const* bst, ContactId data) {
+	return find(bst->root, data, bst->cmp);
 }
 
 void

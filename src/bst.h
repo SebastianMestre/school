@@ -40,7 +40,7 @@ bst_insert(Bst* tree, ContactId datum);
 // encuentra el elemento que sea igual a datum, segun el comparador
 // si no hay uno, devuelve NULL
 BstNode*
-bst_find(Bst tree, ContactId datum);
+bst_find(Bst const* tree, ContactId datum);
 
 // elimina el elemento que sea igual a datum, segun el comparador
 void

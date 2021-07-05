@@ -75,7 +75,7 @@ index_delete(Index* index, ContactId id) {
 
 OptionalContactId
 index_find(Index index, ContactId id) {
-	BstNode* node = bst_find(index.bst, id);
+	BstNode* node = bst_find(&index.bst, id);
 	if (node == nullptr) {
 		return (OptionalContactId){false, 0};
 	}

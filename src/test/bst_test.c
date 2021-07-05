@@ -28,7 +28,7 @@ static void test_find_empty(Bst* bst, int arg) {
 
 	// searching in an empty bst returns nullptr
 	ContactId id = arg;
-	LT_ASSERT(bst_find(*bst, id) == nullptr);
+	LT_ASSERT(bst_find(bst, id) == nullptr);
 }
 
 static void test_insert_empty(Bst* bst, int arg) {
@@ -51,7 +51,7 @@ static void test_insert_find(Bst* bst, int data) {
 	bst_insert(bst, data);
 
 	// finding a value that has been inserted should not return nullptr
-	LT_ASSERT(bst_find(*bst, data) != nullptr);
+	LT_ASSERT(bst_find(bst, data) != nullptr);
 }
 
 static void test_double_insert(Bst* bst, int data) {
@@ -101,8 +101,8 @@ static void test_find_different_values(Bst* bst, int data) {
 	bst_insert(bst, id1);
 	bst_insert(bst, id2);
 
-	BstNode* p1 = bst_find(*bst, id1);
-	BstNode* p2 = bst_find(*bst, id2);
+	BstNode* p1 = bst_find(bst, id1);
+	BstNode* p2 = bst_find(bst, id2);
 
 	LT_ASSERT(p1 != nullptr);
 	LT_ASSERT(p2 != nullptr);
@@ -120,7 +120,7 @@ static void test_erase_then_find_fails(Bst* bst, int data) {
 	bst_insert(bst, id);
 	bst_erase(bst, id);
 
-	BstNode* p = bst_find(*bst, id);
+	BstNode* p = bst_find(bst, id);
 
 	LT_ASSERT(p == nullptr);
 }
@@ -142,8 +142,8 @@ static void test_erase_one_not_the_other(Bst* bst, int data) {
 
 	bst_erase(bst, id2);
 
-	BstNode* p1 = bst_find(*bst, id1);
-	BstNode* p2 = bst_find(*bst, id2);
+	BstNode* p1 = bst_find(bst, id1);
+	BstNode* p2 = bst_find(bst, id2);
 
 	LT_ASSERT(p1 != nullptr);
 	LT_ASSERT(p2 == nullptr);
@@ -161,9 +161,9 @@ static void test_random_values(Bst* bst, int data) {
 		bst_insert(bst, y);
 	}
 
-	LT_ASSERT(bst_find(*bst, x) != nullptr);
+	LT_ASSERT(bst_find(bst, x) != nullptr);
 	bst_erase(bst, x);
-	LT_ASSERT(bst_find(*bst, x) == nullptr);
+	LT_ASSERT(bst_find(bst, x) == nullptr);
 }
 
 static void test_all(int value) {
