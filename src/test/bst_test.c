@@ -70,7 +70,7 @@ static void test_insert_different_values(Bst* bst, int data) {
 
 	run_test(test_insert_empty, data);
 
-	int other = data * 19;
+	int other = (data % 1000) * 19;
 	if (data == other) return;
 
 	ContactId id1 = data;
@@ -92,7 +92,7 @@ static void test_find_different_values(Bst* bst, int data) {
 	run_test(test_insert_different_values, data);
 	run_test(test_insert_find, data);
 
-	int other = data * 19;
+	int other = (data % 1000) * 19;
 	if (data == other) return;
 
 	ContactId id1 = data;
@@ -131,7 +131,7 @@ static void test_erase_one_not_the_other(Bst* bst, int data) {
 	run_test(test_insert_different_values, data);
 	run_test(test_insert_find, data);
 
-	int other = data * 19;
+	int other = (data % 1000) * 19;
 	if (data == other) return;
 
 	ContactId id1 = data;

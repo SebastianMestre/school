@@ -33,9 +33,7 @@ circular_buffer_create(
 void
 circular_buffer_release(CircularBuffer* buffer) {
 	circular_buffer_clear(buffer);
-
-	free(buffer->data.begin);
-	buffer->data = (Span){};
+	span_free(&buffer->data);
 	buffer->begin = nullptr;
 	buffer->end = nullptr;
 }

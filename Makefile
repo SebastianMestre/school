@@ -1,7 +1,7 @@
 
-CFLAGS := -Wall -Werror -Wextra -g # -fsanitize=address
+CFLAGS := -Wall -Wextra -g -fno-omit-frame-pointer # -fsanitize=address,undefined
 INCLUDE := -include src/types.h
-LIBS := # -lasan
+LIBS := # -lubsan
 
 all: app test
 .PHONY: all
@@ -40,7 +40,8 @@ build/test/slot_map_test.o  \
 build/test/bst_test.o       \
 build/test/database_test.o  \
 build/test/search_by_sum_test.o \
-build/test/quicksort_test.o
+build/test/quicksort_test.o \
+build/test/circular_buffer_test.o
 	$(CC) -o $@ $^ $(LIBS)
 
 build/types.o: src/types.c
@@ -81,8 +82,10 @@ build/test/search_by_sum_test.o: src/test/search_by_sum_test.c src/test/search_b
 src/vector.h src/span.h
 build/test/quicksort_test.o: src/test/quicksort_test.c src/test/quicksort_test.h src/quicksort.h   \
 src/string.h
+build/test/circular_buffer_test.o: src/test/circular_buffer_test.c src/test/circular_buffer_test.h \
+src/circular_buffer.h src/span.h
 build/test/main.o: src/test/main.c src/test/bst_test.h src/test/span_test.h src/test/vector_test.h \
-src/test/slot_map_test.h src/test/search_by_sum_test.h
+src/test/slot_map_test.h src/test/search_by_sum_test.h src/test/circular_buffer_test.h
 
 build/test/%_test.o: src/test/%_test.c src/test/lt.h src/types.h
 	mkdir -p $(dir $@)
