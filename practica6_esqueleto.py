@@ -26,9 +26,9 @@ class LayoutGraph:
         self.grafo = grafo
 
         # Inicializo estado
-        # Completar
-        self.posiciones = {}
-        self.fuerzas = {}
+        # TODO
+        self.positions = {}
+        self.forces = {}
 
         # Guardo opciones
         self.iters = iters
@@ -48,13 +48,78 @@ class LayoutGraph:
             draw()
             step()
 
-    def step():
-        initialize_accumulators()
-        compute_attraction_forces()
-        compute_repulsion_forces()
-        compute_gravity_forces()
-        update_positions()
+    def draw(self):
+        # TODO
+        pass
 
+    def step(self):
+        self.initialize_accumulators()
+        self.compute_attraction_forces()
+        self.compute_repulsion_forces()
+        self.compute_gravity_forces()
+        self.update_positions()
+
+    def initialize_accumulators(self):
+        # TODO
+        pass
+
+    def compute_attraction_forces(self):
+        # TODO
+        pass
+
+    def compute_repulsion_forces(self):
+        k = self.k()
+        for u in self.vertices():
+            for v in self.vertices():
+                if u is v:
+                    continue
+                force = compute_repulsion_force(u, v)
+                self.add_force(u, force)
+
+    def compute_gravity_forces(self):
+        # TODO
+        pass
+
+    def update_positions(self):
+        # TODO
+        pass
+
+    def compute_repulsion_force(self, u, v):
+        x1 = self.positions[u]
+        x2 = self.positions[v]
+
+        delta = vector_difference(x2, x1)
+
+        d = vector_length(delta)
+
+        direction = vector_normalize(delta)
+        magnitude = self.repulsion_function(k, d)
+
+        return vector_scale(magnitude, direction)
+
+    def attraction_function(self, k, d):
+        return d**2 / (self.c2 * k)
+
+    def repulsion_function(self, k, d):
+        return -(self.c1 * k)**2 / d
+
+    def add_force(self, u, force):
+        self.forces[u] = vector_add(self.forces[u], fuerza)
+
+    def vertices(self):
+        return self.grafo[0]
+
+    def edges(self):
+        return self.grafo[1]
+
+    def k(self):
+        return sqrt(self.area() / self.number_of_vertices())
+
+    def number_of_vertices(self):
+        return len(self.vertices())
+
+def make_layout_graph(graph, iters, refresh, c1, c2, verbose=False):
+    return LayoutGraph(graph, iters, refresh, c1, c2, verbose)
 
 def main():
     # Definimos los argumentos de linea de comando que aceptamos
@@ -99,8 +164,8 @@ def main():
     grafo1 = ([1, 2, 3, 4, 5, 6, 7],
               [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 1)])
     
-    Creamos nuestro objeto LayoutGraph
-    layout_gr = LayoutGraph(
+    # Creamos nuestro objeto LayoutGraph
+    layout_gr = make_layout_graph(
         grafo1,  # TODO: Cambiar para usar grafo leido de archivo
         iters=args.iters,
         refresh=1,
