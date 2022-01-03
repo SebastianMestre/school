@@ -59,10 +59,10 @@ def main():
     layout_gr = make_layout_graph(
         grafo1,
         iters=args.iters,
-        refresh=10,
+        refresh=1,
         c1=0.1, # repulsion
         c2=30.0, # atraccion
-        pause_time=0.1,
+        pause_time=0.01,
         verbose=args.verbose
     )
     
