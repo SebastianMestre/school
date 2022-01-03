@@ -56,8 +56,10 @@ class LayoutGraph:
         self.logger.notify_layout_started(self.number_of_vertices(), self.number_of_edges())
 
         for i in range(self.iters):
+            if self.refresh != 0 and i % self.refresh == 0:
+                self.draw()
             self.step()
-            self.draw()
+        self.draw()
 
         self.logger.notify_layout_completed()
 
