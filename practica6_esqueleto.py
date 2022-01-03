@@ -130,16 +130,36 @@ def read_graph(filePath):
 
 
 
+class VerboseLogger:
+    def __init__(self):
+        pass
 
+    def log(self, s):
+        print(s)
 
+    def notify_layout_started(self, vertex_count, edge_count):
+        print("Performing layout on", vertex_count, "vertices, and", edge_count, "edges")
 
+    def notify_layout_completed(self):
+        print("Layout completed")
 
+class QuietLogger:
+    def __init__(self):
+        pass
 
+    def log(self, s):
+        pass
+
+    def notify_layout_started(self, vertex_count, edge_count):
+        pass
+
+    def notify_layout_completed(self):
+        pass
 
 
 class LayoutGraph:
 
-    def __init__(self, grafo, iters, refresh, c1, c2, width=400, height=400, padding=20, pause_time=0.1, verbose=False):
+    def __init__(self, grafo, iters, refresh, c1, c2, logger, width=400, height=400, padding=20, pause_time=0.1):
         """
         Parámetros:
         grafo: grafo en formato lista
@@ -153,18 +173,9 @@ class LayoutGraph:
         # Guardo el grafo
         self.grafo = grafo
 
-        # Inicializo estado
-        # TODO
-        self.positions = {}
-        self.forces = {}
-
-        for vertex in self.vertices():
-            self.positions[vertex] = (random() * width, random() * height)
-            self.forces[vertex] = (0, 0)
-
         # Guardo opciones
         self.iters = iters
-        self.verbose = verbose
+
         # TODO: faltan opciones
         self.refresh = refresh
         self.c1 = c1
@@ -175,16 +186,33 @@ class LayoutGraph:
         self.padding = padding
         self.pause_time = pause_time
 
+        self.logger = logger
+
+        # Inicializo estado
+        # TODO
+        self.positions = {}
+        self.forces = {}
+
+        self.randomize_positions()
+        self.nulify_forces()
+
+
     def layout(self):
         """
         Aplica el algoritmo de Fruchtermann-Reingold para obtener (y mostrar)
         un layout
         """
 
+        self.logger.notify_layout_started(self.number_of_vertices(), self.number_of_edges())
+
         for i in range(self.iters):
             self.step()
             self.draw()
+
+        self.logger.notify_layout_completed()
+
         plt.show()
+
 
     def draw(self):
         plt.clf()
@@ -204,15 +232,11 @@ class LayoutGraph:
         plt.pause(self.pause_time)
 
     def step(self):
-        self.initialize_accumulators()
+        self.nulify_forces()
         self.compute_attraction_forces()
         self.compute_repulsion_forces()
         self.compute_gravity_forces()
         self.update_positions()
-
-    def initialize_accumulators(self):
-        for vertex in self.vertices():
-            self.forces[vertex] = (0, 0)
 
     def compute_attraction_forces(self):
         for (u, v) in self.edges():
@@ -250,7 +274,6 @@ class LayoutGraph:
 
         return vector_scale(magnitude, direction)
 
-
     def compute_repulsion_force(self, u, v):
         x1 = self.positions[u]
         x2 = self.positions[v]
@@ -273,6 +296,14 @@ class LayoutGraph:
 
         return vector_scale(magnitude, direction)
 
+    def randomize_positions(self):
+        for vertex in self.vertices():
+            self.positions[vertex] = (random() * self.width, random() * self.height)
+
+    def nulify_forces(self):
+        for vertex in self.vertices():
+            self.forces[vertex] = (0, 0)
+
     def attraction_function(self, k, d):
         return d**2 / (self.c2 * k)
 
@@ -285,23 +316,30 @@ class LayoutGraph:
     def add_force(self, u, force):
         self.forces[u] = vector_add(self.forces[u], force)
 
+    def k(self):
+        return sqrt(self.area() / self.number_of_vertices())
+
+    def number_of_vertices(self):
+        return len(self.vertices())
+
+    def number_of_edges(self):
+        return len(self.edges())
+
     def vertices(self):
         return self.grafo[0]
 
     def edges(self):
         return self.grafo[1]
 
-    def k(self):
-        return sqrt(self.area() / self.number_of_vertices())
-
     def area(self):
         return self.width * self.height
 
-    def number_of_vertices(self):
-        return len(self.vertices())
-
     def centre(self):
         return (self.width / 2, self.height / 2)
+
+def make_layout_graph(grafo, iters, refresh, c1, c2, width=400, height=400, padding=20, pause_time=0.1, verbose=False):
+    logger = VerboseLogger() if verbose else QuietLogger()
+    return LayoutGraph(grafo, iters, refresh, c1, c2, logger, width, height, padding, pause_time)
 
 def main():
     # Definimos los argumentos de linea de comando que aceptamos
@@ -346,14 +384,14 @@ def main():
     grafo1 = ([1, 2, 3, 4, 5, 6, 7],
               [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 1)])
     
-    grafo1 = read_graph(args.file_name)
+    grafo1 = graph_parser.read_graph(args.file_name)
 
     print("===========================")
     print(grafo1)
     print("===========================")
 
     # Creamos nuestro objeto LayoutGraph
-    layout_gr = LayoutGraph(
+    layout_gr = make_layout_graph(
         grafo1,  # TODO: Cambiar para usar grafo leido de archivo
         iters=args.iters,
         refresh=1,
