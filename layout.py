@@ -7,17 +7,27 @@ import vector_math as vmt
 from notifications import VerboseLogger
 from notifications import QuietLogger
 
+# TODO: Temperatura
+# TODO: Mas logging
+# TODO: Limitar los vertices dentro del cuadro?
+
+eps = 1
+
 class LayoutGraph:
 
-    def __init__(self, grafo, iters, refresh, c1, c2, logger, width=400, height=400, padding=20, pause_time=0.1):
+    def __init__(self, grafo, c1, c2, logger, iters, refresh, pause_time=0.1, width=400, height=400, padding=20):
         """
         Parámetros:
         grafo: grafo en formato lista
-        iters: cantidad de iteraciones a realizar
-        refresh: cada cuántas iteraciones graficar. Si su valor es cero, entonces debe graficarse solo al final.
         c1: constante de repulsión
         c2: constante de atracción
-        verbose: si está encendido, activa los comentarios
+        logger: objeto que notifica ciertos eventos importantes
+        iters: cantidad de iteraciones a realizar
+        refresh: cada cuántas iteraciones graficar. Si su valor es cero, entonces debe graficarse solo al final.
+        pause_time: tiempo que se espera antes de graficar nuevamente.
+        width: el ancho del cuadro dentro del cual se hace layout
+        height: la altura del cuadro dentro del cual se hace layout
+        padding: distancia minima del borde del cuadro en la que se posicionan los puntos inicialmente
         """
 
         # Guardo el grafo
@@ -134,6 +144,10 @@ class LayoutGraph:
 
         d = vmt.length(delta)
 
+        if d < eps:
+            # TODO: alejar puntos en direccion aleatoria
+            return (self.width/20, self.height/20)
+
         direction = vmt.normalize(delta)
         magnitude = self.repulsion_function(self.k(), d)
 
@@ -190,5 +204,14 @@ class LayoutGraph:
         return (self.width / 2, self.height / 2)
 
 def make_layout_graph(grafo, iters, refresh, c1, c2, width=400, height=400, padding=20, pause_time=0.1, verbose=False):
+    """
+    Parámetros:
+    grafo: grafo en formato lista
+    iters: cantidad de iteraciones a realizar
+    refresh: cada cuántas iteraciones graficar. Si su valor es cero, entonces debe graficarse solo al final.
+    c1: constante de repulsión
+    c2: constante de atracción
+    verbose: si está encendido, activa los comentarios
+    """
     logger = VerboseLogger() if verbose else QuietLogger()
-    return LayoutGraph(grafo, iters, refresh, c1, c2, logger, width, height, padding, pause_time)
+    return LayoutGraph(grafo, c1, c2, logger, iters, refresh, pause_time, width, height, padding)

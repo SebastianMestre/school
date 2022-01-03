@@ -49,10 +49,6 @@ def main():
     # print(args.temp)
     # return
 
-    # TODO: Borrar antes de la entrega
-    grafo1 = ([1, 2, 3, 4, 5, 6, 7],
-              [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 1)])
-    
     grafo1 = graph_parser.read_graph(args.file_name)
 
     print("===========================")
@@ -61,9 +57,9 @@ def main():
 
     # Creamos nuestro objeto LayoutGraph
     layout_gr = make_layout_graph(
-        grafo1,  # TODO: Cambiar para usar grafo leido de archivo
+        grafo1,
         iters=args.iters,
-        refresh=1,
+        refresh=10,
         c1=0.1, # repulsion
         c2=30.0, # atraccion
         pause_time=0.1,
