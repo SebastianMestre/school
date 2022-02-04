@@ -107,12 +107,13 @@ class LayoutGraph:
             self.add_force(v, vmt.scale(-1, force))
 
     def compute_repulsion_forces(self):
-        for u in self.vertices():
-            for v in self.vertices():
-                if u is v:
-                    continue
+        unused_vertices = list(self.vertices())
+        while unused_vertices:
+            u = unused_vertices.pop()
+            for v in unused_vertices:
                 force = self.compute_repulsion_force(u, v)
                 self.add_force(u, force)
+                self.add_force(v, vmt.scale(-1, force))
 
     def compute_gravity_forces(self):
         for u in self.vertices():
