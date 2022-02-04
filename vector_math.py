@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, sin, cos
 
 def add(u, v):
     return (u[0] + v[0], u[1] + v[1])
@@ -17,4 +17,7 @@ def scale(k, u):
 
 def normalize(u):
     return scale(1 / length(u), u)
+
+def angle2unit_vector(theta):
+    return (cos(theta), sin(theta))
 

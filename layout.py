@@ -1,5 +1,5 @@
 from random import random
-from math import sqrt
+from math import sqrt, pi
 import matplotlib.pyplot as plt
 import numpy as np
 import vector_math as vmt
@@ -145,8 +145,7 @@ class LayoutGraph:
         d = vmt.length(delta)
 
         if d < eps:
-            # TODO: alejar puntos en direccion aleatoria
-            return (self.width/20, self.height/20)
+            return vmt.scale(eps, self.random_direction())
 
         direction = vmt.normalize(delta)
         magnitude = self.repulsion_function(self.k(), d)
@@ -175,6 +174,9 @@ class LayoutGraph:
 
     def repulsion_function(self, k, d):
         return -(self.c1 * k)**2 / d
+    
+    def random_direction(self):
+        return vmt.angle2unit_vector(2 * pi * random())
 
     def gravity_function(self, d):
         return self.attraction_function(self.k(), d)
