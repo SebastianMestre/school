@@ -12,10 +12,11 @@ from notifications import QuietLogger
 # TODO: Limitar los vertices dentro del cuadro?
 
 eps = 1
+temp_scale_constant = 0.95
 
 class LayoutGraph:
 
-    def __init__(self, grafo, c1, c2, logger, iters, refresh, pause_time=0.1, width=400, height=400, padding=20):
+    def __init__(self, grafo, logger, iters, refresh, c1, c2, temperature, pause_time=0.1, width=400, height=400, padding=20):
         """
         Parámetros:
         grafo: grafo en formato lista.
@@ -35,12 +36,12 @@ class LayoutGraph:
         self.grafo = grafo
 
         # Guardo opciones
-        self.iters = iters
-
-        # TODO: faltan opciones
-        self.refresh = refresh
         self.c1 = c1
         self.c2 = c2
+        self.temperature = temperature
+        self.iters = iters
+        self.refresh = refresh
+        # TODO: faltan opciones
 
         self.width = width
         self.height = height
@@ -99,6 +100,7 @@ class LayoutGraph:
         self.compute_attraction_forces()
         self.compute_repulsion_forces()
         self.compute_gravity_forces()
+        self.update_temperature()
         self.update_positions()
 
     def compute_attraction_forces(self):
@@ -120,6 +122,9 @@ class LayoutGraph:
         for u in self.vertices():
             force = self.compute_gravity_force(u)
             self.add_force(u, force)
+
+    def update_temperature(self):
+        self.temperature *= temp_scale_constant
 
     def update_positions(self):
         for u in self.vertices():
