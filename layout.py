@@ -128,7 +128,8 @@ class LayoutGraph:
 
     def update_positions(self):
         for u in self.vertices():
-            self.positions[u] = vmt.add(self.positions[u], self.forces[u])
+            force = self.compute_final_force(self.forces[u])
+            self.positions[u] = vmt.add(self.positions[u], force)
 
     def compute_attraction_force(self, u, v):
         x1 = self.positions[u]
@@ -167,6 +168,14 @@ class LayoutGraph:
         magnitude = self.gravity_function(d)
 
         return vmt.scale(magnitude, direction)
+        
+    # Calcula la fuerza final considerando la temperatura del sistema.
+    def compute_final_force(self, force):
+        magnitude = vmt.length(force)
+        if magnitude > self.temperature:
+            direction = vmt.normalize(force)
+            force = vmt.scale(self.temperature, direction)
+        return force
 
     def randomize_positions(self):
         for vertex in self.vertices():
