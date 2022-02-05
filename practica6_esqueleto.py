@@ -69,6 +69,7 @@ def main():
         refresh=args.refresh,
         c1=0.1, # repulsion
         c2=30.0, # atraccion
+        temperature=args.temp,
         pause_time=0.01,
         verbose=args.verbose
     )

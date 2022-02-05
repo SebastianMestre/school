@@ -206,7 +206,7 @@ class LayoutGraph:
     def centre(self):
         return (self.width / 2, self.height / 2)
 
-def make_layout_graph(grafo, iters, refresh, c1, c2, width=400, height=400, padding=20, pause_time=0.1, verbose=False):
+def make_layout_graph(grafo, iters, refresh, c1, c2, temperature, width=400, height=400, padding=20, pause_time=0.1, verbose=False):
     """
     Parámetros:
     grafo: grafo en formato lista
@@ -217,4 +217,4 @@ def make_layout_graph(grafo, iters, refresh, c1, c2, width=400, height=400, padd
     verbose: si está encendido, activa los comentarios
     """
     logger = VerboseLogger() if verbose else QuietLogger()
-    return LayoutGraph(grafo, c1, c2, logger, iters, refresh, pause_time, width, height, padding)
+    return LayoutGraph(grafo, logger, iters, refresh, c1, c2, temperature, pause_time, width, height, padding)
