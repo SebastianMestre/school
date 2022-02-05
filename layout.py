@@ -18,16 +18,17 @@ class LayoutGraph:
     def __init__(self, grafo, c1, c2, logger, iters, refresh, pause_time=0.1, width=400, height=400, padding=20):
         """
         Parámetros:
-        grafo: grafo en formato lista
-        c1: constante de repulsión
-        c2: constante de atracción
-        logger: objeto que notifica ciertos eventos importantes
-        iters: cantidad de iteraciones a realizar
+        grafo: grafo en formato lista.
+        logger: objeto que notifica ciertos eventos importantes.
+        iters: cantidad de iteraciones a realizar.
         refresh: cada cuántas iteraciones graficar. Si su valor es cero, entonces debe graficarse solo al final.
+        c1: constante de repulsión.
+        c2: constante de atracción.
+        temperature: entropia del sistema.
         pause_time: tiempo que se espera antes de graficar nuevamente.
-        width: el ancho del cuadro dentro del cual se hace layout
-        height: la altura del cuadro dentro del cual se hace layout
-        padding: distancia minima del borde del cuadro en la que se posicionan los puntos inicialmente
+        width: el ancho del cuadro dentro del cual se hace layout.
+        height: la altura del cuadro dentro del cual se hace layout.
+        padding: distancia minima del borde del cuadro en la que se posicionan los puntos inicialmente.
         """
 
         # Guardo el grafo
