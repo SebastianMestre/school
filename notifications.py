@@ -12,6 +12,9 @@ class VerboseLogger:
     def notify_layout_completed(self):
         print("Layout completed")
 
+    def notify_zero_temperature(self):
+        print("Temperature too low, the graph freezed.")
+
 class QuietLogger:
     def __init__(self):
         pass
@@ -24,3 +27,6 @@ class QuietLogger:
 
     def notify_layout_completed(self):
         pass
+
+    def notify_zero_temperature(self):
+        pass 

@@ -70,6 +70,9 @@ class LayoutGraph:
         for i in range(self.iters):
             if self.refresh != 0 and i % self.refresh == 0:
                 self.draw()
+            if self.temperature < eps:
+                self.logger.notify_zero_temperature()
+                break
             self.step()
         self.draw()
 
