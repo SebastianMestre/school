@@ -1,11 +1,8 @@
 from random import random
 from math import sqrt, pi
 import matplotlib.pyplot as plt
-import numpy as np
 import vector_math as vmt
-
-from notifications import VerboseLogger
-from notifications import QuietLogger
+from notifications import *
 
 
 eps = 1
