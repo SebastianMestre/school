@@ -7,16 +7,13 @@ import vector_math as vmt
 from notifications import VerboseLogger
 from notifications import QuietLogger
 
-# TODO: Temperatura
-# TODO: Mas logging
-# TODO: Limitar los vertices dentro del cuadro?
 
 eps = 1
-temp_scale_constant = 0.95
+temp_scale_constant = 0.97
 
 class LayoutGraph:
 
-    def __init__(self, grafo, logger, iters, refresh, c1, c2, temperature, pause_time=0.1, width=400, height=400, padding=20):
+    def __init__(self, grafo, logger, iters, refresh, c1, c2, temperature, pause_time=1, width=400, height=400, padding=20):
         """
         Parámetros:
         grafo: grafo en formato lista.
@@ -82,6 +79,10 @@ class LayoutGraph:
 
 
     def draw(self):
+        """
+        Dibuja el grafo en pantalla.
+        """
+
         plt.clf()
         plt.xlim(0 - self.padding, self.width + self.padding)
         plt.ylim(0 - self.padding, self.height + self.padding)
@@ -99,6 +100,10 @@ class LayoutGraph:
         plt.pause(self.pause_time)
 
     def step(self):
+        """
+        Actualiza el estado del sistema.
+        """
+
         self.nulify_forces()
         self.compute_attraction_forces()
         self.compute_repulsion_forces()
@@ -107,40 +112,69 @@ class LayoutGraph:
         self.update_positions()
 
     def compute_attraction_forces(self):
+        """
+        Calcula las fuerzas de atraccion entre los vertices del grafo.
+        """
+
         for (u, v) in self.edges():
             force = self.compute_attraction_force(u, v)
             self.add_force(u, force)
             self.add_force(v, vmt.scale(-1, force))
 
     def compute_repulsion_forces(self):
+        """
+        Calcula las fuerzas de repulsion entre los vertices del grafo.
+        """
+        
         unused_vertices = list(self.vertices())
         while unused_vertices:
             u = unused_vertices.pop()
             for v in unused_vertices:
                 force = self.compute_repulsion_force(u, v)
+                # La fuerza acciona sobre los vertices en sentido opuesto.
                 self.add_force(u, force)
                 self.add_force(v, vmt.scale(-1, force))
 
     def compute_gravity_forces(self):
+        """
+        Calcula el efecto de la gravedad sobre los vertices del grafo.
+        """
+        
         for u in self.vertices():
             force = self.compute_gravity_force(u)
             self.add_force(u, force)
 
     def update_temperature(self):
+        """
+        Actualiza la temperatura del sistema.
+        """
+
         self.temperature *= temp_scale_constant
 
     def update_positions(self):
+        """
+        Actualiza la posicion de los vertices del grafo.
+        """
+        
         for u in self.vertices():
             force = self.compute_final_force(self.forces[u])
             self.positions[u] = vmt.add(self.positions[u], force)
 
     def compute_attraction_force(self, u, v):
+        """
+        Calcula la fuerza de atraccion entre dos vertices.
+        """
+        
         x1 = self.positions[u]
         x2 = self.positions[v]
 
         delta = vmt.difference(x2, x1)
 
         d = vmt.length(delta)
+
+        # Si la distancia es muy pequeña devolvemos el vector nulo.
+        if d < eps: 
+            return (0,0)
 
         direction = vmt.normalize(delta)
         magnitude = self.attraction_function(self.k(), d)
@@ -148,6 +182,10 @@ class LayoutGraph:
         return vmt.scale(magnitude, direction)
 
     def compute_repulsion_force(self, u, v):
+        """
+        Calcula la fuerza de repulsion entre dos vectores.
+        """
+        
         x1 = self.positions[u]
         x2 = self.positions[v]
 
@@ -155,6 +193,8 @@ class LayoutGraph:
 
         d = vmt.length(delta)
 
+        # Si la distancia es muy pequeña devolvemos una fuerza pequeña
+        # en una direccion aleatoria.
         if d < eps:
             return vmt.scale(eps, self.random_direction())
 
@@ -164,6 +204,10 @@ class LayoutGraph:
         return vmt.scale(magnitude, direction)
 
     def compute_gravity_force(self, u):
+        """
+        Calcula la fuerza de gravedad sobre un vertice.
+        """
+        
         delta = vmt.difference(self.centre(), self.positions[u])
         d = vmt.length(delta)
 
@@ -172,8 +216,11 @@ class LayoutGraph:
 
         return vmt.scale(magnitude, direction)
         
-    # Calcula la fuerza final considerando la temperatura del sistema.
     def compute_final_force(self, force):
+        """
+        Calcula la fuerza final considerando la temperatura del sistema.
+        """
+        
         magnitude = vmt.length(force)
         if magnitude > self.temperature:
             direction = vmt.normalize(force)
@@ -181,10 +228,18 @@ class LayoutGraph:
         return force
 
     def randomize_positions(self):
+        """
+        Asigna posiciones aleatorias a los vertices del grafo.
+        """
+        
         for vertex in self.vertices():
             self.positions[vertex] = (random() * self.width, random() * self.height)
 
     def nulify_forces(self):
+        """
+        Hace nulas las fuerzas que actuan sobre los vertices del grafo.
+        """
+        
         for vertex in self.vertices():
             self.forces[vertex] = (0, 0)
 

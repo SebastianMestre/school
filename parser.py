@@ -2,6 +2,10 @@ import sys
 import re
 
 def read_graph(path):
+    """
+    Toma la direccion del archivo donde se encuentra el grafo y lo interpreta.
+    """
+    
     try:
         file_content = read_file(path)
     except OSError:
@@ -9,6 +13,10 @@ def read_graph(path):
     return parse_graph(file_content)
 
 def parse_graph(file_content):
+    """
+    Toma el grafo en formato crudo y devuelve un par (vertices, aristas).
+    """
+    
     lines = split_lines(file_content)
 
     if len(lines) == 0:
@@ -32,6 +40,9 @@ def parse_graph(file_content):
     return (list(nodes), list(edges))
 
 def parse_nodes(lines):
+    """
+    Toma las lineas de texto que especifican los vertices del grafo y devuelve una lista de nodos.
+    """
     nodes = set()
     for node in lines:
         error = validate_node(node, nodes)
@@ -41,6 +52,10 @@ def parse_nodes(lines):
     return nodes
 
 def validate_node(node, nodes):
+    """
+    Se asegura de que el nombre del vertice sea valido y no este repetido.
+    """
+
     if re.search(r"\s", node):
         return "Se encontro un nodo con un espacio: {}".format(node)
 
@@ -50,6 +65,10 @@ def validate_node(node, nodes):
     return None
 
 def parse_edges(lines, nodes):
+    """
+    Toma las lineas de texto que especifican las aristas del grafo y devuelve una lista de aristas.
+    """
+    
     edges = set()
     for line in lines:
         components = line.split()
@@ -60,6 +79,10 @@ def parse_edges(lines, nodes):
     return edges
 
 def validate_edge(components, nodes, edges, line):
+    """
+    Se asegura de que la arista encontrada sea valida.
+    """
+
     if len(components) != 2:
         return "Se encontro una arista con {} componente/s: {}".format(len(components), line)
 
@@ -77,6 +100,10 @@ def validate_edge(components, nodes, edges, line):
     return None
 
 def show_error(text):
+    """
+    Muestra error en pantalla y termina con la ejecucion del programa.  
+    """
+    
     print("[ Error ] {}".format(text))
     sys.exit()
 

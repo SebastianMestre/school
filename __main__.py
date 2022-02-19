@@ -1,10 +1,3 @@
-#! /usr/bin/python
-
-# 6ta Practica Laboratorio 
-# Complementos Matematicos I
-# Ejemplo parseo argumentos
-
-import sys
 import argparse
 import parser as graph_parser
 
@@ -39,7 +32,7 @@ def main():
         '--temp',
         type=float,
         help='Temperatura inicial',
-        default=100.0
+        default=1000.0
     )
     # Archivo del cual leer el grafo
     parser.add_argument(
@@ -71,7 +64,7 @@ def main():
         c2=30.0, # atraccion
         temperature=args.temp,
         pause_time=0.01,
-        verbose=args.verbose
+        verbose=args.verbose,
     )
     
     # Ejecutamos el layout

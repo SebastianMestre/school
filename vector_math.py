@@ -16,7 +16,11 @@ def scale(k, u):
     return (k * u[0], k * u[1])
 
 def normalize(u):
-    return scale(1 / length(u), u)
+    try:
+        return scale(1 / length(u), u)
+    except ZeroDivisionError:
+        print("Error: trying to normalize zero vector.")
+        raise
 
 def angle2unit_vector(theta):
     return (cos(theta), sin(theta))
