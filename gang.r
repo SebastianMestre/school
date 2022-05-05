@@ -18,8 +18,24 @@ filtrarPorGenero <- function(usuarios, genero) {
 
 # estos estan buenos para hacer histogramas
 hombres <- filtrarPorGenero(usuarios, "M")
+#hist(hombres$edad)
+#hist(hombres$edad_usuario, breaks = 5*0:10 + 15, main = "Hombres por edad", xlab = "edad", ylab = "frecuencia")
 mujeres <- filtrarPorGenero(usuarios, "F")
 nonbiny <- filtrarPorGenero(usuarios, "OTRO")
+
+# ajustar colores
+# referencia de colores?? 
+plotEdadXGenero <- function() {
+  hm <- hist(mujeres$edad_usuario, plot = FALSE)
+  hh <- hist(hombres$edad_usuario, plot = FALSE)
+  hnb <- hist(nonbiny$edad_usuario, plot = FALSE)
+  plot(hm, col = rgb(1, 0, 0, 1/2),
+       main = "Edad por Genero",
+       xlab = "Edad",
+       ylab = "Frecuencia")
+  plot(hh, col = rgb(0,0,1, 1/2), add = TRUE)
+  plot(hnb, col = rgb(1, 0, 1, 1/2), add = TRUE)
+}
 
 dotchart(recorridos$distancia, log = "x",)
 
