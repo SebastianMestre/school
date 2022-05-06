@@ -1,9 +1,54 @@
 ---
 title: TP1
-output: pdf_document
+output:
+   pdf_document:
+     toc: true
+     toc_depth: 3
+     number_sections: true
 ---
+# Introducción
+EcoBici es un sistema de bicicletas compartidas que funciona en la Ciudad de Buenos Aires, cuenta
+con más de 200 estaciones y 1.200 rodados. Actualmente el sistema está presente en 30 de los 48
+barrios de la Ciudad Autónoma de Buenos Aires, funcionando los 365 días del a˜no 24 horas. Existen
+2 formas de usar el sistema: mediante una app o mediante una tarjeta. Mediante la app, el usuario
+debe registrarse y, mediante su nombre de usuario y password, ingresa al sistema, elige la estación
+en la que se encuentra y luego elige la bici que quiere. Mediante tarjeta, el usuario debe apoyarla
+en un lector y el sistema le asigna una bicicleta. El usuario se moviliza por la ciudad durante
+un tiempo limitado (30 minutos) y luego debe devolver la bicicleta en alguna de las estaciones
+habilitadas. El sistema le asigna al usuario un id y registra datos tales como la edad, el género,
+estación de origen, estación de destino... etc.  
+
+# Objetivos
+
+El objetivo de este informe es reflejar las características más notables acerca de los datos brindados.  
+Para llevar esto a cabo se va a utilizar un software estadístico que permita efectuar un estudio
+descriptivo que incluya: tablas de distribución de frecuencias, gráficos y medidas descriptivas.  
+
+# Análisis
+
+## Análisis univariado
+### Edad
+
 ```{r message=FALSE, echo = FALSE, warning = FALSE}
 library(qcc)
+
+usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+
+hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad", ylab="Cant. de usuarios", xlim=range(10:70))
+```
+Se puede observar en este histograma que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, a partir de los 40 años la cantidad de usuarios baja considerablemente. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18. 
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+cortusuarios <- table(cut(usuarios$edad, breaks=10, right=FALSE, dig.lab = 0))
+cumusuarios <- cumsum(cortusuarios)
+tablausuarios <- cbind(cortusuarios,cumusuarios,cortusuarios/length(usuarios$edad),cumusuarios/length(usuarios$edad))
+colnames(tablausuarios) <- (c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada"))
+knitr::kable(tablausuarios)
+
+```
+En esta tabla podemos ver incluso mejor como llegado a los 33 años, la frecuencia acumulada es casi del 60%.
+
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",", encoding = "UTF-8")

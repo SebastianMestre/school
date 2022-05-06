@@ -2,6 +2,17 @@ install.packages("qcc")
 library(qcc)
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+cantusuarios <- length(usuarios$edad)
+
+hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad", ylab="Cant. de usuarios", xlim=range(10:70))
+
+
+cortusuarios <- table(cut(usuarios$edad, breaks=10, dig.lab = 0))
+cumusuarios <- cumsum(cortusuarios)
+tablausuarios <- cbind(cortusuarios,cumusuarios,cortusuarios/cantusuarios,cumusuarios/cantususarios)
+colnames(tablausuarios) <- (c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada"))
+knitr::kable(tablausuarios)
+
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
 
