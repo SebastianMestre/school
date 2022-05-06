@@ -16,7 +16,12 @@ knitr::kable(tablausuarios)
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
 
+recxusu <- table(usuariosrecorridos$edad)/table(usuarios$edad)
+
+barplot(recxusu, main="Viajes realizados por usuario, repartidos por edad", xlab="Edad", ylab="Viajes por usuario", ylim=range(0:14), col="#8E67A7")
+
 boxplot(usuarios$edad, main = "Distribucion de Usuarios por Edad")
+
 usuarios_summ <- summary(usuarios$edad)
 USUARIOS_MIN = usuarios_summ[1]
 USUARIOS_MEDIAN = usuarios_summ[3]

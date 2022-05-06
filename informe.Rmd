@@ -1,10 +1,14 @@
 ---
-title: TP1
+title: "TP1"
 output:
-   pdf_document:
-     toc: true
-     toc_depth: 3
-     number_sections: true
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+  html_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
 ---
 # Introducción
 EcoBici es un sistema de bicicletas compartidas que funciona en la Ciudad de Buenos Aires, cuenta
@@ -34,7 +38,7 @@ library(qcc)
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 
-hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad", ylab="Cant. de usuarios", xlim=range(10:70))
+hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad", ylab="Frecuencia", xlim=range(10:70))
 ```
 Se puede observar en este histograma que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, a partir de los 40 años la cantidad de usuarios baja considerablemente. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18. 
 ```{r message=FALSE, echo = FALSE, warning = FALSE}
@@ -47,24 +51,25 @@ knitr::kable(tablausuarios)
 ```
 En esta tabla podemos ver incluso mejor como llegado a los 33 años, la frecuencia acumulada es casi del 60%.
 
-
 ```{r message=FALSE, echo = FALSE, warning = FALSE}
 
-usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
-recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",", encoding = "UTF-8")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
 
-recorridos$dia <- factor(recorridos$dia)
+hist(usuariosrecorridos$edad, xlab = "Edad", ylab = "Frecuencia", main = "Recorridos por Edad")
 
-freq <- table(recorridos$dia)
-barplot(freq, names.arg = c(
-  "Lunes",
-  "Martes",
-  "Miércoles",
-  "Jueves",
-  "Viernes",
-  "Sábado",
-  "Domingo"), 
-  xlab = "Dia", ylab = "Frecuencia", main = "Viajes por Dia")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
+usuariosrecorridos <- merge(usuarios, recorridos)
+
+recxusu <- table(usuariosrecorridos$edad)/table(usuarios$edad)
+
+barplot(recxusu, main="Viajes realizados por usuario, repartidos por edad", xlab="Edad", ylab="Viajes por usuario", ylim=range(0:14), col="#8E67A7")
+
+
 ```
+
+El gráfico de ditribución de recorridos por edad nos muestra resultados similares a lo visto en el análisis de usuarios por edad.
+Sin embargo, una cosa interesante sucede cuando se analiza los viajes realizados por usuario, repartiendolos en cada edad. Se puede ver que si bien hay una leve tendencia a que baje este número, no es nada determinante.
+O sea, lo que podemos decir es que el hecho de que haya menos viajes realizados por gente mayor a 40 años, no tiene que ver tan directamente con que cada usuario haga menos viajes. Sino que se puede asociar también con el hecho de que son menos los usuarios en esas edades. Esto es lo que termina causando el tamaño de la disparidad.
+
 
