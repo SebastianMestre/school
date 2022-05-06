@@ -1,0 +1,25 @@
+---
+title: TP1
+output: pdf_document
+---
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+library(qcc)
+
+usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",", encoding = "UTF-8")
+usuariosrecorridos <- merge(usuarios, recorridos)
+
+recorridos$dia <- factor(recorridos$dia)
+
+freq <- table(recorridos$dia)
+barplot(freq, names.arg = c(
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+  "Domingo"), 
+  xlab = "Dia", ylab = "Frecuencia", main = "Viajes por Dia")
+```
+
