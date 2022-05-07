@@ -10,7 +10,7 @@ boxplot(recorridos$duracion / 60,
         horizontal = TRUE,
         xlab = "Tiempo [minutos]",
         main = "Duracion Recorridos (sin outliers)",
-        col = c("red"))
+        col = c("#E97444"))
 
 summ <- round(summary(recorridos$duracion / 60))
 MIN <- summ[1]

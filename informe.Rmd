@@ -132,3 +132,41 @@ pieViajesXGenero()
 
 \newpage  
 
+### Duración
+Se hace primero el análisis del gráfico de la distribución de duración con "outliers":  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
+usuariosrecorridos <- merge(usuarios, recorridos)
+
+boxplot(recorridos$duracion / 60,
+        outline = TRUE,
+        horizontal = TRUE,
+        xlab = "Tiempo [minutos]",
+        main = "Duracion Recorridos (con outliers)",
+        col = c("#E97444"))
+```
+
+Al observarlo, se nota que hay muchos valores alejados de la media. Estas son algunas de las medidas descriptivas de la variable (en minutos):  
+- Mínimo: 4  
+- Primer Cuartil: 13  
+- Mediana: 22  
+- Promedio: 27  
+- Tercer Cuartil: 32  
+- Máximo: 298  
+  
+Ahora se analizará el gráfico sin "outliers":  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+boxplot(recorridos$duracion / 60,
+        outline = FALSE,
+        horizontal = TRUE,
+        xlab = "Tiempo [minutos]",
+        main = "Duracion Recorridos (sin outliers)",
+        col = c("#E97444"))
+```
+
+En esta gráfica se puede ver mucho mejor los datos que nos interesan.  
+
+
