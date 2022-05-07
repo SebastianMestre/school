@@ -170,3 +170,33 @@ boxplot(recorridos$duracion / 60,
 En esta gráfica se puede ver mucho mejor los datos que nos interesan.  
 
 
+\newpage  
+
+
+### Distancia
+
+En este análisis, sucede lo mismo que en el anterior: es conveniente mostrar la gráfica sin outliers. El análisis va a ser directamente de esta.  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
+usuariosrecorridos <- merge(usuarios, recorridos)
+
+boxplot(recorridos$distancia / 1000,
+        outline = FALSE,
+        horizontal = TRUE,
+        xlab = "Distancia [km]",
+        main = "Distancia Recorridos (sin outliers)",
+        col = c("#9ED573"))
+```
+
+
+Medidas descriptivas de la variable (en metros):  
+- Mínimo: 758  
+- Primer Cuartil: 2788  
+- Mediana: 4422  
+- Promedio: 5567  
+- Tercer Cuartil: 6625  
+- Máximo: 70528  
+  
+La conclusión que se puede sacar es que la mayoría de los viajes son de media distancia, variando principalmente entre los 3 y 6 kilometros. No hay gran cantidad de viajes muy cortos ni muy largos, aunque efectivamente existen.  

@@ -10,7 +10,7 @@ boxplot(recorridos$distancia / 1000,
         horizontal = TRUE,
         xlab = "Distancia [km]",
         main = "Distancia Recorridos (sin outliers)",
-        col = c("green"))
+        col = c("#9ED573"))
 
 summ <- round(summary(recorridos$distancia))
 MIN <- summ[1]
