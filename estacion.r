@@ -16,8 +16,8 @@ barplot(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
 # falta agregar porcentajes
 pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
           dim(recorridos[!mismaEstacion,])[1]/dim(recorridos)[1]),
-        col = c("blue", "red"),
-        labels = c("Misma estacion", "Diferente estacion"))
+        col = c("#77DDEF", "#FC926E"),
+        labels = c(paste("Misma estacion ", round(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = ""), paste("Diferente estacion ", round(dim(recorridos[!mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = "")))
 
 
 ### plot(vector) hace un grafico de bastones ;)

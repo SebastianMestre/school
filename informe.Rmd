@@ -200,3 +200,46 @@ Medidas descriptivas de la variable (en metros):
 - Máximo: 70528  
   
 La conclusión que se puede sacar es que la mayoría de los viajes son de media distancia, variando principalmente entre los 3 y 6 kilometros. No hay gran cantidad de viajes muy cortos ni muy largos, aunque efectivamente existen.  
+
+
+
+\newpage  
+  
+
+### Dirección de origen y dirección de destino
+
+Para esta variable, hacer un análisis alrededor de qué estaciones en específico tienen mayor o menor tráfico no va a ser de demasiada utilidad. Así que el análisis va a ser alrededor de **cuántas** fueron salida o llegada de cada cantidad de viajes:  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
+usuariosrecorridos <- merge(usuarios, recorridos)
+
+freq_estacion_origen <- table(recorridos$direccion_estacion_origen) 
+freq_viajes_origen <- table(freq_estacion_origen)
+plot(freq_viajes_origen, 
+     xlab = "Cantidad de viajes", 
+     ylab = "Cantidad de estaciones",
+     main = "Cantidad de estaciones origen de x viajes")
+freq_estacion_destino <- table(recorridos$direccion_estacion_destino) 
+freq_viajes_destino <- table(freq_estacion_destino)
+
+plot(freq_viajes_destino, 
+     xlab = "Cantidad de viajes", 
+     ylab = "Cantidad de estaciones",
+     main = "Cantidad de estaciones destino de x viajes")
+```
+  
+Como se puede ver, hay unos pocos "outliers" en estos gráficos también, pero la información se puede ver bien igualmente.
+Lo que se puede notar de estos gráficos es que no hay muchas estaciones que concentren gran cantidad de tráfico. Si hay lugar para mejorar el sistema va a ser en las estaciones que tienen estos valores extremos.  
+  
+El otro foco de análisis con estas variables es cuántos viajes empiezan y terminan en la misma estación. En el gráfico de abajo se ve que la mayoría de los recorridos comienzan y acaban en diferentes lugares. Si un viaje cumple con esta condición, lo más probable es que sea del tipo recreativo. Así que la conclusión es que la mayoría de la gente no hace este tipo de viajes.  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+mismaEstacion <- recorridos$direccion_estacion_origen == recorridos$direccion_estacion_destino
+pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
+          dim(recorridos[!mismaEstacion,])[1]/dim(recorridos)[1]),
+        col = c("#77DDEF", "#FC926E"),
+        labels = c(paste("Misma estacion ", round(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = ""), paste("Diferente estacion ", round(dim(recorridos[!mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = "")),
+    main = "Distribución de viajes que empiezan y terminan en el mismo lugar")
+```
