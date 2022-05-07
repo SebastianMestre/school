@@ -24,25 +24,27 @@ nonbiny <- filtrarPorGenero(usuarios, "OTRO")
 
 viajes_hombres = filtrarPorGenero(usuariosrecorridos, "M")
 viajes_mujeres = filtrarPorGenero(usuariosrecorridos, "F")
-viajes_nonbiny = filtrarPorGenero(usuariosrecorridos, "M")
+viajes_nonbiny = filtrarPorGenero(usuariosrecorridos, "OTRO")
 
 pieUsuariosXGenero <- function() {
   cant_usuarios_genero = c(dim(hombres)[1], dim(mujeres)[1], dim(nonbiny)[1])
-  labels_usuarios_genero = c(paste("hombres ", dim(hombres)[1]/dim(usuarios)[1]*100, "%", sep = ""),
-                             paste("mujeres ", dim(mujeres)[1]/dim(usuarios)[1]*100, "%", sep = ""),
-                             paste("nonbiny ", dim(nonbiny)[1]/dim(usuarios)[1]*100, "%", sep = ""))
+  labels_usuarios_genero = c(paste("Hombres ", dim(hombres)[1]/dim(usuarios)[1]*100, "%", sep = ""),
+                             paste("Mujeres ", dim(mujeres)[1]/dim(usuarios)[1]*100, "%", sep = ""),
+                             paste("Otro ", dim(nonbiny)[1]/dim(usuarios)[1]*100, "%", sep = ""))
   pie(cant_usuarios_genero,
       labels = labels_usuarios_genero,
+      col=c("#82B5F1","#E84B89","#E5EC6D"),
       main = "Usuarios por Genero")
 }
 
 pieViajesXGenero <- function() {
   cant_viajes_genero = c(dim(viajes_hombres)[1], dim(viajes_mujeres)[1], dim(viajes_nonbiny)[1])
-  labels_viajes_genero = c(paste("hombres ", round(dim(viajes_hombres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
-                           paste("mujeres ", round(dim(viajes_mujeres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
-                           paste("nonbiny ", round(dim(viajes_nonbiny)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""))
+  labels_viajes_genero = c(paste("Hombres ", round(dim(viajes_hombres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
+                           paste("Mujeres ", round(dim(viajes_mujeres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
+                           paste("Otros ", round(dim(viajes_nonbiny)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""))
   pie(cant_viajes_genero,
       labels = labels_viajes_genero,
+      col=c("#82B5F1","#E84B89","#E5EC6D"),
       main = "Viajes por Genero") 
 }
 
