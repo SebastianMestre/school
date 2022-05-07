@@ -10,6 +10,10 @@ output:
     toc_depth: '3'
     df_print: paged
 ---
+# Alumnos
+
+Lucas Bachur, Sebastián Mestre, Santiago Coronel.
+
 # Introducción
 EcoBici es un sistema de bicicletas compartidas que funciona en la Ciudad de Buenos Aires, cuenta
 con más de 200 estaciones y 1.200 rodados. Actualmente el sistema está presente en 30 de los 48
@@ -243,3 +247,25 @@ pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
         labels = c(paste("Misma estacion ", round(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = ""), paste("Diferente estacion ", round(dim(recorridos[!mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = "")),
     main = "Distribución de viajes que empiezan y terminan en el mismo lugar")
 ```
+  
+  
+\newpage  
+  
+  
+## Análisis Bivariado
+
+El estudio se realizó relacionando la edad de los usuarios con su género.  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+tablita <- table(usuarios$genero_usuario,cut(usuarios$edad_usuario, breaks=10, dig.lab = 0, right=FALSE))
+barplot(tablita, beside=TRUE, ylim=c(0,25), col=c("#82B5F1","#E84B89","#E5EC6D"))
+```
+  
+Al observar la gráfica se puede notar que el rango de 20 a 30 años está mayormente representado por hombres. El resto de las edades tienen más repartidos los géneros.  
+
+```{r message=FALSE, echo = FALSE, warning = FALSE}
+tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
+knitr::kable(tt)
+```
+  
+Y con esta tabla se puden ver bien las distribuciones acumuladas.

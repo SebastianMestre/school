@@ -57,10 +57,14 @@ plotEdadXGenero <- function() {
   hm <- hist(mujeres$edad_usuario, plot = FALSE)
   hh <- hist(hombres$edad_usuario, plot = FALSE)
   hnb <- hist(nonbiny$edad_usuario, plot = FALSE)
-  plot(hm, col = rgb(1, 0, 0, 1/2),
+  plot(hm, col = "#E84B89",
        main = "Edad por Genero",
        xlab = "Edad",
        ylab = "Frecuencia")
-  plot(hh, col = rgb(0,0,1, 1/2), add = TRUE)
-  plot(hnb, col = rgb(1, 0, 1, 1/2), add = TRUE)
+  plot(hh, col = "#82B5F1", add = TRUE)
+  plot(hnb, col = "#E5EC6D", add = TRUE)
 }
+tablita <- table(usuarios$genero_usuario,cut(usuarios$edad_usuario, breaks=10, dig.lab = 0, right=FALSE))
+barplot(tablita, beside=TRUE, ylim=c(0,25), col=c("#82B5F1","#E84B89","#E5EC6D"))
+
+tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
