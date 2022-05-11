@@ -1,24 +1,12 @@
 #pragma once
 
-#include <pthread.h>
-#include <stdbool.h>
+struct rlock;
 
-typedef struct reader_lock {
-	bool writing;
-	int active_readers;
+struct rlock* rlock_create();
+void rlock_destroy(struct rlock*);
 
-	int buffered_readers;
-	int buffered_writers;
+void rlock_lock_reader(struct rlock*);
+void rlock_lock_writer(struct rlock*);
 
-	pthread_cond_t writer_cond;
-	pthread_cond_t reader_cond;
-
-	pthread_mutex_t lock;
-} reader_lock_t;
-
-void reader_lock_init(reader_lock_t* rlock);
-
-void reader_lock_take_writer(reader_lock_t* rlock);
-void reader_lock_take_reader(reader_lock_t* rlock);
-void reader_lock_drop_writer(reader_lock_t* rlock);
-void reader_lock_drop_reader(reader_lock_t* rlock);
+void rlock_unlock_reader(struct rlock*);
+void rlock_unlock_writer(struct rlock*);

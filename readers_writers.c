@@ -4,53 +4,59 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define MODE 1
-
-#if MODE == 1
-#include "rlock.h"
-reader_lock_t lock;
-#elif MODE == 2
-#include "fair_rwlock.h"
-struct fair_rwlock* lock;
+#ifndef MODE
+#define MODE 0
 #endif
+
+#if MODE == 0
+
+#include "rlock.h"
+struct rlock* lock;
+
+void create_lock() { lock = rlock_create(); }
+void destroy_lock() { rlock_destroy(lock); }
+
+void lock_reader() { rlock_lock_reader(lock); }
+void lock_writer() { rlock_lock_writer(lock); }
+void unlock_reader() { rlock_unlock_reader(lock); }
+void unlock_writer() { rlock_unlock_writer(lock); }
+
+#elif MODE == 1
+
+#include "wlock.h"
+struct wlock* lock;
+
+void create_lock() { lock = wlock_create(); }
+void destroy_lock() { wlock_destroy(lock); }
+
+void lock_reader() { wlock_lock_reader(lock); }
+void lock_writer() { wlock_lock_writer(lock); }
+void unlock_reader() { wlock_unlock_reader(lock); }
+void unlock_writer() { wlock_unlock_writer(lock); }
+
+
+#elif MODE == 2
+
+#include "rwlock.h"
+struct rwlock* lock;
+
+void create_lock() { lock = rwlock_create(); }
+void destroy_lock() { rwlock_destroy(lock); }
+
+void lock_reader() { rwlock_lock_reader(lock); }
+void lock_writer() { rwlock_lock_writer(lock); }
+void unlock_reader() { rwlock_unlock_reader(lock); }
+void unlock_writer() { rwlock_unlock_writer(lock); }
+
+#endif
+
+#define sleep(x) usleep((x) * 1000000)
 
 #define M 5
 #define N 5
 #define ARRLEN 10240
 
 int arr[ARRLEN];
-
-void lock_writer() {
-#if MODE == 1
-	reader_lock_take_writer(&lock);
-#elif MODE == 2
-	fair_rwlock_lock_writer(lock);
-#endif
-}
-
-void unlock_writer() {
-#if MODE == 1
-	reader_lock_drop_writer(&lock);
-#elif MODE == 2
-	fair_rwlock_unlock_writer(lock);
-#endif
-}
-
-void lock_reader() {
-#if MODE == 1
-	reader_lock_take_reader(&lock);
-#elif MODE == 2
-	fair_rwlock_lock_reader(lock);
-#endif
-}
-
-void unlock_reader() {
-#if MODE == 1
-	reader_lock_drop_reader(&lock);
-#elif MODE == 2
-	fair_rwlock_unlock_reader(lock);
-#endif
-}
 
 void* escritor(void *arg) {
 	int i;
@@ -72,16 +78,17 @@ void* lector(void *arg) {
 	while (1) {
 		sleep(random() % 3);
 		lock_reader();
-		v = arr[0];
-		for (i = 1; i < ARRLEN; i++) {
+		v = arr[ARRLEN-1];
+		for (i = ARRLEN-2; i >= 0; i--) {
 			if (arr[i] != v)
 				break;
 		}
 		unlock_reader();
-		if (i < ARRLEN)
+		if (i >= 0)
 			printf("Lector %d, error de lectura\n", num);
-		else
+		else {
 			printf("Lector %d, dato %d\n", num, v);
+		}
 	}
 	return NULL;
 }
@@ -89,11 +96,7 @@ void* lector(void *arg) {
 int main() {
 	pthread_t lectores[M], escritores[N];
 
-#if MODE == 1
-	reader_lock_init(&lock);
-#elif MODE == 2
-	lock = fair_rwlock_create();
-#endif
+	create_lock();
 
 	for (int i = 0; i < M; i++)
 		pthread_create(&lectores[i], NULL, lector, NULL + i);
@@ -102,5 +105,8 @@ int main() {
 		pthread_create(&escritores[i], NULL, escritor, NULL + i);
 
 	pthread_join(lectores[0], NULL); /* Espera para siempre */
+
+	destroy_lock();
+
 	return 0;
 }
