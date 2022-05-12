@@ -56,15 +56,15 @@ void *molinete(void *arg) {
 }
 
 int main() {
-	pthread_t m1, m2, m3, m4;
-	pthread_create(&m1, NULL, molinete, NULL + 0);
-	pthread_create(&m2, NULL, molinete, NULL + 1);
-	pthread_create(&m3, NULL, molinete, NULL + 2);
-	pthread_create(&m4, NULL, molinete, NULL + 3);
-	pthread_join(m1, NULL);
-	pthread_join(m2, NULL);
-	pthread_join(m3, NULL);
-	pthread_join(m4, NULL);
+	pthread_t m[THREAD_COUNT];
+
+	for (int i = 0; i < THREAD_COUNT; ++i) {
+		pthread_create(&m[i], NULL, molinete, NULL + i);
+	}
+
+	for (int i = 0; i < THREAD_COUNT; ++i) {
+		pthread_join(m[i], NULL);
+	}
 
 	printf("Hoy hubo %d visitantes!\n", visitantes);
 	return 0;
