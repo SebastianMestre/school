@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// This file implements a simple queue data structure
+
 struct node {
 	struct node* next;
 	void* data;
