@@ -2,6 +2,8 @@
 #include <pthread.h>
 #include <stdlib.h>
 
+// This file implements synchronous channels.
+
 struct channel {
 	sem_t s1, s2;
 	pthread_mutex_t m;
@@ -14,15 +16,15 @@ struct channel* create_channel() {
 }
 
 void channel_send(struct channel* chan, int x) {
-	// exclusion mutua para que no se pise val
+	// I use a mutex to sequentialize the sending of messages
 	pthread_mutex_lock(&chan->m);
 
 	chan->val = x;
 
-	// notifico que envie un mensaje
+	// Notify that a message was sent
 	sem_post(&chan->s1);
 
-	// espero a que se haya recibido el mensaje
+	// Wait until the message was received
 	sem_wait(&chan->s2);
 
 	pthread_mutex_unlock(&chan->m);
@@ -30,12 +32,12 @@ void channel_send(struct channel* chan, int x) {
 
 int channel_receive(struct channel* chan) {
 
-	// espero a que se haya enviado un mensaje
+	// Wait until a message was sent
 	sem_wait(&chan->s1);
 
 	int x = chan->val;
 
-	// notifico que recibi un mensaje
+	// Notify that a message was received
 	sem_post(&chan->s2);
 
 	return x;
