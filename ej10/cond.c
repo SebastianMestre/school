@@ -2,6 +2,7 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdlib.h>
 
 // This file implements condition variables (CV).
 //

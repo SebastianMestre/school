@@ -53,6 +53,7 @@ void *molinete(void *arg) {
 		visitantes++;
 		unlock(thread_number);
 	}
+	return NULL;
 }
 
 int main() {
