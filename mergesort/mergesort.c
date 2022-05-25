@@ -1,9 +1,11 @@
-#include <omp.h>
-#include <stdlib.h>
 #include "timing.h"
 #include "mergesort.h"
+
+#include <omp.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 int arr[SZ];
 
@@ -12,18 +14,23 @@ static void merge(int A[], int m, int N) {
   // ordenados y los ultimos N-m elementos estan ordenados
   if (N < 2)
     return;
+
+  int* temp = malloc(m * sizeof(*temp));
+  memcpy(temp, A, m * sizeof(*temp));
+
   int lc = 0;
   int rc = m;
-  int i;
-  for (i = 0; i < N; i++) {
-    if (rc == N || A[lc] < A[rc]) {
-      A[i] = A[lc];
+  for (int i = 0; i < N; i++) {
+    if (lc != m && (rc == N || temp[lc] <= A[rc])) {
+      A[i] = temp[lc];
       lc++;
     } else {
       A[i] = A[rc];
       rc++;
     }
   }
+
+  free(temp);
 }
 
 static void _par_mergesort(int A[], int N) {
@@ -103,7 +110,7 @@ static long long calcular_suma() {
 }
 
 static long long suma_;
-static int validar(){
+static int validar() {
   for (int i = 0; i+1 < SZ; i++)
     if (arr[i] > arr[i+1])
       return 0;
