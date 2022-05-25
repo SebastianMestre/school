@@ -95,38 +95,43 @@ static void sec_mergesort(int A[], int N) {
   merge(A, m, N);
 }
 
+static long long calcular_suma() {
+  long long suma = 0;
+  for (int i = 0; i < SZ; i++)
+    suma += arr[i];
+  return suma;
+}
+
+static long long suma_;
 static int validar(){
-  int ordenado = 1, i;
-  for (i = 0; i < SZ-1; i++) {
-    ordenado &= (arr[i] <= arr[i+1]);
-  }
-  return ordenado;
+  for (int i = 0; i+1 < SZ; i++)
+    if (arr[i] > arr[i+1])
+      return 0;
+  return suma_ == calcular_suma();
+}
+
+static void iniciar() {
+  for (int i = 0; i < SZ; i++)
+    arr[i] = random();
+  suma_ = calcular_suma();
 }
 
 int main() {
   int i;
 
-  for (i = 0; i < SZ; i++) {
-    arr[i] = random();
-  }
+  iniciar();
   TIME_void(sec_mergesort(arr, SZ), NULL);
   printf("Ordenado: %d\n", validar());
 
-  for (i = 0; i < SZ; i++) {
-    arr[i] = random();
-  }
+  iniciar();
   TIME_void(par_mergesort(arr, SZ), NULL);
   printf("Ordenado: %d\n", validar());
 
-  for (i = 0; i < SZ; i++) {
-    arr[i] = random();
-  }
+  iniciar();
   TIME_void(for_mergesort(arr, SZ), NULL);
   printf("Ordenado: %d\n", validar());
 
-  for (i = 0; i < SZ; i++) {
-    arr[i] = random();
-  }
+  iniciar();
   TIME_void(par_for_mergesort(arr, SZ), NULL);
   printf("Ordenado: %d\n", validar());
 }
