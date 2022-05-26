@@ -20,8 +20,8 @@ static void merge(int A[], int m, int N) {
 
   int lc = 0;
   int rc = m;
-  for (int i = 0; i < N; i++) {
-    if (lc != m && (rc == N || temp[lc] <= A[rc])) {
+  for (int i = 0; i < N && lc < m; i++) {
+    if (rc == N || temp[lc] <= A[rc]) {
       A[i] = temp[lc];
       lc++;
     } else {

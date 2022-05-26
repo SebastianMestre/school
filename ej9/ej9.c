@@ -24,12 +24,11 @@ int recibir(int rank) {
 	return result;
 }
 
-int padre(int rank) { return (rank - 1) / 2; }
-int hijo1(int rank) { return (rank * 2) + 1; }
-int hijo2(int rank) { return (rank * 2) + 2; }
-
 int main(int argc, char **argv) {
 	MPI_Init(&argc, &argv);
+
+	int num_proc;
+	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
 
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -38,21 +37,17 @@ int main(int argc, char **argv) {
 
 	int suma = mi_valor;
 
-	suma += recibir(hijo1(rank));
-	suma += recibir(hijo2(rank));
+	int w = 1;
+	while (w < num_proc) {
+		int delta = (rank / w) % 2 == 0 ? w : -w;
 
-	int suma_total;
-	if (rank == 0) {
-		suma_total = suma;
-	} else {
-		enviar(padre(rank), suma);
-		suma_total = recibir(padre(rank));
+		enviar(rank + delta, suma);
+		suma += recibir(rank + delta);
+
+		w *= 2;
 	}
 
-	printf("Proc %d: la suma total es %d\n", rank, suma_total);
-
-	enviar(hijo1(rank), suma_total);
-	enviar(hijo2(rank), suma_total);
+	printf("Proc %3d: la suma total es %d\n", rank, suma);
 
 	MPI_Finalize();
 }
