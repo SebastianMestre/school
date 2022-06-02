@@ -117,3 +117,17 @@ reduceS f b s = case lengthS s of
              (go' (pp `div` 2) $ dropS s pp)
 
 --}
+
+
+data Expr = VarE String
+          | Mul Expr Expr
+
+instance Show Expr where
+  show (VarE s)  = s
+  show (Mul l r) = inParen l ++ " ⊕ " ++ inParen r
+    where inParen (VarE s) = s
+          inParen e        = "(" ++ show e ++ ")"
+
+runvars e es = scanS Mul (VarE e) (Arr.fromList $ map VarE es)
+
+example = runvars "b" ["x0", "x1", "x2", "x3", "x4", "x5"]
