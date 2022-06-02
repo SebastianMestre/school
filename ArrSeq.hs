@@ -47,9 +47,11 @@ instance Seq Arr where
   reduceS       = undefined
 
   scanS f b s   = let
-    s'    = scan s
-    lenS' = lengthS s'
-    in (subArray 0 (lenS' - 1) s', nthS s' (lenS' - 1))
+    s' = scan s
+    n' = lengthS s'
+    suffix = nthS s' (n' - 1)
+    prefix = subArray 0 (n' - 1) s'
+    in (prefix, suffix)
     where
 
       scan s = case lengthS s of
