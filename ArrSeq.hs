@@ -6,7 +6,7 @@ import Seq
 instance Seq Arr where
   emptyS        = Arr.empty
 
-  singletonS a  = fromList [a]
+  singletonS a  = Arr.fromList [a]
 
   lengthS       = Arr.length
 
@@ -16,7 +16,7 @@ instance Seq Arr where
 
   mapS f s      = tabulateS (\i -> f (nthS s i)) (lengthS s)
 
-  filterS p s   = joinS $ mapS (\a -> if p a then singletonS a else empty)
+  filterS p s   = joinS $ mapS (\a -> if p a then singletonS a else empty) s
 
   appendS s t   = tabulateS elem (sLen + tLen)
     where
@@ -38,25 +38,36 @@ instance Seq Arr where
 
   showlS s
     | lenS == 0 = NIL
-    | otherwise = CONS (nthS s 0) (dropS 1 s)
+    | otherwise = CONS (nthS s 0) (dropS s 1)
+    where
+      lenS  = lengthS s
 
   joinS         = Arr.flatten
 
   reduceS       = undefined
 
-  scanS f b s   = tabulateS elem 
-    where s' = scanS f b $ contract f s
-    elem i = case i of
-      0                  -> nthS s 0
-      _ | i `mod` 2 == 0 -> f (nthS s' ((i `div` 2)-1)) (nthS s i)
-        | otherwise      -> nthS s' (i `div` 2)
+  scanS f b s   = let
+    s'    = scan s
+    lenS' = lengthS s'
+    in (subArray 0 (lenS' - 1) s', nthS s' (lenS' - 1))
+    where
 
-  contract f s = tabulateS elem (lengthS s `div` 2)
-    where elem i = 
+      scan s = case lengthS s of
+        0 -> singletonS b
+        n -> tabulate elem (n+1)
+        where
+          c  = contract s
+          s' = scan c
+          elem i | (i `mod` 2) == 0 = nthS s' (i `div` 2)
+                 | otherwise        = nthS s' (i `div` 2) `f` nthS s (i-1)
+
+      contract s = tabulateS elem (n `div` 2)
+        where
+          n = lengthS s
+          elem i = nthS s (i*2) `f` nthS s (i*2+1)
+
 
   fromList      = Arr.fromList
-
-
 
 {--
 
