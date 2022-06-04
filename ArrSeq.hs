@@ -56,20 +56,26 @@ instance Seq Arr where
 
       scan s = case lengthS s of
         0 -> singletonS b
-        n -> tabulate elem (n+1)
+        1 -> snoc (singletonS b) (f b (lastS s))
+        n -> snoc (tabulate elem n) (lastS s')
         where
           c  = contract s
           s' = scan c
-          elem i | (i `mod` 2) == 0 = nthS s' (i `div` 2)
-                 | otherwise        = nthS s' (i `div` 2) `f` nthS s (i-1)
+          elem i | even i    = nthS s' (i `div` 2)
+                 | otherwise = nthS s' (i `div` 2) `f` nthS s (i-1)
 
-      contract s = tabulateS elem (n `div` 2)
-        where
-          n = lengthS s
-          elem i = nthS s (i*2) `f` nthS s (i*2+1)
+      contract s | even n    = c
+                 | otherwise = snoc c (lastS s)
+        where n = lengthS s
+              c = tabulateS elem (n `div` 2)
+              elem i = nthS s (i*2) `f` nthS s (i*2+1)
 
 
   fromList      = Arr.fromList
+
+snoc s x = appendS s (singletonS x)
+lastS s = nthS s (lengthS s - 1)
+
 
 {--
 
