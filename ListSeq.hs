@@ -44,3 +44,11 @@ instance Seq [] where
 
   showlS [] = NIL
   showlS (x:xs) = CONS x xs
+
+  joinS      = undefined
+
+  reduceS    = undefined
+
+  scanS      = undefined
+
+  fromList = id
