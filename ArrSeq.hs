@@ -46,23 +46,17 @@ instance Seq Arr where
 
   reduceS       = undefined
 
-  scanS f b s   = let
-    s' = scan s
-    n' = lengthS s'
-    suffix = nthS s' (n' - 1)
-    prefix = subArray 0 (n' - 1) s'
-    in (prefix, suffix)
+  scanS f b s   = scan s
     where
-
       scan s = case lengthS s of
-        0 -> singletonS b
-        1 -> snoc (singletonS b) (f b (lastS s))
-        n -> snoc (tabulate elem n) (lastS s')
+        0 -> (emptyS, b)
+        1 -> (singletonS b, f b (lastS s))
+        n -> (tabulate elem n, snd s')
         where
           c  = contract s
           s' = scan c
-          elem i | even i    = nthS s' (i `div` 2)
-                 | otherwise = nthS s' (i `div` 2) `f` nthS s (i-1)
+          elem i | even i    = nthS (fst s') (i `div` 2)
+                 | otherwise = nthS (fst s') (i `div` 2) `f` nthS s (i-1)
 
       contract s | even n    = c
                  | otherwise = snoc c (lastS s)
