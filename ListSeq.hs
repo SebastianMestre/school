@@ -36,7 +36,7 @@ instance Seq [] where
       n          = length xs
   showlS []     = NIL
   showlS (x:xs) = CONS x xs
-  joinS         = undefined
+  joinS         = concat
 
   reduceS f b [] = b
   reduceS f b s  = f b $ go s
