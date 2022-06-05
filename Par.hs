@@ -12,7 +12,7 @@
 
 module Par ((|||)) where
 
-import Control.Parallel
+-- import Control.Parallel
 
 infix 1 |||
 
