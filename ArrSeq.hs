@@ -1,76 +1,117 @@
-module ArrSeq where
+module ArrSeq(Arr, Seq) where
 
 import Arr
 import Seq
 
 instance Seq Arr where
-  emptyS        = Arr.empty
+  emptyS     = ArrSeq.empty
+  singletonS = ArrSeq.singleton
+  lengthS    = ArrSeq.length
+  nthS       = ArrSeq.nth
+  tabulateS  = ArrSeq.tabulate
+  mapS       = ArrSeq.map
+  filterS    = ArrSeq.filter
+  appendS    = ArrSeq.append
+  takeS      = ArrSeq.take
+  dropS      = ArrSeq.take
+  showtS     = ArrSeq.showt
+  showlS     = ArrSeq.showl
+  joinS      = ArrSeq.join
+  reduceS    = ArrSeq.reduce
+  scanS      = ArrSeq.scan
+  fromList   = ArrSeq.fromList
 
-  singletonS a  = Arr.fromList [a]
+empty :: Arr a
+empty = Arr.empty
 
-  lengthS       = Arr.length
+singleton :: a -> Arr a
+singleton a = Arr.fromList [a]
 
-  nthS          = (Arr.!)
+length :: Arr a -> Int
+length = Arr.length
 
-  tabulateS     = Arr.tabulate
+nth :: Arr a -> Int -> a
+nth = (Arr.!)
 
-  mapS f s      = tabulateS (\i -> f (nthS s i)) (lengthS s)
+tabulate :: (Int -> a) -> Int -> Arr a
+tabulate = Arr.tabulate
 
-  filterS p s   = joinS $ mapS (\a -> if p a then singletonS a else emptyS) s
+fromList :: [a] -> Arr a
+fromList = Arr.fromList
 
-  appendS s t   = tabulateS elem (n + m)
-    where
-      elem i = if i < n then nthS s i else nthS t (i - n)
-      n      = lengthS s
-      m      = lengthS t
+map :: (a -> b) -> Arr a -> Arr b
+map f s    = ArrSeq.tabulate elem (lengthS s)
+  where elem i = f $ nthS s i
 
-  takeS s n     = Arr.subArray 0 n s
+filter :: (a -> Bool) -> Arr a -> Arr a
+filter p s = Arr.flatten $ ArrSeq.map f s
+  where f a | p a       = ArrSeq.singleton a
+            | otherwise = ArrSeq.empty
 
-  dropS s n     = Arr.subArray n (lengthS s - n) s
+append :: Arr a -> Arr a -> Arr a
+append s t = ArrSeq.tabulate elem (n + m)
+  where
+    elem i = if i < n then nthS s i else nthS t (i - n)
+    n      = lengthS s
+    m      = lengthS t
 
-  showtS s
-    | n == 0    = EMPTY
-    | n == 1    = ELT (firstS s)
-    | otherwise = NODE (takeS s n') (dropS s n')
-    where
-      n  = lengthS s
-      n' = n `div` 2
+take :: Arr a -> Int -> Arr a
+take s n   = Arr.subArray 0 n s
 
-  showlS s
-    | n == 0    = NIL
-    | otherwise = CONS (firstS s) (dropS s 1)
-    where
-      n  = lengthS s
+drop :: Arr a -> Int -> Arr a
+drop s n   = Arr.subArray n (lengthS s - n) s
 
-  joinS         = Arr.flatten
+showt :: Arr a -> TreeView a (Arr a)
+showt s
+  | n == 0    = EMPTY
+  | n == 1    = ELT (first s)
+  | otherwise = NODE (takeS s n') (dropS s n')
+  where
+    n  = lengthS s
+    n' = n `div` 2
 
-  reduceS f b s | lengthS s == 0 = b
-                | otherwise      = f b $ go s
-    where
-      go s | lengthS s == 1 = firstS s
-           | otherwise      = go $ contractS f s
+showl :: Arr a -> ListView a (Arr a)
+showl s
+  | n == 0    = NIL
+  | otherwise = CONS (first s) (dropS s 1)
+  where
+    n  = lengthS s
 
-  scanS f b s   = go s
-    where
-      go s = case lengthS s of
-        0 -> (emptyS, b)
-        1 -> (singletonS b, f b (lastS s))
-        n -> (tabulate elem n, p)
-        where
-          (s', p)            = go $ contractS f s
-          elem i | even i    = nthS s' (i `div` 2)
-                 | otherwise = nthS s' (i `div` 2) `f` nthS s (i-1)
+join :: Arr (Arr a) -> Arr a
+join = Arr.flatten
 
-  fromList      = Arr.fromList
+reduce :: (a -> a -> a) -> a -> Arr a -> a
+reduce f b s | lengthS s == 0 = b
+             | otherwise      = f b $ go s
+  where
+    go s | lengthS s == 1 = first s
+         | otherwise      = go $ contract f s
 
+scan :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
+scan f b s   = go s
+  where
+    go s = case lengthS s of
+      0 -> (emptyS, b)
+      1 -> (singletonS b, f b (ArrSeq.last s))
+      n -> (ArrSeq.tabulate elem n, p)
+      where
+        (s', p)            = go $ contract f s
+        elem i | even i    = nthS s' (i `div` 2)
+               | otherwise = nthS s' (i `div` 2) `f` nthS s (i-1)
 
-
-contractS f s | even n    = c
-              | otherwise = snocS c (lastS s)
+contract :: (a -> a -> a) -> Arr a -> Arr a
+contract f s | even n    = c
+                | otherwise = snoc c (ArrSeq.last s)
   where n      = lengthS s
-        c      = tabulateS elem (n `div` 2)
+        c      = ArrSeq.tabulate elem (n `div` 2)
         elem i = nthS s (i*2) `f` nthS s (i*2+1)
-firstS s  = nthS s 0
-lastS s   = nthS s (lengthS s - 1)
-snocS s x = appendS s (singletonS x)
+
+first :: Arr a -> a
+first s  = nthS s 0
+
+last :: Arr a -> a
+last s   = nthS s (lengthS s - 1)
+
+snoc :: Arr a -> a -> Arr a
+snoc s x = append s (singletonS x)
 
