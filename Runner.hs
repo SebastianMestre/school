@@ -1,14 +1,19 @@
 
 import Expr
-import Arr
 import Seq
 import ListSeq
 import ArrSeq
 
-stringsToExprSeq l = Seq.fromList (map VarE l)
+symbols n = take n $ map (VarE.("x"++).show) [0..]
 
-testscan f e es = f Mul (VarE e) $ stringsToExprSeq es
+run :: ((a -> a -> a) -> a -> s a -> b) -> (a -> a -> a) -> a -> s a -> s a -> b
+run f c e es _ = f c e es
 
-example f = testscan f "b" ["x0", "x1", "x2", "x3", "x4", "x5"]
+-- simple :: Seq s => ((Expr -> Expr -> Expr) -> Expr -> s Expr -> b) -> Int -> s Expr -> b
+simple f n aux = run f Mul (VarE "b") (fromList $ symbols n) aux
 
-symbols n = take n $ map (("x"++).show) [0..]
+mtyA :: Arr a
+mtyA = emptyS
+
+mtyL :: Arr a
+mtyL = emptyS
