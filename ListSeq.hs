@@ -1,65 +1,71 @@
-module ListSeq where
+module ListSeq(Seq) where
 
 import Seq
 import Par
 
 instance Seq [] where
-  emptyS        = []
-  singletonS a  = [a]
-  lengthS       = length
-  nthS          = (!!)
-  tabulateS f n = mapS f [0..(n-1)]
-  mapS f s      = go s
-    where
-      go [] = []
-      go (x:xs) = let
-        (y, ys) = f x ||| go xs
-        in y:ys
-  filterS p s   = go s
-    where
-      go [] = []
-      go (x:xs) = let
-        (b, ys) = p x ||| go ys
-          in if b then x:ys else ys
-  appendS       = (++)
-  -- takeS [] _    = []
-  -- takeS (x:xs) n
-  --   | n <= 0    = []
-  --   | otherwise = x : takeS xs (n-1)
-  takeS         = flip take -- Vale esto ???
-  dropS         = flip drop -- Vale esto ???
-  showtS []     = EMPTY
-  showtS [x]    = ELT x
-  showtS xs     = NODE lhs rhs
-    where
-      (lhs, rhs) = splitAt (n `div` 2) xs
-      n          = length xs
-  showlS []     = NIL
-  showlS (x:xs) = CONS x xs
-  joinS         = concat
+  emptyS       = []
+  singletonS x = [x]
+  lengthS      = length
+  nthS         = (!!)
+  tabulateS    = ListSeq.tabulate
+  mapS         = ListSeq.map
+  filterS      = ListSeq.filter
+  appendS      = (++)
+  takeS        = flip take
+  dropS        = flip drop
+  showtS       = ListSeq.showt
+  showlS       = ListSeq.showl
+  joinS        = concat
+  reduceS      = ListSeq.reduce
+  scanS        = ListSeq.scan
+  fromList     = id
 
-  reduceS f b [] = b
-  reduceS f b s  = f b $ go s
-    where
-      go [x] = x
-      go xs  = go $ contractS f s
+tabulate :: (Int -> a) -> Int -> [a]
+tabulate f n = ListSeq.map f [0..(n-1)]
 
-  scanS f b s   = go s
-    where
-      go []  = ([], b)
-      go [x] = ([b], f b x)
-      go s   = (expandList s s', p)
-        where
-          (s', p)            = go $ contractS f s
+map :: (a -> b) -> [a] -> [b]
+map f [] = []
+map f (x:xs) = y : ys
+  where (y, ys) = f x ||| ListSeq.map f xs
 
-  fromList      = id
+filter :: (a -> Bool) -> [a] -> [a]
+filter p [] = []
+filter p (x:xs) | b         = x : ys
+                | otherwise = ys
+  where (b, ys) = p x ||| ListSeq.filter p ys
 
-contractList f []        = []
-contractList f [x]       = [x]
-contractList f (x:x':xs) = y:ys
-  where (y, ys) = f x x' ||| contractList f xs
+showt :: [a] -> TreeView a [a]
+showt []  = EMPTY
+showt [x] = ELT x
+showt xs  = NODE lhs rhs
+  where (lhs, rhs) = splitAt (n `div` 2) xs
+        n          = length xs
 
-expandList f [] _            = []
-expandList f [_] (y:_)       = [y]
-expandList f (x:_:xs) (y:ys) = y:z:zs
-  where (z, zs) = f y x ||| expandList f xs ys
+showl :: [a] -> ListView a [a]
+showl []     = NIL
+showl (x:xs) = CONS x xs
+
+reduce :: (a -> a -> a) -> a -> [a] -> a
+reduce f b [] = b
+reduce f b s  = f b $ go s
+  where go [x] = x
+        go xs  = go $ contract f xs
+
+scan :: (a -> a -> a) -> a -> [a] -> ([a], a)
+scan f b []  = ([], b)
+scan f b [x] = ([b], f b x)
+scan f b s   = (expand f s s', p)
+  where (s', p) = scan f b $ contract f s
+
+contract :: (a -> a -> a) -> [a] -> [a]
+contract f []        = []
+contract f [x]       = [x]
+contract f (x:x':xs) = y : ys
+  where (y, ys) = f x x' ||| contract f xs
+
+expand :: (a -> a -> a) -> [a] -> [a] -> [a]
+expand f [] _            = []
+expand f [_] (y:_)       = [y]
+expand f (x:_:xs) (y:ys) = y : z : zs
+  where (z, zs) = f y x ||| expand f xs ys
