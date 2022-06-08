@@ -88,16 +88,15 @@ reduce f b s | lengthS s == 0 = b
          | otherwise      = go $ contract f s
 
 scan :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
-scan f b s   = go s
+scan f b s
+  | n == 0    = (emptyS, b)
+  | n == 1    = (singletonS b, f b (ArrSeq.last s))
+  | otherwise = (ArrSeq.tabulate elem n, p)
   where
-    go s = case lengthS s of
-      0 -> (emptyS, b)
-      1 -> (singletonS b, f b (ArrSeq.last s))
-      n -> (ArrSeq.tabulate elem n, p)
-      where
-        (s', p)            = go $ contract f s
-        elem i | even i    = nthS s' (i `div` 2)
-               | otherwise = nthS s' (i `div` 2) `f` nthS s (i-1)
+    n                  = Arr.length s
+    (s', p)            = scan f b $ contract f s
+    elem i | even i    = nthS s' (i `div` 2)
+           | otherwise = nthS s' (i `div` 2) `f` nthS s (i-1)
 
 contract :: (a -> a -> a) -> Arr a -> Arr a
 contract f s | even n    = c
