@@ -42,7 +42,7 @@ fromList :: [a] -> Arr a
 fromList = Arr.fromList
 
 map :: (a -> b) -> Arr a -> Arr b
-map f s    = tabulate elem (Arr.length s)
+map f s = tabulate elem (Arr.length s)
   where elem i = f $ nth s i
 
 filter :: (a -> Bool) -> Arr a -> Arr a
@@ -58,10 +58,10 @@ append s t = tabulate elem (n + m)
     m      = Arr.length t
 
 take :: Arr a -> Int -> Arr a
-take s n   = Arr.subArray 0 n s
+take s n = Arr.subArray 0 n s
 
 drop :: Arr a -> Int -> Arr a
-drop s n   = Arr.subArray n (Arr.length s - n) s
+drop s n = Arr.subArray n (Arr.length s - n) s
 
 showt :: Arr a -> TreeView a (Arr a)
 showt s
@@ -84,10 +84,10 @@ join = Arr.flatten
 
 reduce :: (a -> a -> a) -> a -> Arr a -> a
 reduce f b s | Arr.length s == 0 = b
-             | otherwise      = f b $ go s
+             | otherwise         = f b $ go s
   where
     go s | Arr.length s == 1 = first s
-         | otherwise      = go $ contract f s
+         | otherwise         = go $ contract f s
 
 scan :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
 scan f b s
@@ -108,10 +108,10 @@ contract f s | even n    = c
         elem i = nth s (i*2) `f` nth s (i*2+1)
 
 first :: Arr a -> a
-first s  = nth s 0
+first s = nth s 0
 
 last :: Arr a -> a
-last s   = nth s (Arr.length s - 1)
+last s = nth s (Arr.length s - 1)
 
 snoc :: Arr a -> a -> Arr a
 snoc s x = append s (singleton x)
