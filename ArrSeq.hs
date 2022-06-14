@@ -15,7 +15,7 @@ instance Seq Arr.Arr where
   filterS    = ArrSeq.filter
   appendS    = ArrSeq.append
   takeS      = ArrSeq.take
-  dropS      = ArrSeq.take
+  dropS      = ArrSeq.drop
   showtS     = ArrSeq.showt
   showlS     = ArrSeq.showl
   joinS      = ArrSeq.join
