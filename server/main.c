@@ -1,11 +1,15 @@
-#include <stdio.h>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <unistd.h>
-#include <stdlib.h>
+#define _GNU_SOURCE
+
 #include <assert.h>
-#include <string.h>
 #include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/epoll.h>
+#include <sys/errno.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 struct fd_data {
 	enum fd_type {
@@ -17,13 +21,43 @@ struct fd_data {
 	int fd;
 };
 
-struct dictionary {
-	int size, capacity;
-	char** keys;
-	int* key_lengths;
-	char** values;
-	int* value_lengths;
-};
+void register_epoll(int epollfd, int fd, int op, int flags, struct fd_data* data) {
+	fprintf(stderr, "epoll_ctl <~~ epollfd = %d, fd = %d, op = %d, flags = %x, data = %p\n", epollfd, fd, op, flags, data);
+	struct epoll_event evt;
+	evt.events = flags;
+	evt.data.ptr = data;
+	int err = epoll_ctl(epollfd, op, fd, &evt);
+	fprintf(stderr, "epoll_ctl ~~> retval = %d, errno = %d\n", err, errno);
+	if (err < 0) {
+		perror("epoll.2");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void register_listen_socket_first_time(int epollfd, int sock) {
+	struct fd_data* data = malloc(sizeof(*data));
+	data->type = FD_TYPE_TEXT_LISTEN;
+	data->fd = sock;
+
+	register_epoll(epollfd, sock, EPOLL_CTL_ADD, EPOLLIN | EPOLLONESHOT, data);
+}
+
+void register_listen_socket_again(int epollfd, int sock, struct fd_data* data) {
+	register_epoll(epollfd, sock, EPOLL_CTL_MOD, EPOLLIN | EPOLLONESHOT, data);
+}
+
+void register_client_socket_first_time(int epollfd, int sock) {
+	struct fd_data* data = malloc(sizeof(*data));
+	data->type = FD_TYPE_TEXT_CONN;
+	data->fd = sock;
+
+	register_epoll(epollfd, sock, EPOLL_CTL_ADD, EPOLLIN | EPOLLONESHOT | EPOLLRDHUP, data);
+}
+
+void register_client_socket_again(int epollfd, int sock, struct fd_data* data) {
+	register_epoll(epollfd, sock, EPOLL_CTL_MOD, EPOLLIN | EPOLLONESHOT | EPOLLRDHUP, data);
+}
+
 
 int main() {
 
@@ -63,28 +97,23 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
-	err = listen(listen_sock, 4); // TODO: que valor usar para el backlog?
+	err = listen(listen_sock, 10); // medio trucho el tamanno del backlog
 	if (err < 0) {
 		perror("listen.1");
 		exit(EXIT_FAILURE);
 	}
 
-	struct fd_data* sock_data = malloc(sizeof(*sock_data));
-	sock_data->type = FD_TYPE_TEXT_LISTEN;
-	sock_data->fd = listen_sock;
+	register_listen_socket_first_time(epollfd, listen_sock);
 
-	struct epoll_event evt;
-	evt.events = EPOLLIN | EPOLLONESHOT;
-	evt.data.ptr = sock_data;
-
-	err = epoll_ctl(epollfd, EPOLL_CTL_ADD, listen_sock, &evt);
-	if (err < 0) {
-		perror("epoll.1");
-		exit(EXIT_FAILURE);
-	}
+	fprintf(stderr, "ENTRANDO AL LOOP EPOLL\n");
 
 	while (1) {
+		fprintf(stderr, "WAIT\n");
+		struct epoll_event evt;
 		int event_count = epoll_wait(epollfd, &evt, 1, -1);
+
+		fprintf(stderr, "DEJO DE ESPERAR\n");
+
 		assert(event_count > 0);
 
 		assert(event_count == 1); // TODO: borrar cuando manejemos varios eventos
@@ -93,67 +122,81 @@ int main() {
 
 		switch (data->type) {
 		case FD_TYPE_TEXT_LISTEN: {
+			fprintf(stderr, "NUEVO CLIENTE!\n");
 			int listen_sock = data->fd;
 
-			int conn_sock = accept(listen_sock, NULL, NULL);
+			int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
 			if (conn_sock < 0) {
 				perror("accept.1");
 				exit(EXIT_FAILURE);
 			}
 
-			struct fd_data* sock_data = malloc(sizeof(*sock_data));
-			sock_data->type = FD_TYPE_TEXT_CONN;
-			sock_data->fd = conn_sock;
+			register_client_socket_first_time(epollfd, conn_sock);
 
-			struct epoll_event conn_evt;
-			conn_evt.events = EPOLLIN | EPOLLONESHOT;
-			conn_evt.data.ptr = sock_data;
+			register_listen_socket_again(epollfd, listen_sock, data);
 
-			err = epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock, &conn_evt);
-			if (err < 0) {
-				perror("epoll.2");
-				exit(EXIT_FAILURE);
-			}
-
-			err = epoll_ctl(epollfd, EPOLL_CTL_MOD, listen_sock, &evt);
-			if (err < 0) {
-				perror("epoll.3");
-				exit(EXIT_FAILURE);
-			}
 		} break;
 		case FD_TYPE_BINARY_LISTEN: {
 			int listen_sock = data->fd;
-
-			int conn_sock = accept(listen_sock, NULL, NULL);
-			if (conn_sock < 0) {
-				perror("accept.1");
-				exit(EXIT_FAILURE);
-			}
-
-			struct fd_data* sock_data = malloc(sizeof(*sock_data));
-			sock_data->type = FD_TYPE_BINARY_CONN;
-			sock_data->fd = conn_sock;
-
-			struct epoll_event conn_evt;
-			conn_evt.events = EPOLLIN | EPOLLONESHOT;
-			conn_evt.data.ptr = sock_data;
-
-			err = epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock, &conn_evt);
-			if (err < 0) {
-				perror("epoll.2");
-				exit(EXIT_FAILURE);
-			}
-
-			err = epoll_ctl(epollfd, EPOLL_CTL_MOD, listen_sock, &evt);
-			if (err < 0) {
-				perror("epoll.3");
-				exit(EXIT_FAILURE);
-			}
-		} break;
-		case FD_TYPE_TEXT_CONN: {
-			int sock = data->fd;
 			// TODO
 			exit(EXIT_FAILURE);
+		} break;
+		case FD_TYPE_TEXT_CONN: {
+			fprintf(stderr, "ME HABLA UN CLIENTE!\n");
+			fprintf(stderr, "evt flags = %8x\n", evt.events);
+
+			int sock = data->fd;
+
+			#define READ_BUF_SIZE 1024
+			char read_buf[READ_BUF_SIZE];
+
+			int should_reregister = 0;
+
+			if (evt.events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
+				fprintf(stderr, "HANGUP\n");
+				// TODO limpiar recursos, cerrar socket, borrar del epoll group, etc
+				fprintf(stderr, "BORRANDO POR HUP O ERR\n");
+				err = epoll_ctl(epollfd, EPOLL_CTL_DEL, sock, NULL);
+				if (err < 0) {
+					perror("epoll_ctl.5");
+					exit(EXIT_FAILURE);
+				}
+
+			} else {
+
+				while (1) {
+					// fprintf(stderr, "LEYENDO DEL CLIENTE\n");
+					int read_bytes = read(sock, read_buf, READ_BUF_SIZE);
+					if (read_bytes < 0) {
+						if (errno == EAGAIN || errno == EWOULDBLOCK) {
+							should_reregister = 1;
+							break;
+						} else {
+							should_reregister = 0;
+							perror("read.1");
+							exit(EXIT_FAILURE);
+						}
+					}
+					if (read_bytes == 0) {
+						should_reregister = 0;
+						fprintf(stderr, "????\n");
+						break;
+					}
+				}
+
+				if (should_reregister) {
+					register_listen_socket_again(epollfd, sock, data);
+				} else {
+					// fprintf(stderr, "BORRANDO POR ALGUNA RAZON RARA\n");
+					// err = epoll_ctl(epollfd, EPOLL_CTL_DEL, sock, NULL);
+					// if (err < 0) {
+						// perror("epoll_ctl.5");
+						// exit(EXIT_FAILURE);
+					// }
+				}
+			}
+
+
 		} break;
 		case FD_TYPE_BINARY_CONN: {
 			int sock = data->fd;
