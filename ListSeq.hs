@@ -33,7 +33,7 @@ filter :: (a -> Bool) -> [a] -> [a]
 filter p [] = []
 filter p (x:xs) | b         = x : ys
                 | otherwise = ys
-  where (b, ys) = p x ||| ListSeq.filter p ys
+  where (b, ys) = p x ||| ListSeq.filter p xs
 
 showt :: [a] -> TreeView a [a]
 showt []  = EMPTY
