@@ -1,51 +1,73 @@
 ---
 title: "TP1"
+lang: "es"
 output:
   pdf_document:
     toc: yes
     toc_depth: 3
     number_sections: yes
+    fig_caption: true
   html_document:
     toc: yes
     toc_depth: '3'
     df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
 # Alumnos
 
 Lucas Bachur, Sebastián Mestre, Santiago Coronel.
 
 # Introducción
-EcoBici es un sistema de bicicletas compartidas que funciona en la Ciudad de Buenos Aires, cuenta
-con más de 200 estaciones y 1.200 rodados. Actualmente el sistema está presente en 30 de los 48
-barrios de la Ciudad Autónoma de Buenos Aires, funcionando los 365 días del a˜no 24 horas. Existen
-2 formas de usar el sistema: mediante una app o mediante una tarjeta. Mediante la app, el usuario
-debe registrarse y, mediante su nombre de usuario y password, ingresa al sistema, elige la estación
-en la que se encuentra y luego elige la bici que quiere. Mediante tarjeta, el usuario debe apoyarla
-en un lector y el sistema le asigna una bicicleta. El usuario se moviliza por la ciudad durante
-un tiempo limitado (30 minutos) y luego debe devolver la bicicleta en alguna de las estaciones
-habilitadas. El sistema le asigna al usuario un id y registra datos tales como la edad, el género,
-estación de origen, estación de destino... etc.  
+
+EcoBici es un sistema de bicicletas compartidas que funciona en la
+Ciudad de Buenos Aires, cuenta con más de 200 estaciones y 1.200
+rodados. Actualmente el sistema está presente en 30 de los 48 barrios de
+la Ciudad Autónoma de Buenos Aires, funcionando los 365 días del a˜no 24
+horas. Existen 2 formas de usar el sistema: mediante una app o mediante
+una tarjeta. Mediante la app, el usuario debe registrarse y, mediante su
+nombre de usuario y password, ingresa al sistema, elige la estación en
+la que se encuentra y luego elige la bici que quiere. Mediante tarjeta,
+el usuario debe apoyarla en un lector y el sistema le asigna una
+bicicleta. El usuario se moviliza por la ciudad durante un tiempo
+limitado (30 minutos) y luego debe devolver la bicicleta en alguna de
+las estaciones habilitadas. El sistema le asigna al usuario un id y
+registra datos tales como la edad, el género, estación de origen,
+estación de destino... etc.
 
 # Objetivos
 
-El objetivo de este informe es reflejar las características más notables acerca de los datos brindados.  
-Para llevar esto a cabo se va a utilizar un software estadístico que permita efectuar un estudio
-descriptivo que incluya: tablas de distribución de frecuencias, gráficos y medidas descriptivas.  
+El objetivo de este informe es reflejar las características más notables
+acerca de los datos brindados.\
+Para llevar esto a cabo se va a utilizar un software estadístico que
+permita efectuar un estudio descriptivo que incluya: tablas de
+distribución de frecuencias, gráficos y medidas descriptivas.
 
 # Análisis
 
 ## Análisis univariado
+
 ### Edad
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+```{r fig.cap="Edad Usuarios", echo=FALSE, message=FALSE, warning=FALSE}
 library(qcc)
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 
-hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad", ylab="Frecuencia", xlim=range(10:70))
+hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad [años]", ylab="Frecuencia absoluta", xlim=range(15:70))
 ```
-Se puede observar en este histograma que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, a partir de los 40 años la cantidad de usuarios baja considerablemente. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18. 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+
+Se puede observar en este histograma que la mayoría de los usuarios
+estan en las franjas etarias más bajas. Más especificamente, se ve una
+concentracion de usuarios en la franja de 20 a 40 años, con un pico en
+el intervalo [25, 30]. Se detecta que usuarios con una edad mayor a 40
+años hace un menor uso del servicio. Una aclaración importante es que el
+número de personas que figuran entre 15 y 20 años es baja, ya que sólo
+estamos teniendo en cuenta los mayores a 18.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 cortusuarios <- table(cut(usuarios$edad, breaks=10, right=FALSE, dig.lab = 0))
 cumusuarios <- cumsum(cortusuarios)
 tablausuarios <- cbind(cortusuarios,cumusuarios,cortusuarios/length(usuarios$edad),cumusuarios/length(usuarios$edad))
@@ -53,34 +75,41 @@ colnames(tablausuarios) <- (c("Frecuencia absoluta","Frecuencia absoluta acumula
 knitr::kable(tablausuarios)
 
 ```
-En esta tabla podemos ver incluso mejor como llegado a los 33 años, la frecuencia acumulada es casi del 60%.
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+En esta tabla podemos ver incluso mejor como llegado a los 33 años, la
+frecuencia acumulada es casi del 60%.
 
-recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
-usuariosrecorridos <- merge(usuarios, recorridos)
-
-hist(usuariosrecorridos$edad, xlab = "Edad", ylab = "Frecuencia", main = "Recorridos por Edad")
+```{r echo=FALSE, fig.cap="Edad Recorridos", message=FALSE, warning=FALSE}
 
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
 
-recxusu <- table(usuariosrecorridos$edad)/table(usuarios$edad)
-
-barplot(recxusu, main="Viajes realizados por usuario, repartidos por edad", xlab="Edad", ylab="Viajes por usuario", ylim=range(0:14), col="#8E67A7")
-
+hist(usuariosrecorridos$edad, xlab = "Edad en Años", ylab = "Frecuencia absoluta", main = "Recorridos por Edad", xlim = range(10:70))
 
 ```
+<!-- TODO: agregar grafico, borre el q estaba antes pq estaba mal (ver correcciones) -->
 
-El gráfico de ditribución de recorridos por edad nos muestra resultados similares a lo visto en el análisis de usuarios por edad.
-Sin embargo, una cosa interesante sucede cuando se analiza los viajes realizados por usuario, repartiendolos en cada edad. Se puede ver que si bien hay una leve tendencia a que baje este número, no es nada determinante.
-O sea, lo que podemos decir es que el hecho de que haya menos viajes realizados por gente mayor a 40 años, no tiene que ver tan directamente con que cada usuario haga menos viajes. Sino que se puede asociar también con el hecho de que son menos los usuarios en esas edades. Esto es lo que termina causando el tamaño de la disparidad.  
-\newpage  
+
+El gráfico de ditribución de recorridos por edad nos muestra resultados
+similares a lo visto en el análisis de usuarios por edad. Sin embargo,
+una cosa interesante sucede cuando se analiza los viajes realizados por
+usuario, repartiendolos en cada edad. Se puede ver que si bien hay una
+leve tendencia a que baje este número, no es nada determinante. O sea,
+lo que podemos decir es que el hecho de que haya menos viajes realizados
+por gente mayor a 40 años, no tiene que ver tan directamente con que
+cada usuario haga menos viajes. Sino que se puede asociar también con el
+hecho de que son menos los usuarios en esas edades. Esto es lo que
+termina causando el tamaño de la disparidad.\
+\newpage
 
 ### Género
-Se analizará ahora la distrución del género. Algo interesante para acotar es que si un usuario no proporciona esta información, por defecto su género asignado será "Otro". Esto significa que los datos no representan exactamente la distribución de género real.
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+Se analizará ahora la distrución del género. Algo interesante para
+acotar es que si un usuario no proporciona esta información, por defecto
+su género asignado será "Otro". Esto significa que los datos no
+representan exactamente la distribución de género real.
+
+```{r fig.cap="Genero Usuarios", message=FALSE, echo = FALSE, warning = FALSE}
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
@@ -125,21 +154,25 @@ pieViajesXGenero <- function() {
 pieUsuariosXGenero()
 ```
 
-Por ambos gráficos se puede observar que:  
-- la mayoría de usuarios son mujeres  
-- la mayoría de viajes lo realizan mujeres  
-Estos datos tienen una relación directa y se puede decir que la razón por la que más viajes los realizan personas de género femenino es que estos son la mayoría.  
+Por ambos gráficos se puede observar que:\
+- la mayoría de usuarios son mujeres\
+- la mayoría de viajes lo realizan mujeres\
+Estos datos tienen una relación directa y se puede decir que la razón
+por la que más viajes los realizan personas de género femenino es que
+estos son la mayoría.
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+```{r fig.cap="Genero Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
 pieViajesXGenero()
 ```
 
-\newpage  
+\newpage
 
 ### Duración
-Se hace primero el análisis del gráfico de la distribución de duración con "outliers":  
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+Se hace primero el análisis del gráfico de la distribución de duración
+con "outliers":
+
+```{r fig.cap="Duracion Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
@@ -148,73 +181,83 @@ boxplot(recorridos$duracion / 60,
         outline = TRUE,
         horizontal = TRUE,
         xlab = "Tiempo [minutos]",
-        main = "Duracion Recorridos (con outliers)",
+        main = "Distribución de la duración de los recorridos (en minutos).",
         col = c("#E97444"))
 ```
 
-Al observarlo, se nota que hay muchos valores alejados de la media. Estas son algunas de las medidas descriptivas de la variable (en minutos):  
-- Mínimo: 4  
-- Primer Cuartil: 13  
-- Mediana: 22  
-- Promedio: 27  
-- Tercer Cuartil: 32  
-- Máximo: 298  
-  
-Ahora se analizará el gráfico sin "outliers":  
+Al observarlo, se nota que hay muchos valores alejados de la media.
+Estas son algunas de las medidas descriptivas de la variable (en
+minutos):\
+- Mínimo: 4\
+- Primer Cuartil: 13\
+- Mediana: 22\
+- Promedio: 27\
+- Tercer Cuartil: 32\
+- Máximo: 298
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
-boxplot(recorridos$duracion / 60,
-        outline = FALSE,
-        horizontal = TRUE,
-        xlab = "Tiempo [minutos]",
-        main = "Duracion Recorridos (sin outliers)",
-        col = c("#E97444"))
-```
+Se observa que hay algunos valores outliers muy por encima de la media.
+Podria considerarse la posibilidad de que sean errores de registro o del
+sistema; aunque en este caso tambien podrian adjudicarse a un
+error/eventualidad en relacion al usuario.
 
-En esta gráfica se puede ver mucho mejor los datos que nos interesan.  
+Por otro lado, interpretamos que la mayor concentracion de outliers que
+se encuentran en el intervalo [60, 100] son resultados logicos del
+factor humano, ya que representan un intervalo de tiempo razonablemente
+menor.
 
-
-\newpage  
-
+\newpage
 
 ### Distancia
 
-En este análisis, sucede lo mismo que en el anterior: es conveniente mostrar la gráfica sin outliers. El análisis va a ser directamente de esta.  
+En este análisis, sucede lo mismo que en el anterior: es conveniente
+mostrar la gráfica sin outliers. El análisis va a ser directamente de
+esta.
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+```{r fig.cap="Distancia Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
 
 boxplot(recorridos$distancia / 1000,
-        outline = FALSE,
+        #outline = FALSE,
         horizontal = TRUE,
         xlab = "Distancia [km]",
-        main = "Distancia Recorridos (sin outliers)",
+        main = "Distancia Recorridos",
         col = c("#9ED573"))
 ```
 
+Medidas descriptivas de la variable (en metros):\
+- Mínimo: 758\
+- Primer Cuartil: 2788\
+- Mediana: 4422\
+- Promedio: 5567\
+- Tercer Cuartil: 6625\
+- Máximo: 70528
 
-Medidas descriptivas de la variable (en metros):  
-- Mínimo: 758  
-- Primer Cuartil: 2788  
-- Mediana: 4422  
-- Promedio: 5567  
-- Tercer Cuartil: 6625  
-- Máximo: 70528  
-  
-La conclusión que se puede sacar es que la mayoría de los viajes son de media distancia, variando principalmente entre los 3 y 6 kilometros. No hay gran cantidad de viajes muy cortos ni muy largos, aunque efectivamente existen.  
+La conclusión que se puede sacar es que la mayoría de los viajes son de
+media distancia, variando principalmente entre los 3 y 6 kilometros. No
+hay gran cantidad de viajes muy cortos ni muy largos, aunque
+efectivamente existen.
 
+Recordando el analisis anterior (***referencia***) sobre la duracion de
+los recorridos, notamos que existe cierta correspondencia entre la
+distribucion de los outliers. Esto puede deberse a que los usuarios que
+debian viajar largas distancias no cumplieron con el tiempo debido, o
+bien simplemente decidieron no respetarlo. Concluimos que existe
+evidencia a favor de extender el tiempo de uso de las bicletas, o al
+menos considerar una politica de uso acondicionada al los viajes de
+mayor distancia .
 
-
-\newpage  
-  
+\newpage
 
 ### Dirección de origen y dirección de destino
 
-Para esta variable, hacer un análisis alrededor de qué estaciones en específico tienen mayor o menor tráfico no va a ser de demasiada utilidad. Así que el análisis va a ser alrededor de **cuántas** fueron salida o llegada de cada cantidad de viajes:  
+Para esta variable, hacer un análisis alrededor de qué estaciones en
+específico tienen mayor o menor tráfico no va a ser de demasiada
+utilidad. Así que el análisis va a ser alrededor de **cuántas** fueron
+salida o llegada de cada cantidad de viajes:
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+```{r fig.cap="Estaciones Origen", message=FALSE, echo = FALSE, warning = FALSE}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
@@ -225,6 +268,9 @@ plot(freq_viajes_origen,
      xlab = "Cantidad de viajes", 
      ylab = "Cantidad de estaciones",
      main = "Cantidad de estaciones origen de x viajes")
+```
+
+```{r fig.cap="Estaciones Destino", message=FALSE, echo = FALSE, warning = FALSE}
 freq_estacion_destino <- table(recorridos$direccion_estacion_destino) 
 freq_viajes_destino <- table(freq_estacion_destino)
 
@@ -233,13 +279,21 @@ plot(freq_viajes_destino,
      ylab = "Cantidad de estaciones",
      main = "Cantidad de estaciones destino de x viajes")
 ```
-  
-Como se puede ver, hay unos pocos "outliers" en estos gráficos también, pero la información se puede ver bien igualmente.
-Lo que se puede notar de estos gráficos es que no hay muchas estaciones que concentren gran cantidad de tráfico. Si hay lugar para mejorar el sistema va a ser en las estaciones que tienen estos valores extremos.  
-  
-El otro foco de análisis con estas variables es cuántos viajes empiezan y terminan en la misma estación. En el gráfico de abajo se ve que la mayoría de los recorridos comienzan y acaban en diferentes lugares. Si un viaje cumple con esta condición, lo más probable es que sea del tipo recreativo. Así que la conclusión es que la mayoría de la gente no hace este tipo de viajes.  
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+Como se puede ver, hay unos pocos "outliers" en estos gráficos también,
+pero la información se puede ver bien igualmente. Lo que se puede notar
+de estos gráficos es que no hay muchas estaciones que concentren gran
+cantidad de tráfico. Si hay lugar para mejorar el sistema va a ser en
+las estaciones que tienen estos valores extremos.
+
+El otro foco de análisis con estas variables es cuántos viajes empiezan
+y terminan en la misma estación. En el gráfico de abajo se ve que la
+mayoría de los recorridos comienzan y acaban en diferentes lugares. Si
+un viaje cumple con esta condición, lo más probable es que sea del tipo
+recreativo. Así que la conclusión es que la mayoría de la gente no hace
+este tipo de viajes.
+
+```{r fig.cap="Viajes por Estacion", message=FALSE, echo = FALSE, warning = FALSE}
 mismaEstacion <- recorridos$direccion_estacion_origen == recorridos$direccion_estacion_destino
 pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
           dim(recorridos[!mismaEstacion,])[1]/dim(recorridos)[1]),
@@ -247,25 +301,26 @@ pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
         labels = c(paste("Misma estacion ", round(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = ""), paste("Diferente estacion ", round(dim(recorridos[!mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = "")),
     main = "Distribución de viajes que empiezan y terminan en el mismo lugar")
 ```
-  
-  
-\newpage  
-  
-  
+
+\newpage
+
 ## Análisis Bivariado
 
-El estudio se realizó relacionando la edad de los usuarios con su género.  
+El estudio se realizó relacionando la edad de los usuarios con su
+género.
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+```{r fig.cap="Genero por Edad", message=FALSE, echo = FALSE, warning = FALSE}
 tablita <- table(usuarios$genero_usuario,cut(usuarios$edad_usuario, breaks=10, dig.lab = 0, right=FALSE))
 barplot(tablita, beside=TRUE, ylim=c(0,25), col=c("#82B5F1","#E84B89","#E5EC6D"))
 ```
-  
-Al observar la gráfica se puede notar que el rango de 20 a 30 años está mayormente representado por hombres. El resto de las edades tienen más repartidos los géneros.  
 
-```{r message=FALSE, echo = FALSE, warning = FALSE}
+Al observar la gráfica se puede notar que el rango de 20 a 30 años está
+mayormente representado por hombres. El resto de las edades tienen más
+repartidos los géneros.
+
+```{r fig.cap="Genero por Edad",message=FALSE, echo = FALSE, warning = FALSE}
 tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
 knitr::kable(tt)
 ```
-  
+
 Y con esta tabla se puden ver bien las distribuciones acumuladas.
