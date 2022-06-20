@@ -1,19 +1,22 @@
 ---
 title: "TP1"
-lang: "es"
+lang: es
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  bookdown::html_document2:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
   bookdown::pdf_document2:
     toc: yes
     toc_depth: 3
     number_sections: yes
     fig_caption: yes
     tab.caption: yes
-  bookdown::html_document2:
-    toc: yes
-    toc_depth: '3'
-    df_print: paged
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
@@ -60,7 +63,7 @@ usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad [años]", ylab="Frecuencia absoluta", xlim=range(15:70))
 ```
 
-Se observa en el histograma de la Figura \ref{fig:edadusuarios1} que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, se ve unaconcentracion de usuarios en la franja de 20 a 40 años, con un pico en el intervalo [25, 30]. Se detecta que usuarios con una edad mayor a 40 años hace un menor uso del servicio. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18.
+Se observa en el histograma de la Figura \ref{fig:edadusuarios1} que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, se ve una concentracion de usuarios en la franja de 20 a 40 años, con un pico en el intervalo [25, 30]. Se detecta que usuarios con una edad mayor a 40 años hace un menor uso del servicio. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18.
 
 
 
@@ -162,7 +165,7 @@ pieViajesXGenero <- function() {
 pieUsuariosXGenero()
 ```
 
-De los gráficos (\ref{fig:generousuarios1}) y (\ref{fig:generousuarios2}) se puede observar que:\
+De los gráficos \ref{fig:generousuarios1} y (\ref{fig:generousuarios2}) se puede observar que:\
 - la mayoría de usuarios son mujeres\
 - la mayoría de viajes lo realizan mujeres\
 Estos datos tienen una relación directa y se puede decir que la razón
@@ -172,6 +175,58 @@ estos son la mayoría.
 ```{r generousuarios2, fig.cap="Genero Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
 pieViajesXGenero()
 ```
+
+
+### Día de la semana
+
+Vamos a analizar ahora la distribución de viajes que se realizan por día de la semana.
+
+```{r diasdelasemana1, fig.cap="Días de la semana", message=FALSE, echo = FALSE, warning = FALSE}
+
+usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
+recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
+usuariosrecorridos <- merge(usuarios, recorridos)
+
+recorridos$dia <- factor(recorridos$dia, levels = c(
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+  "Domingo"))
+
+freq <- table(recorridos$dia)
+barplot(freq, names.arg = c(
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+  "Domingo"),
+  ylim = c(0, 180),
+  xlab = "Día de la semana", ylab = "Frecuencia absoluta", main = "Viajes por día")
+```
+
+La distribución muestra que el día en que se realizan más viajes es el lunes, mientras que los días con menor frecuencia son viernes y domingo. La dismunición de viajes en los 2 días recién mencionados puede atribuirse al hecho de que las personas pueden tender a quedarse en sus hogares a descansar durante el fin de semana, o bien realizan actividades fuera de la casa, pero se transportan de otra manera.
+
+```{r diasdelasemana2, fig.cap="Tabla días de la semana", message=FALSE, echo = FALSE, warning = FALSE}
+freqTable = cbind("Frecuencia Abs" = freq,
+                  "Frecuencia Rel" = freq / length(recorridos$dia),
+                  "Frecencia Acum Abs" = cumsum(freq),
+                  "Frecuencia Acum Rel" = cumsum(freq / length(recorridos$dia)))
+row.names(freqTable) <- c(
+  "Lunes",
+  "Martes",
+  "Miercoles",
+  "Jueves",
+  "Viernes",
+  "Sabado",
+  "Domingo")
+knitr::kable(freqTable, caption="Frecuencias Genero por Edad")
+```
+En esta tabla se observa con mayor precisión la diferencia en frecuencia entre cada día. 
 
 \newpage
 
@@ -259,9 +314,7 @@ mayor distancia .
 
 ### Dirección de origen y dirección de destino
 
-Para esta variable, hacer un análisis alrededor de qué estaciones en
-específico tienen mayor o menor tráfico no va a ser de demasiada
-utilidad. Así que el análisis va a ser alrededor de **cuántas** fueron
+Para esta variable, el análisis va a ser alrededor de **cuántas** estaciones fueron
 salida o llegada de cada cantidad de viajes:
 
 ```{r estacionesorigen1,  fig.cap="Estaciones Origen", message=FALSE, echo = FALSE, warning = FALSE}
@@ -316,18 +369,28 @@ pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
 El estudio se realizó relacionando la edad de los usuarios con su
 género.
 
-```{r generoedad1, fig.cap="Genero por Edad", message=FALSE, echo = FALSE, warning = FALSE}
+```{r generoedad1, fig.cap="Genero por Edad", fig.height = 6, message=FALSE, echo = FALSE, warning = FALSE}
 tablita <- table(usuarios$genero_usuario,cut(usuarios$edad_usuario, breaks=10, dig.lab = 0, right=FALSE))
-barplot(tablita, beside=TRUE, ylim=c(0,25), col=c("#82B5F1","#E84B89","#E5EC6D"))
+boxplot(usuarios$edad_usuario ~ usuarios$genero_usuario,
+        col=c("#E84B89","#82B5F1","#E5EC6D"),
+        xlab = "Género del usuario", 
+        ylab = "Edad del usuario [años]",
+        ylim = c(15,80),
+        main = "Distribución de la edad por género del usuario ")
 ```
 
-Al observar la gráfica \ref{fig:generoedad1} se puede notar que el rango de 20 a 30 años está
-mayormente representado por hombres. El resto de las edades tienen más
-repartidos los géneros.
+Al observar la gráfica \ref{fig:generoedad1} se puede notar que los análisis por edad de cada género tienen distribuciones bastante parecidas. Para los 3 casos la media está cerca de los 30 años y el valor mínimo va a ser 18 siempre. También se puede ver que para la gran mayoría de los usuarios, la edad no supera los 60 años para ninguno de los géneros.
 
+\newpage
 ```{r generoedad2, message=FALSE, echo = FALSE, warning = FALSE}
 tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
+tt <- cbind(c("F","M","Otro"),tt)
+
 knitr::kable(tt, caption="Frecuencias Genero por Edad")
 ```
 
 Y con la tabla \ref{tab:generoedad2} se puden ver bien las distribuciones acumuladas.
+
+# Conclusiones
+Luego de que se analizaron los distintos gráficos y tablas que se crearon para este informe se puede concluir que el sistema de EcoBicis brinda un medio de transporte muy utilizado por una gran variedad de ciudadanos de la Ciudad de Buenos Aires. La mayoría de estos se encuentran en el rango etario de entre 25 y 30 años y el género predominante entre los usarios es el femenino. El servicio se suele utilizar para viajes de entre 10 y 30 minutos, y se recorre un promedio de aproximadamente 4500 metros.
+Una posible mejora al sistema es agregar más estaciones en las zonas más concurridas. Nuestro análisis denotó que, si bien la mayoría de la estaciones no parecen sufrir de sobrecarga, hay unas pocas que tienen un número particularmente alto de concurrencia, alejandose estadísticamente del resto.

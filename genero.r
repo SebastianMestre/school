@@ -64,7 +64,13 @@ plotEdadXGenero <- function() {
   plot(hh, col = "#82B5F1", add = TRUE)
   plot(hnb, col = "#E5EC6D", add = TRUE)
 }
-tablita <- table(usuarios$genero_usuario,cut(usuarios$edad_usuario, breaks=10, dig.lab = 0, right=FALSE))
-barplot(tablita, beside=TRUE, ylim=c(0,25), col=c("#82B5F1","#E84B89","#E5EC6D"))
+
+tablita <- table(usuarios$genero_usuario,usuarios$edad_usuario)
 
 tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
+
+boxplot(usuarios$edad_usuario ~ usuarios$genero_usuario,
+        col=c("#82B5F1","#E84B89","#E5EC6D"),
+        xlab = "Género del usuario", 
+        ylab = "Edad del usuario [años]",
+        main = "Distribución de la edad por género del usuario ")
