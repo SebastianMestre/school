@@ -165,6 +165,9 @@ pieViajesXGenero <- function() {
 pieUsuariosXGenero()
 ```
 
+```{r generousuarios2, fig.cap="Genero Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
+pieViajesXGenero()
+```
 De los gráficos \ref{fig:generousuarios1} y (\ref{fig:generousuarios2}) se puede observar que:\
 - la mayoría de usuarios son mujeres\
 - la mayoría de viajes lo realizan mujeres\
@@ -172,9 +175,6 @@ Estos datos tienen una relación directa y se puede decir que la razón
 por la que más viajes los realizan personas de género femenino es que
 estos son la mayoría.
 
-```{r generousuarios2, fig.cap="Genero Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
-pieViajesXGenero()
-```
 
 
 ### Día de la semana
@@ -206,6 +206,8 @@ barplot(freq, names.arg = c(
   "Sábado",
   "Domingo"),
   ylim = c(0, 180),
+  cex.names = 0.8,
+  col = "#B0F180",
   xlab = "Día de la semana", ylab = "Frecuencia absoluta", main = "Viajes por día")
 ```
 
