@@ -58,16 +58,8 @@ void register_client_socket_again(int epollfd, int sock, struct fd_data* data) {
 	register_epoll(epollfd, sock, EPOLL_CTL_MOD, EPOLLIN | EPOLLONESHOT | EPOLLRDHUP, data);
 }
 
-
-int main() {
-
+int create_listen_socket(char const* address, char const* port) {
 	int err;
-
-	int epollfd = epoll_create(1);
-	if (epollfd < 0) {
-		perror("epoll.1");
-		exit(EXIT_FAILURE);
-	}
 
 	int listen_sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (listen_sock < 0) {
@@ -81,7 +73,7 @@ int main() {
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 
-	err = getaddrinfo("localhost", "8000", &hints, &addrinfo);
+	err = getaddrinfo(address, port, &hints, &addrinfo);
 	if (err) {
 		fprintf(stderr, "getaddrinfo: ???\n");
 		exit(EXIT_FAILURE);
@@ -102,6 +94,68 @@ int main() {
 		perror("listen.1");
 		exit(EXIT_FAILURE);
 	}
+
+	return listen_sock;
+}
+
+enum message_action_tag { MA_ERROR, MA_CONTINUE, MA_BREAK, MA_OK };
+struct message_action { enum message_action_tag tag; int value; };
+struct message_action ma_error()       { return (struct message_action){ MA_ERROR, -1 }; }
+struct message_action ma_ok(int value) { return (struct message_action){ MA_OK, value }; }
+struct message_action ma_continue()    { return (struct message_action){ MA_CONTINUE, -1 }; }
+struct message_action ma_break()       { return (struct message_action){ MA_BREAK, -1 }; }
+
+struct message_action handle_new_client(int listen_sock) {
+	int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
+
+	if (conn_sock < 0)
+		return ma_error();
+
+	return ma_ok(conn_sock);
+}
+
+struct message_action handle_text_message(struct fd_data* data, int events) {
+	int sock = data->fd;
+
+	#define READ_BUF_SIZE 1024
+	char read_buf[READ_BUF_SIZE];
+
+	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
+		fprintf(stderr, "HANGUP\n");
+		return ma_break();
+	}
+
+	while (1) {
+		int read_bytes = read(sock, read_buf, READ_BUF_SIZE);
+
+		if (read_bytes < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				return ma_continue();
+			} else {
+				// TODO: algo distinto???
+				perror("read.1");
+				return ma_error();
+			}
+		}
+
+		if (read_bytes == 0) {
+			fprintf(stderr, "????\n");
+			return ma_break();;
+		}
+	}
+}
+
+int main() {
+
+	int err;
+
+	int epollfd = epoll_create(1);
+	if (epollfd < 0) {
+		perror("epoll.1");
+		exit(EXIT_FAILURE);
+	}
+
+	int listen_sock = create_listen_socket("localhost", "8000");
 
 	register_listen_socket_first_time(epollfd, listen_sock);
 
@@ -125,13 +179,12 @@ int main() {
 			fprintf(stderr, "NUEVO CLIENTE!\n");
 			int listen_sock = data->fd;
 
-			int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
-			if (conn_sock < 0) {
-				perror("accept.1");
-				exit(EXIT_FAILURE);
-			}
 
-			register_client_socket_first_time(epollfd, conn_sock);
+			struct message_action action = handle_new_client(listen_sock);
+
+			if (action.tag == MA_OK) {
+				register_client_socket_first_time(epollfd, action.value);
+			}
 
 			register_listen_socket_again(epollfd, listen_sock, data);
 
@@ -142,57 +195,22 @@ int main() {
 			exit(EXIT_FAILURE);
 		} break;
 		case FD_TYPE_TEXT_CONN: {
+
 			fprintf(stderr, "ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			int sock = data->fd;
 
-			#define READ_BUF_SIZE 1024
-			char read_buf[READ_BUF_SIZE];
+			struct message_action action = handle_text_message(data, evt.events);
 
-			int should_reregister = 0;
-
-			if (evt.events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
-				fprintf(stderr, "HANGUP\n");
-				// TODO limpiar recursos, cerrar socket, borrar del epoll group, etc
-				fprintf(stderr, "BORRANDO POR HUP O ERR\n");
+			if (action.tag == MA_OK) {
+				int sock = data->fd;
+				register_client_socket_again(epollfd, sock, data);
+			} else {
+				int sock = data->fd;
 				err = epoll_ctl(epollfd, EPOLL_CTL_DEL, sock, NULL);
 				if (err < 0) {
 					perror("epoll_ctl.5");
-					exit(EXIT_FAILURE);
-				}
-
-			} else {
-
-				while (1) {
-					// fprintf(stderr, "LEYENDO DEL CLIENTE\n");
-					int read_bytes = read(sock, read_buf, READ_BUF_SIZE);
-					if (read_bytes < 0) {
-						if (errno == EAGAIN || errno == EWOULDBLOCK) {
-							should_reregister = 1;
-							break;
-						} else {
-							should_reregister = 0;
-							perror("read.1");
-							exit(EXIT_FAILURE);
-						}
-					}
-					if (read_bytes == 0) {
-						should_reregister = 0;
-						fprintf(stderr, "????\n");
-						break;
-					}
-				}
-
-				if (should_reregister) {
-					register_listen_socket_again(epollfd, sock, data);
-				} else {
-					// fprintf(stderr, "BORRANDO POR ALGUNA RAZON RARA\n");
-					// err = epoll_ctl(epollfd, EPOLL_CTL_DEL, sock, NULL);
-					// if (err < 0) {
-						// perror("epoll_ctl.5");
-						// exit(EXIT_FAILURE);
-					// }
+					exit(EXIT_FAILURE); // TODO -- tiene sentido ? NO SE
 				}
 			}
 
@@ -205,4 +223,6 @@ int main() {
 		} break;
 		}
 	}
+
+	return 0;
 }
