@@ -55,26 +55,31 @@ distribución de frecuencias, gráficos y medidas descriptivas.
 
 ### Edad
 
-```{r edadusuarios1, fig.cap="Edad Usuarios", echo=FALSE, message=FALSE, warning=FALSE}
+```{r edadusuarios1, fig.cap="Distribución de edad de los usuarios", echo=FALSE, message=FALSE, warning=FALSE, out.width="90%"}
 library(qcc)
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 
-hist(usuarios$edad, main="Distrubucion de edad de los usuarios", col="#D5B7E8", xlab="Edad [años]", ylab="Frecuencia absoluta", xlim=range(15:70))
+hist(usuarios$edad,
+     main="",
+     col="#D5B7E8",
+     xlab="Edad [años]",
+     ylab="Frecuencia absoluta",
+     xlim=range(0:70))
 ```
 
-Se observa en el histograma de la Figura \ref{fig:edadusuarios1} que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, se ve una concentracion de usuarios en la franja de 20 a 40 años, con un pico en el intervalo [25, 30]. Se detecta que usuarios con una edad mayor a 40 años hace un menor uso del servicio. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18.
+Se observa en el histograma de la Figura (\ref{fig:edadusuarios1}) que la mayoría de los usuarios estan en las franjas etarias más bajas. Más especificamente, se ve una concentracion de usuarios en la franja de 20 a 40 años, con un pico en el intervalo [25, 30]. Se detecta que usuarios con una edad mayor a 40 años hace un menor uso del servicio. Una aclaración importante es que el número de personas que figuran entre 15 y 20 años es baja, ya que sólo estamos teniendo en cuenta los mayores a 18.
 
 
 
-```{r edadusuarios2, echo=FALSE, message=FALSE, warning=FALSE}
+```{r edadusuarios2, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%"}
 cortusuarios <- table(cut(usuarios$edad, breaks=10, right=FALSE, dig.lab = 0))
 Total <- sum
 # agrega totales
 tablausuarios <- addmargins(cbind(cortusuarios,cumsum(cortusuarios),cortusuarios/length(usuarios$edad)), margin=1, FUN=Total)
 pcumusuarios <- cumsum(cortusuarios)/length(usuarios$edad)
 # no queremos total en este campo
-pcumusuarios[length(pcumusuarios) + 1] <- ' ' 
+pcumusuarios[length(pcumusuarios) + 1] <- ' '
 tablausuarios <- cbind(tablausuarios, pcumusuarios)
 colnames(tablausuarios) <- (c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada"))
 knitr::kable(tablausuarios, caption="Frecuencias Edad Usuarios")
@@ -83,25 +88,26 @@ knitr::kable(tablausuarios, caption="Frecuencias Edad Usuarios")
 
 
 \newpage
-En la tabla \ref{tab:edadusuarios2} podemos ver incluso mejor como llegado a los 33 años, la
+
+En la tabla (1) podemos ver incluso mejor como llegado a los 33 años, la
 frecuencia acumulada es casi del 60%.
 
-
-
-
-```{r edadrecorridos1, echo=FALSE, fig.cap="Edad Recorridos", message=FALSE, warning=FALSE}
+```{r edadrecorridos1, echo=FALSE, fig.cap="Distribución de recorridos por Edad", message=FALSE, warning=FALSE, out.width="90%"}
 
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
 
-hist(usuariosrecorridos$edad, xlab = "Edad en Años", ylab = "Frecuencia absoluta", main = "Recorridos por Edad", xlim = range(10:70))
+hist(
+  usuariosrecorridos$edad,
+  xlab = "Edad en Años",
+  ylab = "Frecuencia absoluta",
+  xlim = range(0:70),
+  main = '')
 
 ```
 
 
-
-
-El gráfico \ref{fig:edadrecorridos1} de ditribución de recorridos por edad nos muestra resultados
+El gráfico (\ref{fig:edadrecorridos1}) de ditribución de recorridos por edad nos muestra resultados
 similares a lo visto en el análisis de usuarios por edad. Sin embargo,
 una cosa interesante sucede cuando se analiza los viajes realizados por
 usuario, repartiendolos en cada edad. Se puede ver que si bien hay una
@@ -111,6 +117,7 @@ por gente mayor a 40 años, no tiene que ver tan directamente con que
 cada usuario haga menos viajes. Sino que se puede asociar también con el
 hecho de que son menos los usuarios en esas edades. Esto es lo que
 termina causando el tamaño de la disparidad.\
+
 \newpage
 
 ### Género
@@ -120,7 +127,7 @@ acotar es que si un usuario no proporciona esta información, por defecto
 su género asignado será "Otro". Esto significa que los datos no
 representan exactamente la distribución de género real.
 
-```{r generousuarios1, fig.cap="Genero Usuarios", message=FALSE, echo = FALSE, warning = FALSE}
+```{r generousuarios1, fig.cap="Distribución de usuarios por Genero", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
@@ -148,10 +155,14 @@ pieUsuariosXGenero <- function() {
                              paste("Otro ", dim(nonbiny)[1]/dim(usuarios)[1]*100, "%", sep = ""))
   pie(cant_usuarios_genero,
       labels = labels_usuarios_genero,
-      col=c("#82B5F1","#E84B89","#E5EC6D"),
-      main = "Usuarios por Genero")
+      col=c("#82B5F1","#E84B89","#E5EC6D"))
 }
 
+pieUsuariosXGenero()
+```
+
+
+```{r generousuarios2, fig.cap="Distribución de viajes por Genero", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 pieViajesXGenero <- function() {
   cant_viajes_genero = c(dim(viajes_hombres)[1], dim(viajes_mujeres)[1], dim(viajes_nonbiny)[1])
   labels_viajes_genero = c(paste("Hombres ", round(dim(viajes_hombres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
@@ -159,16 +170,13 @@ pieViajesXGenero <- function() {
                            paste("Otros ", round(dim(viajes_nonbiny)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""))
   pie(cant_viajes_genero,
       labels = labels_viajes_genero,
-      col=c("#82B5F1","#E84B89","#E5EC6D"),
-      main = "Viajes por Genero") 
+      col=c("#82B5F1","#E84B89","#E5EC6D"))
 }
-pieUsuariosXGenero()
-```
 
-```{r generousuarios2, fig.cap="Genero Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
 pieViajesXGenero()
 ```
-De los gráficos \ref{fig:generousuarios1} y (\ref{fig:generousuarios2}) se puede observar que:\
+
+De los gráficos (\ref{fig:generousuarios1}) y (\ref{fig:generousuarios2}) se puede observar que:\
 - la mayoría de usuarios son mujeres\
 - la mayoría de viajes lo realizan mujeres\
 Estos datos tienen una relación directa y se puede decir que la razón
@@ -181,7 +189,7 @@ estos son la mayoría.
 
 Vamos a analizar ahora la distribución de viajes que se realizan por día de la semana.
 
-```{r diasdelasemana1, fig.cap="Días de la semana", message=FALSE, echo = FALSE, warning = FALSE}
+```{r diasdelasemana1, fig.cap="Distribución de viajes por día de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
@@ -208,17 +216,19 @@ barplot(freq, names.arg = c(
   ylim = c(0, 180),
   cex.names = 0.8,
   col = "#B0F180",
-  xlab = "Día de la semana", ylab = "Frecuencia absoluta", main = "Viajes por día")
+  xlab = "Día de la semana",
+  ylab = "Frecuencia absoluta")
 ```
 
 La distribución muestra que el día en que se realizan más viajes es el lunes, mientras que los días con menor frecuencia son viernes y domingo. La dismunición de viajes en los 2 días recién mencionados puede atribuirse al hecho de que las personas pueden tender a quedarse en sus hogares a descansar durante el fin de semana, o bien realizan actividades fuera de la casa, pero se transportan de otra manera.
 
-```{r diasdelasemana2, fig.cap="Tabla días de la semana", message=FALSE, echo = FALSE, warning = FALSE}
-freqTable = cbind("Frecuencia Abs" = freq,
-                  "Frecuencia Rel" = freq / length(recorridos$dia),
-                  "Frecencia Acum Abs" = cumsum(freq),
-                  "Frecuencia Acum Rel" = cumsum(freq / length(recorridos$dia)))
-row.names(freqTable) <- c(
+```{r diasdelasemana2, fig.cap="Tabla dias de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+tablazaa <- cbind("Frecuencia Abs" = freq,
+                   "Frecuencia Rel" = freq / length(recorridos$dia),
+                   "Frecencia Acum Abs" = cumsum(freq),
+                   "Frecuencia Acum Rel" = cumsum(freq / length(recorridos$dia)))
+
+row.names(tablazaa) <- c(
   "Lunes",
   "Martes",
   "Miercoles",
@@ -226,17 +236,23 @@ row.names(freqTable) <- c(
   "Viernes",
   "Sabado",
   "Domingo")
-knitr::kable(freqTable, caption="Frecuencias Genero por Edad")
+
+knitr::kable(tablazaa, caption="Frecuencias de recorridos por día de la semana")
+
 ```
+
+
 En esta tabla se observa con mayor precisión la diferencia en frecuencia entre cada día. 
 
 \newpage
 
 ### Duración
+\label{sec:duracion}
+
 
 Se hace primero el análisis del gráfico (\ref{fig:duracionrecorridos1}) de la distribución de duración:
 
-```{r duracionrecorridos1, fig.cap="Duracion Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
+```{r duracionrecorridos1, fig.cap="Distribución de la duración de los recorridos (en minutos).", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
@@ -245,7 +261,6 @@ boxplot(recorridos$duracion / 60,
         outline = TRUE,
         horizontal = TRUE,
         xlab = "Tiempo [minutos]",
-        main = "Distribución de la duración de los recorridos (en minutos).",
         col = c("#E97444"))
 ```
 
@@ -277,7 +292,7 @@ En este análisis, sucede lo mismo que en el anterior: es conveniente
 mostrar la gráfica sin outliers. El análisis va a ser directamente de
 esta.
 
-```{r fig.cap="Distancia Recorridos", message=FALSE, echo = FALSE, warning = FALSE}
+```{r fig.cap="Distancia de los recorridos", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
@@ -286,7 +301,6 @@ boxplot(recorridos$distancia / 1000,
         #outline = FALSE,
         horizontal = TRUE,
         xlab = "Distancia [km]",
-        main = "Distancia Recorridos",
         col = c("#9ED573"))
 ```
 
@@ -303,7 +317,7 @@ media distancia, variando principalmente entre los 3 y 6 kilometros. No
 hay gran cantidad de viajes muy cortos ni muy largos, aunque
 efectivamente existen.
 
-Recordando el analisis anterior (***referencia***) sobre la duracion de
+Recordando el analisis anterior (sección Duración) sobre la duracion de
 los recorridos, notamos que existe cierta correspondencia entre la
 distribucion de los outliers. Esto puede deberse a que los usuarios que
 debian viajar largas distancias no cumplieron con el tiempo debido, o
@@ -319,7 +333,7 @@ mayor distancia .
 Para esta variable, el análisis va a ser alrededor de **cuántas** estaciones fueron
 salida o llegada de cada cantidad de viajes:
 
-```{r estacionesorigen1,  fig.cap="Estaciones Origen", message=FALSE, echo = FALSE, warning = FALSE}
+```{r estacionesorigen1,  fig.cap="Cantidad de estaciones segun cantidad de viajes que empiezan ahí", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
@@ -328,18 +342,16 @@ freq_estacion_origen <- table(recorridos$direccion_estacion_origen)
 freq_viajes_origen <- table(freq_estacion_origen)
 plot(freq_viajes_origen, 
      xlab = "Cantidad de viajes", 
-     ylab = "Cantidad de estaciones",
-     main = "Cantidad de estaciones origen de x viajes")
+     ylab = "Cantidad de estaciones")
 ```
 
-```{r estacionesdestino1,fig.cap="Estaciones Destino", message=FALSE, echo = FALSE, warning = FALSE}
+```{r estacionesdestino1,fig.cap="Cantidad de estaciones segun cantidad de viajes que terminan ahí", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 freq_estacion_destino <- table(recorridos$direccion_estacion_destino) 
 freq_viajes_destino <- table(freq_estacion_destino)
 
 plot(freq_viajes_destino, 
      xlab = "Cantidad de viajes", 
-     ylab = "Cantidad de estaciones",
-     main = "Cantidad de estaciones destino de x viajes")
+     ylab = "Cantidad de estaciones")
 ```
 
 Como se puede ver en (\ref{fig:estacionesorigen1}) y (\ref{fig:estacionesdestino1}), hay unos pocos "outliers" en estos gráficos también,
@@ -355,13 +367,29 @@ un viaje cumple con esta condición, lo más probable es que sea del tipo
 recreativo. Así que la conclusión es que la mayoría de la gente no hace
 este tipo de viajes.
 
-```{r estacionrecorridos1, fig.cap="Viajes por Estacion", message=FALSE, echo = FALSE, warning = FALSE}
-mismaEstacion <- recorridos$direccion_estacion_origen == recorridos$direccion_estacion_destino
-pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
-          dim(recorridos[!mismaEstacion,])[1]/dim(recorridos)[1]),
-        col = c("#77DDEF", "#FC926E"),
-        labels = c(paste("Misma estacion ", round(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = ""), paste("Diferente estacion ", round(dim(recorridos[!mismaEstacion,])[1] / dim(recorridos)[1] * 100), "%", sep = "")),
-    main = "Distribución de viajes que empiezan y terminan en el mismo lugar")
+```{r estacionrecorridos1, fig.cap="Distribución de viajes que empiezan y terminan en el mismo lugar", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+
+igualar_levelset <- function(a, b) {
+  result <- factor(a, levels=levels(b))
+}
+
+mascara_iguales <- function(a, b) {
+  result <- igualar_levelset(a, b) == b
+}
+
+mismaEstacion <- mascara_iguales(recorridos$direccion_estacion_origen, recorridos$direccion_estacion_destino)
+
+cant_total <- dim(recorridos)[1]
+cant_dstta_estacion <- dim(recorridos[!mismaEstacion,])[1]
+cant_misma_estacion <- cant_total - cant_dstta_estacion
+
+prop_dstta_estacion <- cant_dstta_estacion / cant_total
+prop_misma_estacion <- cant_misma_estacion / cant_total
+
+pie(c(prop_misma_estacion, prop_dstta_estacion),
+    col = c("#77DDEF", "#FC926E"),
+    labels = c(paste("Misma estacion ", round(prop_misma_estacion * 100), "%", sep = ""),
+               paste("Diferente estacion ", round(prop_dstta_estacion * 100), "%", sep = "")))
 ```
 
 \newpage
@@ -371,27 +399,26 @@ pie(c(dim(recorridos[mismaEstacion,])[1] / dim(recorridos)[1],
 El estudio se realizó relacionando la edad de los usuarios con su
 género.
 
-```{r generoedad1, fig.cap="Genero por Edad", fig.height = 6, message=FALSE, echo = FALSE, warning = FALSE}
+```{r generoedad1, fig.cap="Distribución de la edad por género del usuario", fig.height = 6, message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 tablita <- table(usuarios$genero_usuario,cut(usuarios$edad_usuario, breaks=10, dig.lab = 0, right=FALSE))
 boxplot(usuarios$edad_usuario ~ usuarios$genero_usuario,
         col=c("#E84B89","#82B5F1","#E5EC6D"),
         xlab = "Género del usuario", 
         ylab = "Edad del usuario [años]",
-        ylim = c(15,80),
-        main = "Distribución de la edad por género del usuario ")
+        ylim = c(15,80))
 ```
 
-Al observar la gráfica \ref{fig:generoedad1} se puede notar que los análisis por edad de cada género tienen distribuciones bastante parecidas. Para los 3 casos la media está cerca de los 30 años y el valor mínimo va a ser 18 siempre. También se puede ver que para la gran mayoría de los usuarios, la edad no supera los 60 años para ninguno de los géneros.
+Al observar la gráfica (\ref{fig:generoedad1}) se puede notar que los análisis por edad de cada género tienen distribuciones bastante parecidas. Para los 3 casos la media está cerca de los 30 años y el valor mínimo va a ser 18 siempre. También se puede ver que para la gran mayoría de los usuarios, la edad no supera los 60 años para ninguno de los géneros.
 
 \newpage
-```{r generoedad2, message=FALSE, echo = FALSE, warning = FALSE}
+```{r generoedad2, message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
 tt <- cbind(c("F","M","Otro"),tt)
 
 knitr::kable(tt, caption="Frecuencias Genero por Edad")
 ```
 
-Y con la tabla \ref{tab:generoedad2} se puden ver bien las distribuciones acumuladas.
+Y con la tabla (3) se puden ver bien las distribuciones acumuladas.
 
 # Conclusiones
 Luego de que se analizaron los distintos gráficos y tablas que se crearon para este informe se puede concluir que el sistema de EcoBicis brinda un medio de transporte muy utilizado por una gran variedad de ciudadanos de la Ciudad de Buenos Aires. La mayoría de estos se encuentran en el rango etario de entre 25 y 30 años y el género predominante entre los usarios es el femenino. El servicio se suele utilizar para viajes de entre 10 y 30 minutos, y se recorre un promedio de aproximadamente 4500 metros.
