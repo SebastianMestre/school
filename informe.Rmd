@@ -107,16 +107,14 @@ hist(
 ```
 
 
-El gráfico (\ref{fig:edadrecorridos1}) de ditribución de recorridos por edad nos muestra resultados
+El gráfico (\ref{fig:edadrecorridos1}) de distribución de recorridos por edad nos muestra resultados
 similares a lo visto en el análisis de usuarios por edad. Sin embargo,
-una cosa interesante sucede cuando se analiza los viajes realizados por
-usuario, repartiendolos en cada edad. Se puede ver que si bien hay una
-leve tendencia a que baje este número, no es nada determinante. O sea,
-lo que podemos decir es que el hecho de que haya menos viajes realizados
-por gente mayor a 40 años, no tiene que ver tan directamente con que
-cada usuario haga menos viajes. Sino que se puede asociar también con el
-hecho de que son menos los usuarios en esas edades. Esto es lo que
-termina causando el tamaño de la disparidad.\
+una cosa interesante sucede cuando se analizan los recorridos realizados por
+usuario, repartiendolos por grupos de edad. En particular, se puede ver que hay una
+leve tendencia a que baje este número en los grupos etarios mas altos. Esto se
+puede asociar con el hecho de que son menos los usuarios en esas edades. Especulamos
+que es eso mismo lo que termina causando tal disparidad y que no se debe a, por ejemplo,
+que los usuarios en grupos etarios más altos realicen menos recorridos individualmente.\
 
 \newpage
 
@@ -162,7 +160,7 @@ pieUsuariosXGenero()
 ```
 
 
-```{r generousuarios2, fig.cap="Distribución de viajes por Genero", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+```{r generousuarios2, fig.cap="Distribución de recorridos por Genero", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 pieViajesXGenero <- function() {
   cant_viajes_genero = c(dim(viajes_hombres)[1], dim(viajes_mujeres)[1], dim(viajes_nonbiny)[1])
   labels_viajes_genero = c(paste("Hombres ", round(dim(viajes_hombres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
@@ -177,19 +175,19 @@ pieViajesXGenero()
 ```
 
 De los gráficos (\ref{fig:generousuarios1}) y (\ref{fig:generousuarios2}) se puede observar que:\
-- la mayoría de usuarios son mujeres\
-- la mayoría de viajes lo realizan mujeres\
-Estos datos tienen una relación directa y se puede decir que la razón
-por la que más viajes los realizan personas de género femenino es que
-estos son la mayoría.
+- de entre los usuarios que eligen revelar su genero, la mayoría son mujeres\
+- de entre los recorridos relizados por usuarios que eligen revelar su genero, la mayoría los realizan mujeres\
+Limitandonos a los usuarios que eligen revelar su genero, se ve que estos datos tienen
+una relación directa, e inferimos que la razón por la que más recorridos los realizan
+personas de género femenino es que estas son la mayoría.
 
 
 
 ### Día de la semana
 
-Vamos a analizar ahora la distribución de viajes que se realizan por día de la semana.
+Vamos a analizar ahora la distribución de recorridos que se realizan por día de la semana.
 
-```{r diasdelasemana1, fig.cap="Distribución de viajes por día de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+```{r diasdelasemana1, fig.cap="Distribución de recorridos por día de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
@@ -220,7 +218,11 @@ barplot(freq, names.arg = c(
   ylab = "Frecuencia absoluta")
 ```
 
-La distribución muestra que el día en que se realizan más viajes es el lunes, mientras que los días con menor frecuencia son viernes y domingo. La dismunición de viajes en los 2 días recién mencionados puede atribuirse al hecho de que las personas pueden tender a quedarse en sus hogares a descansar durante el fin de semana, o bien realizan actividades fuera de la casa, pero se transportan de otra manera.
+La distribución muestra que el día en que se realizan más recorridos es el lunes,
+mientras que los días con menor frecuencia son viernes y domingo. La disminución
+de recorridos en los 2 días recién mencionados puede atribuirse a que las personas
+tiendan a quedarse en sus hogares a descansar durante el fin de semana, o que
+realizen actividades fuera de la casa, pero se transporten de otra manera.
 
 ```{r diasdelasemana2, fig.cap="Tabla dias de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 tablazaa <- cbind("Frecuencia Abs" = freq,
@@ -242,7 +244,8 @@ knitr::kable(tablazaa, caption="Frecuencias de recorridos por día de la semana"
 ```
 
 
-En esta tabla se observa con mayor precisión la diferencia en frecuencia entre cada día. 
+En esta tabla se observa con mayor precisión la diferencia en frecuencia entre
+cada día de la semana.
 
 \newpage
 
@@ -250,7 +253,7 @@ En esta tabla se observa con mayor precisión la diferencia en frecuencia entre 
 \label{sec:duracion}
 
 
-Se hace primero el análisis del gráfico (\ref{fig:duracionrecorridos1}) de la distribución de duración:
+Se hace primero el análisis del gráfico (\ref{fig:duracionrecorridos1}) de la distribución de duración de los recorridos:
 
 ```{r duracionrecorridos1, fig.cap="Distribución de la duración de los recorridos (en minutos).", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
@@ -312,9 +315,9 @@ Medidas descriptivas de la variable (en metros):\
 - Tercer Cuartil: 6625\
 - Máximo: 70528
 
-La conclusión que se puede sacar es que la mayoría de los viajes son de
+La conclusión que se puede sacar es que la mayoría de los recorridos son de
 media distancia, variando principalmente entre los 3 y 6 kilometros. No
-hay gran cantidad de viajes muy cortos ni muy largos, aunque
+hay gran cantidad de recorridos muy cortos ni muy largos, aunque
 efectivamente existen.
 
 Recordando el analisis anterior (sección Duración) sobre la duracion de
@@ -323,7 +326,7 @@ distribucion de los outliers. Esto puede deberse a que los usuarios que
 debian viajar largas distancias no cumplieron con el tiempo debido, o
 bien simplemente decidieron no respetarlo. Concluimos que existe
 evidencia a favor de extender el tiempo de uso de las bicletas, o al
-menos considerar una politica de uso acondicionada al los viajes de
+menos considerar una politica de uso acondicionada al los recorridos de
 mayor distancia .
 
 \newpage
@@ -331,9 +334,9 @@ mayor distancia .
 ### Dirección de origen y dirección de destino
 
 Para esta variable, el análisis va a ser alrededor de **cuántas** estaciones fueron
-salida o llegada de cada cantidad de viajes:
+salida o llegada de cada cantidad de recorridos:
 
-```{r estacionesorigen1,  fig.cap="Cantidad de estaciones segun cantidad de viajes que empiezan ahí", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+```{r estacionesorigen1,  fig.cap="Cantidad de estaciones segun cantidad de recorridos que empiezan ahí", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
 usuariosrecorridos <- merge(usuarios, recorridos)
@@ -341,16 +344,16 @@ usuariosrecorridos <- merge(usuarios, recorridos)
 freq_estacion_origen <- table(recorridos$direccion_estacion_origen) 
 freq_viajes_origen <- table(freq_estacion_origen)
 plot(freq_viajes_origen, 
-     xlab = "Cantidad de viajes", 
+     xlab = "Cantidad de recorridos", 
      ylab = "Cantidad de estaciones")
 ```
 
-```{r estacionesdestino1,fig.cap="Cantidad de estaciones segun cantidad de viajes que terminan ahí", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+```{r estacionesdestino1,fig.cap="Cantidad de estaciones segun cantidad de recorridos que terminan ahí", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 freq_estacion_destino <- table(recorridos$direccion_estacion_destino) 
 freq_viajes_destino <- table(freq_estacion_destino)
 
 plot(freq_viajes_destino, 
-     xlab = "Cantidad de viajes", 
+     xlab = "Cantidad de recorridos", 
      ylab = "Cantidad de estaciones")
 ```
 
@@ -360,14 +363,14 @@ de estos gráficos es que no hay muchas estaciones que concentren gran
 cantidad de tráfico. Si hay lugar para mejorar el sistema va a ser en
 las estaciones que tienen estos valores extremos.
 
-El otro foco de análisis con estas variables es cuántos viajes empiezan
+El otro foco de análisis con estas variables es cuántos recorridos empiezan
 y terminan en la misma estación. En el gráfico \ref{fig:estacionrecorridos1} se ve que la
 mayoría de los recorridos comienzan y acaban en diferentes lugares. Si
 un viaje cumple con esta condición, lo más probable es que sea del tipo
 recreativo. Así que la conclusión es que la mayoría de la gente no hace
-este tipo de viajes.
+este tipo de recorridos.
 
-```{r estacionrecorridos1, fig.cap="Distribución de viajes que empiezan y terminan en el mismo lugar", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+```{r estacionrecorridos1, fig.cap="Distribución de recorridos que empiezan y terminan en el mismo lugar", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 
 igualar_levelset <- function(a, b) {
   result <- factor(a, levels=levels(b))
@@ -415,11 +418,11 @@ Al observar la gráfica (\ref{fig:generoedad1}) se puede notar que los análisis
 tt <- rbind(cumsum(tablita[1,]),cumsum(tablita[2,]),cumsum(tablita[3,]))
 tt <- cbind(c("F","M","Otro"),tt)
 
-knitr::kable(tt, caption="Frecuencias Genero por Edad")
+knitr::kable(tt, caption="Frecuencias absolutas de Genero por Edad")
 ```
 
 Y con la tabla (3) se puden ver bien las distribuciones acumuladas.
 
 # Conclusiones
-Luego de que se analizaron los distintos gráficos y tablas que se crearon para este informe se puede concluir que el sistema de EcoBicis brinda un medio de transporte muy utilizado por una gran variedad de ciudadanos de la Ciudad de Buenos Aires. La mayoría de estos se encuentran en el rango etario de entre 25 y 30 años y el género predominante entre los usarios es el femenino. El servicio se suele utilizar para viajes de entre 10 y 30 minutos, y se recorre un promedio de aproximadamente 4500 metros.
+Luego de que se analizaron los distintos gráficos y tablas que se crearon para este informe se puede concluir que el sistema de EcoBicis brinda un medio de transporte muy utilizado por una gran variedad de ciudadanos de la Ciudad de Buenos Aires. La mayoría de estos se encuentran en el rango etario de entre 25 y 30 años y el género predominante entre los usarios es el femenino. El servicio se suele utilizar para recorridos de entre 10 y 30 minutos, y se recorre un promedio de aproximadamente 4500 metros.
 Una posible mejora al sistema es agregar más estaciones en las zonas más concurridas. Nuestro análisis denotó que, si bien la mayoría de la estaciones no parecen sufrir de sobrecarga, hay unas pocas que tienen un número particularmente alto de concurrencia, alejandose estadísticamente del resto.
