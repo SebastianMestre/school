@@ -19,7 +19,27 @@ struct fd_data {
 		FD_TYPE_TEXT_CONN,
 	} type;
 	int fd;
+	struct text_client_state* text_client_state;
 };
+
+#define TEXT_CLIENT_BUF_SIZE 2048
+
+struct text_client_state {
+	int gen_start;
+	int gen;
+	int buf_size;
+	char buf[TEXT_CLIENT_BUF_SIZE];
+};
+
+struct text_client_state* create_text_client_state() {
+	struct text_client_state* result = malloc(sizeof(*result));
+	if (result != NULL) {
+		memset(result, 0, sizeof(*result));
+	}
+	return result;
+}
+
+
 
 void register_epoll(int epollfd, int fd, int op, int flags, struct fd_data* data) {
 	fprintf(stderr, "epoll_ctl <~~ epollfd = %d, fd = %d, op = %d, flags = %x, data = %p\n", epollfd, fd, op, flags, data);
@@ -35,7 +55,7 @@ void register_epoll(int epollfd, int fd, int op, int flags, struct fd_data* data
 }
 
 void register_listen_socket_first_time(int epollfd, int sock) {
-	struct fd_data* data = malloc(sizeof(*data));
+	struct fd_data* data = calloc(1, sizeof(*data));
 	data->type = FD_TYPE_TEXT_LISTEN;
 	data->fd = sock;
 
@@ -47,9 +67,10 @@ void register_listen_socket_again(int epollfd, int sock, struct fd_data* data) {
 }
 
 void register_client_socket_first_time(int epollfd, int sock) {
-	struct fd_data* data = malloc(sizeof(*data));
+	struct fd_data* data = calloc(1, sizeof(*data));
 	data->type = FD_TYPE_TEXT_CONN;
 	data->fd = sock;
+	data->text_client_state = create_text_client_state();
 
 	register_epoll(epollfd, sock, EPOLL_CTL_ADD, EPOLLIN | EPOLLONESHOT | EPOLLRDHUP, data);
 }
@@ -98,12 +119,11 @@ int create_listen_socket(char const* address, char const* port) {
 	return listen_sock;
 }
 
-enum message_action_tag { MA_ERROR, MA_CONTINUE, MA_BREAK, MA_OK };
+enum message_action_tag { MA_ERROR, MA_STOP, MA_OK };
 struct message_action { enum message_action_tag tag; int value; };
 struct message_action ma_error()       { return (struct message_action){ MA_ERROR, -1 }; }
 struct message_action ma_ok(int value) { return (struct message_action){ MA_OK, value }; }
-struct message_action ma_continue()    { return (struct message_action){ MA_CONTINUE, -1 }; }
-struct message_action ma_break()       { return (struct message_action){ MA_BREAK, -1 }; }
+struct message_action ma_stop()       { return (struct message_action){ MA_STOP, -1 }; }
 
 struct message_action handle_new_client(int listen_sock) {
 	int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
@@ -117,32 +137,59 @@ struct message_action handle_new_client(int listen_sock) {
 struct message_action handle_text_message(struct fd_data* data, int events) {
 	int sock = data->fd;
 
-	#define READ_BUF_SIZE 1024
-	char read_buf[READ_BUF_SIZE];
+	struct text_client_state* state = data->text_client_state;
+	assert(state);
+
+	char read_buf[TEXT_CLIENT_BUF_SIZE];
+	char cmd_buf[TEXT_CLIENT_BUF_SIZE];
 
 	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
 		fprintf(stderr, "HANGUP\n");
-		return ma_break();
+		return ma_stop();
 	}
 
+	int status = 0;
+
 	while (1) {
-		int read_bytes = read(sock, read_buf, READ_BUF_SIZE);
+		int read_bytes = read(sock, state->buf + state->buf_size, TEXT_CLIENT_BUF_SIZE - state->buf_size);
 
 		if (read_bytes < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				return ma_continue();
+				status = 1;
+				break;
 			} else {
-				// TODO: algo distinto???
-				perror("read.1");
 				return ma_error();
 			}
 		}
 
 		if (read_bytes == 0) {
-			fprintf(stderr, "????\n");
-			return ma_break();;
+			fprintf(stderr, "modo texto: fin de la comunicacion -- sock = %d\n", sock);
+			status = 2;
+			break;
 		}
+		
+		state->buf_size += read_bytes;
 	}
+
+	int line_count = 0;
+	for (int i = 0; i < state->buf_size; ++i)
+		line_count += state->buf[i] == '\n';
+
+	if (state->buf_size == TEXT_CLIENT_BUF_SIZE && line_count == 0) {
+		return ma_error();
+	}
+
+	char* cursor = state->buf;
+	char* buf_end = state->buf + state->buf_size;
+	for (; line_count >= 0; --line_count) {
+		cursor = parse_command(cursor, buf_end);
+	}
+
+	switch (status) {
+		case 1: return ma_ok();
+		case 2: return ma_stop();
+	}
+
 }
 
 int main() {
@@ -176,9 +223,10 @@ int main() {
 
 		switch (data->type) {
 		case FD_TYPE_TEXT_LISTEN: {
-			fprintf(stderr, "NUEVO CLIENTE!\n");
-			int listen_sock = data->fd;
 
+			fprintf(stderr, "NUEVO CLIENTE!\n");
+
+			int listen_sock = data->fd;
 
 			struct message_action action = handle_new_client(listen_sock);
 
@@ -199,19 +247,18 @@ int main() {
 			fprintf(stderr, "ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-
 			struct message_action action = handle_text_message(data, evt.events);
 
+			int sock = data->fd;
 			if (action.tag == MA_OK) {
-				int sock = data->fd;
 				register_client_socket_again(epollfd, sock, data);
 			} else {
-				int sock = data->fd;
-				err = epoll_ctl(epollfd, EPOLL_CTL_DEL, sock, NULL);
-				if (err < 0) {
-					perror("epoll_ctl.5");
-					exit(EXIT_FAILURE); // TODO -- tiene sentido ? NO SE
+				if (action.tag == MA_ERROR) {
+					fprintf(stderr, "error handle_text_message sock = %d\n", sock);
 				}
+				free(data->text_client_state);
+				free(data);
+				close(sock);
 			}
 
 
