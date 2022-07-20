@@ -119,22 +119,20 @@ int create_listen_socket(char const* address, char const* port) {
 	return listen_sock;
 }
 
-enum message_action_tag { MA_ERROR, MA_STOP, MA_OK };
-struct message_action { enum message_action_tag tag; int value; };
-struct message_action ma_error()       { return (struct message_action){ MA_ERROR, -1 }; }
-struct message_action ma_ok(int value) { return (struct message_action){ MA_OK, value }; }
-struct message_action ma_stop()       { return (struct message_action){ MA_STOP, -1 }; }
+enum message_action { MA_ERROR, MA_STOP, MA_OK };
 
-struct message_action handle_new_client(int listen_sock) {
+enum message_action handle_new_client(int listen_sock, int* out_sock) {
+	*out_sock = -1;
 	int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
 
 	if (conn_sock < 0)
-		return ma_error();
+		return MA_ERROR;
 
-	return ma_ok(conn_sock);
+	*out_sock = conn_sock;
+	return MA_OK;
 }
 
-struct message_action handle_text_message(struct fd_data* data, int events) {
+enum message_action handle_text_message(struct fd_data* data, int events) {
 	int sock = data->fd;
 
 	struct text_client_state* state = data->text_client_state;
@@ -145,7 +143,7 @@ struct message_action handle_text_message(struct fd_data* data, int events) {
 
 	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
 		fprintf(stderr, "HANGUP\n");
-		return ma_stop();
+		return MA_STOP;
 	}
 
 	int status = 0;
@@ -158,7 +156,7 @@ struct message_action handle_text_message(struct fd_data* data, int events) {
 				status = 1;
 				break;
 			} else {
-				return ma_error();
+				return MA_ERROR;
 			}
 		}
 
@@ -171,12 +169,14 @@ struct message_action handle_text_message(struct fd_data* data, int events) {
 		state->buf_size += read_bytes;
 	}
 
+	// parsear comando
+
 	int line_count = 0;
 	for (int i = 0; i < state->buf_size; ++i)
 		line_count += state->buf[i] == '\n';
 
 	if (state->buf_size == TEXT_CLIENT_BUF_SIZE && line_count == 0) {
-		return ma_error();
+		return MA_ERROR;
 	}
 
 	char* cursor = state->buf;
@@ -185,9 +185,13 @@ struct message_action handle_text_message(struct fd_data* data, int events) {
 		cursor = parse_command(cursor, buf_end);
 	}
 
+	// TODO: matar el cliente si parse_command encuentra un comando invalido
+	// TODO: resetear el buffer si parse_command llega al final mientras parsea
+	// TODO: correr comandos
+
 	switch (status) {
-		case 1: return ma_ok();
-		case 2: return ma_stop();
+		case 1: return MA_OK;
+		case 2: return MA_STOP;
 	}
 
 }
@@ -228,10 +232,11 @@ int main() {
 
 			int listen_sock = data->fd;
 
-			struct message_action action = handle_new_client(listen_sock);
+			int conn_sock;
+			enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
-			if (action.tag == MA_OK) {
-				register_client_socket_first_time(epollfd, action.value);
+			if (action == MA_OK) {
+				register_client_socket_first_time(epollfd, conn_sock);
 			}
 
 			register_listen_socket_again(epollfd, listen_sock, data);
@@ -247,13 +252,13 @@ int main() {
 			fprintf(stderr, "ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			struct message_action action = handle_text_message(data, evt.events);
+			enum message_action action = handle_text_message(data, evt.events);
 
 			int sock = data->fd;
-			if (action.tag == MA_OK) {
+			if (action == MA_OK) {
 				register_client_socket_again(epollfd, sock, data);
 			} else {
-				if (action.tag == MA_ERROR) {
+				if (action == MA_ERROR) {
 					fprintf(stderr, "error handle_text_message sock = %d\n", sock);
 				}
 				free(data->text_client_state);
