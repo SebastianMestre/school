@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "text_mode_parser.h"
+
 struct fd_data {
 	enum fd_type {
 		FD_TYPE_BINARY_LISTEN,
