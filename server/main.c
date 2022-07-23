@@ -184,19 +184,19 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	struct cmd cmd;
 	char* cursor = state->buf;
 	char* buf_end = state->buf + state->buf_size;
-	for (; line_count >= 0; --line_count) {
+	for (; line_count > 0; --line_count) {
 		switch(parse_command(&cursor, buf_end, &cmd)) {
-			case INCOMPLETE:
-				// copiar comando incompleto y resetar buffer
-				break;
 			case OK:
-				// correr comando y resetear buffer
+				// TODO correr comando
 				break;
 			default:
-				// matar al cliente
+				// TODO matar al cliente
 				break;
 		}
 	}
+
+	// los comandos recibidos son correctos y ya los corrimos
+	// TODO resetear buffer conservando lo que quede
 
 	switch (status) {
 		case 1: return MA_OK;
