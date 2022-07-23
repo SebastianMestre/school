@@ -1,5 +1,6 @@
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "text_mode_parser.h"
 
@@ -20,13 +21,13 @@ static enum status parse_(char const* prefix, char** start, char* end) {
 	int buf_len = end - *start;
 	int prefix_len = strlen(prefix);
 
-	if (prefix_len > buf_len) return INCOMPLETE;
+	if (prefix_len > buf_len) return MISMATCH;
 	if (memcmp(*start, prefix, prefix_len) != 0) return MISMATCH;
 
 	*start += prefix_len;
 	buf_len -= prefix_len;
 
-	if (buf_len <= 0) return INCOMPLETE;
+	if (buf_len <= 0) return INVALID;
 	if (**start != '\n') return INVALID;
 
 	*start += 1;
@@ -39,19 +40,17 @@ static enum status parse_k(char const* prefix, char** start, char* end, struct c
 	int buf_len = end - *start;
 	int prefix_len = strlen(prefix);
 
-	if (prefix_len > buf_len) return INCOMPLETE;
+	if (prefix_len > buf_len) return MISMATCH;
 	if (memcmp(*start, prefix, prefix_len) != 0) return MISMATCH;
 
 	*start += prefix_len;
 	buf_len -= prefix_len;
 
-	if (buf_len <= 0) return INCOMPLETE;
+	if (buf_len <= 0) return INVALID;
 	if (**start != ' ') return INVALID;
 
 	*start += 1;
 	buf_len -= 1;
-
-	if (buf_len <= 0) return INCOMPLETE;
 	
 	// parsear w1
 	char* key_start = *start;
@@ -61,7 +60,7 @@ static enum status parse_k(char const* prefix, char** start, char* end, struct c
 	*start += key_len;
 	buf_len -= key_len;
 
-	if (buf_len <= 0) return INCOMPLETE;
+	if (buf_len <= 0) return INVALID;
 	if (**start != '\n') return INVALID;
 
 	*start += 1;
@@ -78,20 +77,18 @@ static enum status parse_kv(char const* prefix, char** start, char* end, struct 
 	int buf_len = end - *start;
 	int prefix_len = strlen(prefix);
 
-	if (prefix_len > buf_len) return INCOMPLETE;
+	if (prefix_len > buf_len) return MISMATCH;
 	if (memcmp(*start, prefix, prefix_len) != 0) return MISMATCH;
 
 	*start += prefix_len;
 	buf_len -= prefix_len;
 
 
-	if (buf_len <= 0) return INCOMPLETE;
+	if (buf_len <= 0) return INVALID;
 	if (**start != ' ') return INVALID;
 
 	*start += 1;
 	buf_len -= 1;
-
-	if (buf_len <= 0) return INCOMPLETE;
 	
 	// parsear key
 	char* key_start = *start;
@@ -101,13 +98,11 @@ static enum status parse_kv(char const* prefix, char** start, char* end, struct 
 	*start += key_len;
 	buf_len -= key_len;
 
-	if (buf_len <= 0) return INCOMPLETE;
+	if (buf_len <= 0) return INVALID;
 	if (**start != ' ') return INVALID;
 
 	*start += 1;
 	buf_len -= 1;
-
-	if(buf_len <= 0) return INCOMPLETE;
 	
 	// parsear val
 	char* val_start = *start;
@@ -117,7 +112,7 @@ static enum status parse_kv(char const* prefix, char** start, char* end, struct 
 	*start += val_len;
 	buf_len -= val_len;
 	
-	if (buf_len <= 0) return INCOMPLETE;
+	if (buf_len <= 0) return INVALID;
 	if (**start != '\n') return INVALID;
 
 	*start += 1;
@@ -140,7 +135,7 @@ static enum status parse_command_by_tag(char** start, char* end, struct cmd* cmd
 		case DEL:
 			return parse_k("DEL", start, end, cmd);
 		case GET:
-			return parse_k("DEL", start, end, cmd);
+			return parse_k("GET", start, end, cmd);
 		case TAKE:
 			return parse_k("TAKE", start, end, cmd);
 		case STATS:
@@ -164,18 +159,8 @@ enum status parse_command(char** start, char* end, struct cmd* cmd) {
 			*start = out_start;
 			return OK;
 		}
-		if (status == INCOMPLETE) incomplete = 1; 
 	}
 
-	// si se detecto incompleto, chequeamos que la linea no este terminada
-	if (incomplete) {
-		for (char* cursor = *start; cursor != end; cursor++) {
-			if (*cursor == '\n') return INVALID;
-		}
-		return INCOMPLETE;
-	}
-
-	// si fueron todos MISMATCH, devolvemos INVALID
 	return INVALID;
 }
 
