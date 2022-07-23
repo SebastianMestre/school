@@ -5,8 +5,6 @@
 
 #define N_CMDS 5
 
-enum cmd_tag cmd_tags[N_CMDS] = {PUT, DEL, GET, TAKE, STATS};
-
 // parsea una palabra (alfanumerica)
 // return: el largo de la palabra si es valida, un valor negativo en otro caso  
 static int parse_word(char* start, char* end) {
@@ -147,6 +145,8 @@ static enum status parse_command_by_tag(char** start, char* end, struct cmd* cmd
 			return parse_k("TAKE", start, end, cmd);
 		case STATS:
 			return parse_("STATS", start, end);
+		default:
+			assert(0);
 		}
 }
 
@@ -156,7 +156,7 @@ enum status parse_command(char** start, char* end, struct cmd* cmd) {
 	int incomplete = 0;
 	enum status status;
 	for (int i = 0; i < N_CMDS; i++) {
-		status = parse_command_by_tag(&out_start, end, cmd, cmd_tags[i]);
+		status = parse_command_by_tag(&out_start, end, cmd, i);
 		// error de formato
 		if (status == INVALID) return INVALID;
 		// comando parseado
