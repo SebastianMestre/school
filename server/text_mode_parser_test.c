@@ -24,7 +24,7 @@ void print_cmd_tag(enum cmd_tag tag) {
 	}
 }
 
-void print_cmd(struct cmd cmd) {
+void print_cmd(struct text_command cmd) {
 	print_cmd_tag(cmd.tag);
 	if (cmd.tag == STATS) return;
 	for (int i = 0; i < cmd.key_len; i++)
@@ -41,8 +41,8 @@ int main() {
 	int buf_len = strlen(buf);
 
 	char* cursor = buf;
-	struct cmd cmd;
-	switch (parse_command(&cursor, cursor + buf_len, &cmd)) {
+	struct text_command cmd;
+	switch (parse_text_command(&cursor, cursor + buf_len, &cmd)) {
 		case INVALID:
 			printf("INVALID\n");
 			break;

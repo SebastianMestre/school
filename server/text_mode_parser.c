@@ -36,7 +36,8 @@ static enum status parse_(char const* prefix, char** start, char* end) {
 	return OK;
 }
 // parser para comandos de la forma "PREFIJO CLAVE\n"
-static enum status parse_k(char const* prefix, char** start, char* end, struct cmd* cmd){
+static enum status parse_k(char const* prefix, char** start, char* end, 
+							struct text_command* cmd){
 	int buf_len = end - *start;
 	int prefix_len = strlen(prefix);
 
@@ -72,7 +73,8 @@ static enum status parse_k(char const* prefix, char** start, char* end, struct c
 	return OK;
 }
 // parser para comandos de la forma "PREFIJO CLAVE VALOR\n"
-static enum status parse_kv(char const* prefix, char** start, char* end, struct cmd* cmd) {
+static enum status parse_kv(char const* prefix, char** start, char* end, 
+							struct text_command* cmd) {
 	
 	int buf_len = end - *start;
 	int prefix_len = strlen(prefix);
@@ -126,8 +128,8 @@ static enum status parse_kv(char const* prefix, char** start, char* end, struct 
 	return OK;
 }
 
-static enum status parse_command_by_tag(char** start, char* end, struct cmd* cmd,
-								enum cmd_tag tag) {
+static enum status parse_command_by_tag(char** start, char* end, 
+										struct text_command* cmd, enum cmd_tag tag) {
 	cmd->tag = tag;
 	switch (tag) {
 		case PUT:
@@ -146,7 +148,7 @@ static enum status parse_command_by_tag(char** start, char* end, struct cmd* cmd
 }
 
 // MAYBE pasar el largo en vez de `end`
-enum status parse_command(char** start, char* end, struct cmd* cmd) {
+enum status parse_text_command(char** start, char* end, struct text_command* cmd) {
 	char* out_start = *start;
 	int incomplete = 0;
 	enum status status;
@@ -163,5 +165,3 @@ enum status parse_command(char** start, char* end, struct cmd* cmd) {
 
 	return INVALID;
 }
-
-

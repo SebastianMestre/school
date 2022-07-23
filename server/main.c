@@ -181,11 +181,11 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 		return MA_ERROR;
 	}
 
-	struct cmd cmd;
+	struct text_command cmd;
 	char* cursor = state->buf;
 	char* buf_end = state->buf + state->buf_size;
 	for (; line_count > 0; --line_count) {
-		switch(parse_command(&cursor, buf_end, &cmd)) {
+		switch(parse_text_command(&cursor, buf_end, &cmd)) {
 			case OK:
 				// TODO correr comando
 				break;

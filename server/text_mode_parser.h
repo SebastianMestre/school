@@ -8,7 +8,7 @@
 // MISMATCH: (para parsear un comando) no hay match en el prefijo 
 enum status { OK, INVALID, INCOMPLETE, MISMATCH };
 enum cmd_tag { PUT, DEL, GET, TAKE, STATS };
-struct cmd {
+struct text_command {
 	enum cmd_tag tag;
 	char key[WORD_SIZE];
 	int key_len;
@@ -17,4 +17,4 @@ struct cmd {
 };
 
 
-enum status parse_command(char** start, char* end, struct cmd* cmd);
+enum status parse_text_command(char** start, char* end, struct text_command* cmd);
