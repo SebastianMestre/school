@@ -150,7 +150,6 @@ static enum status parse_command_by_tag(char** start, char* end,
 // MAYBE pasar el largo en vez de `end`
 enum status parse_text_command(char** start, char* end, struct text_command* cmd) {
 	char* out_start = *start;
-	int incomplete = 0;
 	enum status status;
 	for (int i = 0; i < N_CMDS; i++) {
 		status = parse_command_by_tag(&out_start, end, cmd, i);
