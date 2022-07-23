@@ -2,9 +2,6 @@
 
 #define WORD_SIZE 2048
 
-// consideramos el estado INCOMPLETE aunque realmente no es necesario
-// MAYBE quitarlo
-
 // OK: comando parseado correctamente
 // INVALID: linea invalida
 // INCOMPLETE: linea no terminada; puede ser correcta
