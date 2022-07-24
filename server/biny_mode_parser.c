@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 #include "biny_mode_parser.h"
 
@@ -20,7 +21,7 @@ static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command*
 	if (nbuffer == 0) return INCOMPLETE;
 
 	uint32_t ndata = MIN(nbuffer, nbytes);
-	memcpy(cmd->val + val_len, *start, ndata);
+	memcpy(cmd->val + cmd->val_len, *start, ndata);
 	*start += ndata;
 	cmd->val_len += ndata;
 	
@@ -29,9 +30,9 @@ static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command*
 	return OK;
 }
 
-static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biniy_command* cmd) {
+static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	if (end - *start < 4) return INCOMPLETE;
-	cmd->val_size = ntohl((uint32_t)*start);
+	cmd->val_size = ntohl((uint32_t)**start);
 	*start += 4;
 	return OK; 
 }
@@ -44,7 +45,7 @@ static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command*
 	if (nbuffer == 0) return INCOMPLETE;
 
 	uint32_t ndata = MIN(nbuffer, nbytes);
-	memcpy(cmd->key + key_len, *start, ndata);
+	memcpy(cmd->key + cmd->key_len, *start, ndata);
 	*start += ndata;
 	cmd->key_len += ndata;
 	
@@ -53,9 +54,9 @@ static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command*
 	return OK;
 }
 
-static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biniy_command* cmd) {
+static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	if (end - *start < 4) return INCOMPLETE;
-	cmd->key_size = ntohl((uint32_t)*start);
+	cmd->key_size = ntohl((uint32_t)**start);
 	*start += 4;
 	return OK; 
 }
