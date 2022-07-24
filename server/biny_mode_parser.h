@@ -1,21 +1,23 @@
 #pragma once
 #include <stdint.h>
 
-#define CHUNK_SIZE 2048
 
-
-// OK: comando parseado correctamente
-// INVALID: linea invalida
-// INCOMPLETE: linea no terminada; puede ser correcta
-// MISMATCH: (para parsear un comando) no hay match en el prefijo 
-enum status { OK, INVALID, INCOMPLETE, MISMATCH };
+// OK: 			comando parseado correctamente
+// INVALID:	 	linea invalida
+// MISMATCH: 	(para parsear un comando) no hay match en el prefijo
+// INCOMPLETE: 	faltan datos
+// KEY_NEXT: 	reservar memoria para `key` y parsear
+// VAL_NEXT: 	reservar memoria para `val` y parsear 
+enum status { OK, INVALID, MISMATCH, INCOMPLETE, KEY_NEXT, VAL_NEXT };
 enum cmd_tag { PUT, DEL, GET, TAKE, STATS };
 struct biny_command {
 	enum cmd_tag tag;
-	uint8_t key[CHUNK_SIZE];
-	int key_len;
-	uint8_t val[CHUNK_SIZE];
-	int val_len;   
+	uint8_t* key;
+	uint32_t key_size;
+	uint32_t key_len;
+	uint8_t* val;
+	uint32_t val_size;
+	uint32_t val_len;   
 };
 
 
