@@ -128,6 +128,7 @@ static enum status parse_kv(char const* prefix, char** start, char* end,
 	return OK;
 }
 
+// parsea el formato correcto en funcion de `tag` 
 static enum status parse_command_by_tag(char** start, char* end, 
 										struct text_command* cmd, enum cmd_tag tag) {
 	cmd->tag = tag;
@@ -147,7 +148,6 @@ static enum status parse_command_by_tag(char** start, char* end,
 		}
 }
 
-// MAYBE pasar el largo en vez de `end`
 enum status parse_text_command(char** start, char* end, struct text_command* cmd) {
 	char* out_start = *start;
 	enum status status;
