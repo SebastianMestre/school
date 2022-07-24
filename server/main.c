@@ -190,7 +190,7 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 				// TODO correr comando
 				break;
 			default:
-				// TODO matar al cliente
+				// TODO elevar error (matar al cliente)
 				break;
 		}
 	}
