@@ -140,9 +140,6 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	struct text_client_state* state = data->text_client_state;
 	assert(state);
 
-	char read_buf[TEXT_CLIENT_BUF_SIZE];
-	char cmd_buf[TEXT_CLIENT_BUF_SIZE];
-
 	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
 		fprintf(stderr, "HANGUP\n");
 		return MA_STOP;
@@ -198,7 +195,7 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	// los comandos recibidos son correctos y ya los corrimos
 	// reseteamos el buffer conservando lo que queda
 	state->buf_size = buf_end - cursor; 
-	memcpy(state->buf, cursor, state->buf_size);
+	memmove(state->buf, cursor, state->buf_size);
 
 	switch (status) {
 		case 1: return MA_OK;
