@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "connections.h"
 #include "text_mode_parser.h"
 
 struct fd_data {
@@ -42,30 +43,19 @@ struct text_client_state* create_text_client_state() {
 }
 
 
-
-void register_epoll(int epollfd, int fd, int op, int flags, struct fd_data* data) {
-	fprintf(stderr, "epoll_ctl <~~ epollfd = %d, fd = %d, op = %d, flags = %x, data = %p\n", epollfd, fd, op, flags, data);
-	struct epoll_event evt;
-	evt.events = flags;
-	evt.data.ptr = data;
-	int err = epoll_ctl(epollfd, op, fd, &evt);
-	fprintf(stderr, "epoll_ctl ~~> retval = %d, errno = %d\n", err, errno);
-	if (err < 0) {
-		perror("epoll.2");
-		exit(EXIT_FAILURE);
-	}
-}
-
 void register_listen_socket_first_time(int epollfd, int sock) {
 	struct fd_data* data = calloc(1, sizeof(*data));
 	data->type = FD_TYPE_TEXT_LISTEN;
 	data->fd = sock;
-
-	register_epoll(epollfd, sock, EPOLL_CTL_ADD, EPOLLIN | EPOLLONESHOT, data);
+	int flags = EPOLLIN | EPOLLONESHOT;
+	if (register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data) < 0)
+		exit(EXIT_FAILURE);
 }
 
 void register_listen_socket_again(int epollfd, int sock, struct fd_data* data) {
-	register_epoll(epollfd, sock, EPOLL_CTL_MOD, EPOLLIN | EPOLLONESHOT, data);
+	int flags = EPOLLIN | EPOLLONESHOT;
+	if (register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data) < 0)
+		exit(EXIT_FAILURE);
 }
 
 void register_client_socket_first_time(int epollfd, int sock) {
@@ -73,53 +63,17 @@ void register_client_socket_first_time(int epollfd, int sock) {
 	data->type = FD_TYPE_TEXT_CONN;
 	data->fd = sock;
 	data->text_client_state = create_text_client_state();
-
-	register_epoll(epollfd, sock, EPOLL_CTL_ADD, EPOLLIN | EPOLLONESHOT | EPOLLRDHUP, data);
+	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
+	if (register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data) < 0)
+		exit(EXIT_FAILURE);
 }
 
 void register_client_socket_again(int epollfd, int sock, struct fd_data* data) {
-	register_epoll(epollfd, sock, EPOLL_CTL_MOD, EPOLLIN | EPOLLONESHOT | EPOLLRDHUP, data);
+	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
+	if (register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data) < 0)
+		exit(EXIT_FAILURE);
 }
 
-int create_listen_socket(char const* address, char const* port) {
-	int err;
-
-	int listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (listen_sock < 0) {
-		perror("sock.1");
-		exit(EXIT_FAILURE);
-	}
-
-	struct addrinfo hints;
-	struct addrinfo* addrinfo;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-
-	err = getaddrinfo(address, port, &hints, &addrinfo);
-	if (err) {
-		fprintf(stderr, "getaddrinfo: ???\n");
-		exit(EXIT_FAILURE);
-	}
-
-	struct sockaddr_in server_addr = *(struct sockaddr_in*)addrinfo->ai_addr;
-
-	freeaddrinfo(addrinfo);
-
-	err = bind(listen_sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
-	if (err < 0) {
-		perror("bind.1");
-		exit(EXIT_FAILURE);
-	}
-
-	err = listen(listen_sock, 10); // medio trucho el tamanno del backlog
-	if (err < 0) {
-		perror("listen.1");
-		exit(EXIT_FAILURE);
-	}
-
-	return listen_sock;
-}
 
 enum message_action { MA_ERROR, MA_STOP, MA_OK };
 
@@ -215,6 +169,7 @@ int main() {
 	}
 
 	int listen_sock = create_listen_socket("localhost", "8000");
+	if (listen_sock < 0) exit(EXIT_FAILURE);
 
 	register_listen_socket_first_time(epollfd, listen_sock);
 
