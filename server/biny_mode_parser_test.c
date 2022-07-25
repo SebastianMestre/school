@@ -8,26 +8,26 @@
 void print_cmd_tag(enum cmd_tag tag) {
 	switch (tag) {
 		case PUT:
-			printf("PUT ");
+			printf("PUT");
 			break;
 		case DEL:
-			printf("DEL ");
+			printf("DEL");
 			break;
 		case GET:
-			printf("GET ");
+			printf("GET");
 			break;
 		case TAKE:
-			printf("TAKE ");
+			printf("TAKE");
 			break;
 		case STATS:
-			printf("STATS ");
+			printf("STATS");
 			break;
 	}
 }
 
 void print_cmd(struct biny_command cmd) {
 	print_cmd_tag(cmd.tag);
-	printf("key_size: %u val_size: %u  ", cmd.key_size, cmd.val_size);
+	printf(" key_size: %u val_size: %u  ", cmd.key_size, cmd.val_size);
 	for (uint32_t i = 0; i < cmd.key_len; i++)
 		printf("%u ", cmd.key[i]);
 	for (uint32_t i = 0; i < cmd.val_len; i++)
@@ -108,6 +108,7 @@ void main() {
 	}
 
 	print_cmd(cmd);
+
 	if (cmd.key_size > 0) free(cmd.key);
 	if (cmd.val_size > 0) free(cmd.val);
 	

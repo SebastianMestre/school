@@ -104,7 +104,8 @@ static enum status parse_pfx(uint8_t** start, uint8_t* end, struct biny_command*
 	return INVALID;
 }
 
-
+// para comenzar a parsear, el comando debe estar inicializado en 0
+// el parser detecta que falta parsear y continua a partir de ahi
 enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	uint8_t* out_start = *start;
 	enum status status;
@@ -125,6 +126,7 @@ enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_comman
 	if (cmd->key_len < cmd->key_size) {
 		status = parse_key(start, end, cmd);
 		if (status == INCOMPLETE) return INCOMPLETE;
+		assert(status == OK);
 		if (cmd->tag != PUT) return OK;
 		out_start = *start;
 		status = parse_val_size(&out_start, end, cmd);
@@ -132,10 +134,10 @@ enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_comman
 		*start = out_start;
 		return VAL_NEXT;
 	}
-	// no hay que parsear el valor
-	if (cmd->val_size == 0) return OK;
 	// tenemos que parsear el valor
-	if (cmd->val_len < cmd->val_size) return parse_val(start, end, cmd);
+	if (cmd->val_len < cmd->val_size) {
+		return parse_val(start, end, cmd);
+	}
 
 	return OK;
 } 
