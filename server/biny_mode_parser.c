@@ -11,7 +11,7 @@
 #define DEL_ID 12 
 #define GET_ID 13
 #define TAKE_ID 14
-#define STATS_ID 15
+#define STATS_ID 21
 
 static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	uint32_t nbytes = cmd->val_size - cmd->val_len;
@@ -32,7 +32,8 @@ static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command*
 
 static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	if (end - *start < 4) return INCOMPLETE;
-	cmd->val_size = ntohl((uint32_t)**start);
+	uint32_t* val_size = (uint32_t*)*start;
+	cmd->val_size = ntohl(*val_size);
 	*start += 4;
 	return OK; 
 }
@@ -56,7 +57,8 @@ static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command*
 
 static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	if (end - *start < 4) return INCOMPLETE;
-	cmd->key_size = ntohl((uint32_t)**start);
+	uint32_t* key_size = (uint32_t*)*start;
+	cmd->key_size = ntohl(*key_size);
 	*start += 4;
 	return OK; 
 }
@@ -64,31 +66,30 @@ static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_com
 static enum status parse_pfx_by_id(uint8_t id, uint8_t** start, uint8_t* end) {
 	if (end - *start <= 0) return INCOMPLETE;
 	if (**start == id) {
-		start += 1;
+		*start += 1;
 		return OK;
 	}
 	return MISMATCH;
 }
 
 static enum status parse_pfx(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	uint8_t* out_start;
 	enum status status;
 	for (enum cmd_tag tag = 0; tag < N_CMDS; tag++) {
 		switch (tag) {
 			case PUT:
-				status = parse_pfx_by_id(PUT_ID, &out_start, end);
+				status = parse_pfx_by_id(PUT_ID, start, end);
 				break;
 			case DEL:
-				status = parse_pfx_by_id(DEL_ID, &out_start, end);
+				status = parse_pfx_by_id(DEL_ID, start, end);
 				break;
 			case GET:
-				status = parse_pfx_by_id(GET_ID, &out_start, end);
+				status = parse_pfx_by_id(GET_ID, start, end);
 				break;
 			case TAKE:
-				status = parse_pfx_by_id(TAKE_ID, &out_start, end);
+				status = parse_pfx_by_id(TAKE_ID, start, end);
 				break;
 			case STATS:
-				status = parse_pfx_by_id(STATS_ID, &out_start, end);
+				status = parse_pfx_by_id(STATS_ID, start, end);
 				break;
 			default:
 				assert(0);
