@@ -185,18 +185,20 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	char* cursor = state->buf;
 	char* buf_end = state->buf + state->buf_size;
 	for (; line_count > 0; --line_count) {
-		switch(parse_text_command(&cursor, buf_end, &cmd)) {
+		switch (parse_text_command(&cursor, buf_end, &cmd)) {
 			case OK:
 				// TODO correr comando
+				fprintf(stderr, "correr comando: tag = %d\n", cmd.tag);
 				break;
 			default:
-				// TODO elevar error (matar al cliente)
-				break;
+				return MA_ERROR;
 		}
 	}
 
 	// los comandos recibidos son correctos y ya los corrimos
-	// TODO resetear buffer conservando lo que quede
+	// reseteamos el buffer conservando lo que queda
+	state->buf_size = buf_end - cursor; 
+	memcpy(state->buf, cursor, state->buf_size);
 
 	switch (status) {
 		case 1: return MA_OK;
