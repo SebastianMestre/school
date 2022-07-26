@@ -148,7 +148,7 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 		}
 
 		if (read_bytes == 0) {
-			fprintf(stderr, "modo texto: fin de la comunicacion -- sock = %d\n", sock);
+			fprintf(stderr, "texto: fin de la comunicacion -- sock = %d\n", sock);
 			status = 2;
 			break;
 		}
@@ -184,6 +184,50 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	// reseteamos el buffer conservando lo que queda
 	state->buf_size = buf_end - cursor; 
 	memmove(state->buf, cursor, state->buf_size);
+
+	switch (status) {
+		case 1: return MA_OK;
+		case 2: return MA_STOP;
+	}
+
+}
+
+enum message_action handle_biny_message(struct fd_data* data, int events) {
+	int sock = data->fd;
+
+	struct biny_client_state* state = data->client_state.biny;
+	assert(state);
+
+	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
+		fprintf(stderr, "HANGUP\n");
+		return MA_STOP;
+	}
+
+	int status = 0;
+
+	while (1) {
+		int read_bytes = read(sock, state->buf + state->buf_size, BINY_CLIENT_BUF_SIZE - state->buf_size);
+
+		if (read_bytes < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				status = 1;
+				break;
+			} else {
+				return MA_ERROR;
+			}
+		}
+
+		if (read_bytes == 0) {
+			fprintf(stderr, "binario: fin de la comunicacion -- sock = %d\n", sock);
+			status = 2;
+			break;
+		}
+		
+		state->buf_size += read_bytes;
+	}
+
+	// TODO parsear comando
+	state->buf_size = 0; 
 
 	switch (status) {
 		case 1: return MA_OK;
