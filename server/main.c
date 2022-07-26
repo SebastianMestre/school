@@ -42,6 +42,21 @@ struct text_client_state* create_text_client_state() {
 	return result;
 }
 
+#define BINY_CLIENT_BUF_SIZE 2048
+
+struct biny_client_state {
+	int buf_size;
+	uint8_t buf[BINY_CLIENT_BUF_SIZE];
+};
+
+struct biny_client_state* create_biny_client_state() {
+	struct biny_client_state* result = malloc(sizeof(*result));
+	if (result != NULL) {
+		memset(result, 0, sizeof(*result));
+	}
+	return result;
+}
+
 
 void register_listen_socket_first(int epollfd, int sock, enum protocol protocol) {
 	struct fd_data* data = calloc(1, sizeof(*data));
