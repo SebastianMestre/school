@@ -240,7 +240,7 @@ enum message_action handle_biny_message(struct fd_data* data, int events) {
 	switch (parse_status) {
 		case OK:
 			// TODO correr comando (dar ownership de key y val)
-			fprintf(stderr, "correr comando: tag = %d", state->cmd.tag);
+			fprintf(stderr, "correr comando: tag = %d\n", state->cmd.tag);
 			state->cmd.key_size = state->cmd.val_size = 0;
 			goto PARSE;
 		case KEY_NEXT:
