@@ -12,7 +12,9 @@
 #include <unistd.h>
 
 #include "connections.h"
+#include "commands.h"
 #include "text_mode_parser.h"
+#include "biny_mode_parser.h"
 
 enum protocol { TEXT, BINY };
 
@@ -329,12 +331,13 @@ int main() {
 			fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
+			printf("Todavia no implementamos esto jeje adios\n");
+			exit(EXIT_FAILURE);
+			enum message_action action;
 			// enum message_action action = handle_biny_message(data, evt.events);
-			enum message_action action = MA_OK;
 
 			int sock = data->fd;
 			if (action == MA_OK) {
-				printf("Todavia no implementamos esto jeje bye\n");
 				register_client_socket_again(epollfd, sock, data);
 			} else {
 				if (action == MA_ERROR) {
