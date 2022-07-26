@@ -91,14 +91,10 @@ void register_client_socket_first(int epollfd, int sock, enum protocol protocol)
 			data->type = FD_TYPE_TEXT_CONN;
 			data->client_state.text = create_text_client_state();
 			break;
-	/*	case BINY:
+		case BINY:
 			data->type = FD_TYPE_BINARY_CONN;
 			data->client_state.biny = create_biny_client_state();
 			break;
-	*/
-		default:
-			printf("Todavia no implementamos esto jeje chau\n");
-			exit(EXIT_FAILURE);			
 	}
 
 	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
@@ -285,9 +281,25 @@ int main() {
 
 		} break;
 		case FD_TYPE_BINARY_CONN: {
+			
+			fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
+			fprintf(stderr, "evt flags = %8x\n", evt.events);
+
+			// enum message_action action = handle_biny_message(data, evt.events);
+			enum message_action action = MA_OK;
+
 			int sock = data->fd;
-			// TODO
-			exit(EXIT_FAILURE);
+			if (action == MA_OK) {
+				printf("Todavia no implementamos esto jeje bye\n");
+				register_client_socket_again(epollfd, sock, data);
+			} else {
+				if (action == MA_ERROR) {
+					fprintf(stderr, "error handle_biny_message sock = %d\n", sock);
+				}
+				free(data->client_state.biny);
+				free(data);
+				close(sock);
+			}
 		} break;
 		}
 	}
