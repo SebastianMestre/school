@@ -14,6 +14,8 @@
 #define STATS_ID 21
 
 static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
+	assert(cmd->val);
+	
 	uint32_t nbytes = cmd->val_size - cmd->val_len;
 	if (nbytes == 0) return OK;
 
@@ -29,7 +31,7 @@ static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command*
 
 	return OK;
 }
-
+// no modifica `start` si no hay suficientes datos
 static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	if (end - *start < 4) return INCOMPLETE;
 	uint32_t* val_size = (uint32_t*)*start;
@@ -39,6 +41,8 @@ static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_com
 }
 
 static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
+	assert(cmd->key);
+	
 	uint32_t nbytes = cmd->key_size - cmd->key_len;
 	if (nbytes == 0) return OK;
 
@@ -54,7 +58,7 @@ static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command*
 
 	return OK;
 }
-
+// no modifica `start` si no hay suficientes datos
 static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	if (end - *start < 4) return INCOMPLETE;
 	uint32_t* key_size = (uint32_t*)*start;
@@ -62,7 +66,7 @@ static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_com
 	*start += 4;
 	return OK; 
 }
-
+// no modifica `start` si no hay suficientes datos
 static enum status parse_pfx_by_id(uint8_t id, uint8_t** start, uint8_t* end) {
 	if (end - *start <= 0) return INCOMPLETE;
 	if (**start == id) {
@@ -107,33 +111,39 @@ static enum status parse_pfx(uint8_t** start, uint8_t* end, struct biny_command*
 // para comenzar a parsear, el comando debe estar inicializado en 0
 // el parser detecta que falta parsear y continua a partir de ahi
 enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	uint8_t* out_start = *start;
 	enum status status;
+	
 	// tenemos que parsear el prefijo
 	if (cmd->key_size == 0) {
-		status = parse_pfx(&out_start, end, cmd);
-		if (status != OK) return status;
-		if (cmd->tag == STATS) {
-			*start = out_start;
-			return OK;
-		}
-		status = parse_key_size(&out_start, end, cmd);
-		if (status != OK) return status;
-		*start = out_start;
-		return KEY_NEXT; 
+		status = parse_pfx(start, end, cmd);
+		if (status != OK) return status; 
 	}
+
+	if (cmd->tag == STATS) return OK;
+
+	// tenemos que parsear el largo de la clave
+	if (cmd->key_size == 0) {
+		status = parse_key_size(start, end, cmd);
+		if (status != OK) return status;
+		return KEY_NEXT;
+	}
+
 	// tenemos que parsear la clave
 	if (cmd->key_len < cmd->key_size) {
 		status = parse_key(start, end, cmd);
 		if (status == INCOMPLETE) return INCOMPLETE;
 		assert(status == OK);
-		if (cmd->tag != PUT) return OK;
-		out_start = *start;
-		status = parse_val_size(&out_start, end, cmd);
+	}
+
+	if (cmd->tag != PUT) return OK;
+
+	// tenemos que parsear el largo del valor
+	if (cmd->val_size == 0) {
+		status = parse_val_size(start, end, cmd);
 		if (status != OK) return status;
-		*start = out_start;
 		return VAL_NEXT;
 	}
+
 	// tenemos que parsear el valor
 	if (cmd->val_len < cmd->val_size) {
 		return parse_val(start, end, cmd);
