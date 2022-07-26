@@ -24,7 +24,10 @@ struct fd_data {
 		FD_TYPE_TEXT_CONN,
 	} type;
 	int fd;
-	struct text_client_state* text_client_state;
+	union client_state {
+		struct text_client_state* text;
+		struct biny_client_state* biny;
+	} client_state; 	
 };
 
 #define TEXT_CLIENT_BUF_SIZE 2048
@@ -86,7 +89,7 @@ void register_client_socket_first(int epollfd, int sock, enum protocol protocol)
 	switch (protocol) {
 		case TEXT:
 			data->type = FD_TYPE_TEXT_CONN;
-			data->text_client_state = create_text_client_state();
+			data->client_state.text = create_text_client_state();
 			break;
 	/*	case BINY:
 			data->type = FD_TYPE_BINARY_CONN;
@@ -126,7 +129,7 @@ enum message_action handle_new_client(int listen_sock, int* out_sock) {
 enum message_action handle_text_message(struct fd_data* data, int events) {
 	int sock = data->fd;
 
-	struct text_client_state* state = data->text_client_state;
+	struct text_client_state* state = data->client_state.text;
 	assert(state);
 
 	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
@@ -274,7 +277,7 @@ int main() {
 				if (action == MA_ERROR) {
 					fprintf(stderr, "error handle_text_message sock = %d\n", sock);
 				}
-				free(data->text_client_state);
+				free(data->client_state.text);
 				free(data);
 				close(sock);
 			}
