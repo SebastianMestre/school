@@ -30,8 +30,6 @@ struct fd_data {
 #define TEXT_CLIENT_BUF_SIZE 2048
 
 struct text_client_state {
-	int gen_start;
-	int gen;
 	int buf_size;
 	char buf[TEXT_CLIENT_BUF_SIZE];
 };
