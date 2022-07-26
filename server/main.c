@@ -14,6 +14,8 @@
 #include "connections.h"
 #include "text_mode_parser.h"
 
+enum protocol { TEXT, BINY };
+
 struct fd_data {
 	enum fd_type {
 		FD_TYPE_BINARY_LISTEN,
@@ -43,9 +45,16 @@ struct text_client_state* create_text_client_state() {
 }
 
 
-void register_listen_socket_first_time(int epollfd, int sock) {
+void register_listen_socket_first(int epollfd, int sock, enum protocol protocol) {
 	struct fd_data* data = calloc(1, sizeof(*data));
-	data->type = FD_TYPE_TEXT_LISTEN;
+	switch (protocol) {
+		case TEXT:
+			data->type = FD_TYPE_TEXT_LISTEN;
+			break;
+		case BINY:
+			data->type = FD_TYPE_BINARY_LISTEN;
+			break;
+	}
 	data->fd = sock;
 	int flags = EPOLLIN | EPOLLONESHOT;
 	if (register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data) < 0)
@@ -58,11 +67,24 @@ void register_listen_socket_again(int epollfd, int sock, struct fd_data* data) {
 		exit(EXIT_FAILURE);
 }
 
-void register_client_socket_first_time(int epollfd, int sock) {
+void register_client_socket_first(int epollfd, int sock, enum protocol protocol) {
 	struct fd_data* data = calloc(1, sizeof(*data));
-	data->type = FD_TYPE_TEXT_CONN;
 	data->fd = sock;
-	data->text_client_state = create_text_client_state();
+	switch (protocol) {
+		case TEXT:
+			data->type = FD_TYPE_TEXT_CONN;
+			data->text_client_state = create_text_client_state();
+			break;
+	/*	case BINY:
+			data->type = FD_TYPE_BINARY_CONN;
+			data->client_state.biny = create_biny_client_state();
+			break;
+	*/
+		default:
+			printf("Todavia no implementamos esto jeje chau\n");
+			exit(EXIT_FAILURE);			
+	}
+
 	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
 	if (register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data) < 0)
 		exit(EXIT_FAILURE);
@@ -168,11 +190,15 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
-	int listen_sock = create_listen_socket("localhost", "8000");
-	if (listen_sock < 0) exit(EXIT_FAILURE);
+	int listen_text_sock = create_listen_socket("localhost", "8000");
+	if (listen_text_sock < 0) exit(EXIT_FAILURE);
 
-	register_listen_socket_first_time(epollfd, listen_sock);
+	int listen_biny_sock = create_listen_socket("localhost", "8001");
+	if (listen_biny_sock < 0) exit(EXIT_FAILURE);
 
+	register_listen_socket_first(epollfd, listen_text_sock, TEXT);
+	register_listen_socket_first(epollfd, listen_biny_sock, BINY);
+	
 	fprintf(stderr, "ENTRANDO AL LOOP EPOLL\n");
 
 	while (1) {
@@ -191,7 +217,7 @@ int main() {
 		switch (data->type) {
 		case FD_TYPE_TEXT_LISTEN: {
 
-			fprintf(stderr, "NUEVO CLIENTE!\n");
+			fprintf(stderr, "TEXTO: NUEVO CLIENTE!\n");
 
 			int listen_sock = data->fd;
 
@@ -199,20 +225,31 @@ int main() {
 			enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
 			if (action == MA_OK) {
-				register_client_socket_first_time(epollfd, conn_sock);
+				register_client_socket_first(epollfd, conn_sock, TEXT);
 			}
 
 			register_listen_socket_again(epollfd, listen_sock, data);
 
 		} break;
 		case FD_TYPE_BINARY_LISTEN: {
+			
+			fprintf(stderr, "BINARIO: NUEVO CLIENTE!\n");
+
 			int listen_sock = data->fd;
-			// TODO
-			exit(EXIT_FAILURE);
+
+			int conn_sock;
+			enum message_action action = handle_new_client(listen_sock, &conn_sock);
+
+			if (action == MA_OK) {
+				register_client_socket_first(epollfd, conn_sock, BINY);
+			}
+
+			register_listen_socket_again(epollfd, listen_sock, data);
+
 		} break;
 		case FD_TYPE_TEXT_CONN: {
 
-			fprintf(stderr, "ME HABLA UN CLIENTE!\n");
+			fprintf(stderr, "TEXTO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
 			enum message_action action = handle_text_message(data, evt.events);
