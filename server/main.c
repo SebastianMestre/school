@@ -32,6 +32,8 @@ struct fd_data {
 	} client_state; 	
 };
 
+// TODO que hacemos si no podemos alocar el client_state?
+
 #define TEXT_CLIENT_BUF_SIZE 2048
 
 struct text_client_state {
@@ -52,6 +54,7 @@ struct text_client_state* create_text_client_state() {
 struct biny_client_state {
 	int buf_size;
 	uint8_t buf[BINY_CLIENT_BUF_SIZE];
+	struct biny_command cmd;
 };
 
 struct biny_client_state* create_biny_client_state() {
@@ -178,6 +181,7 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 				fprintf(stderr, "correr comando: tag = %d\n", cmd.tag);
 				break;
 			default:
+				fprintf(stderr, "no parse\n");
 				return MA_ERROR;
 		}
 	}
@@ -228,8 +232,34 @@ enum message_action handle_biny_message(struct fd_data* data, int events) {
 		state->buf_size += read_bytes;
 	}
 
-	// TODO parsear comando
-	state->buf_size = 0; 
+	uint8_t* cursor	= state->buf;
+	uint8_t* buf_end = state->buf + state->buf_size; 
+	enum status parse_status;
+
+	PARSE: parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
+	switch (parse_status) {
+		case OK:
+			// TODO correr comando (dar ownership de key y val)
+			fprintf(stderr, "correr comando: tag = %d", state->cmd.tag);
+			state->cmd.key_size = state->cmd.val_size = 0;
+			goto PARSE;
+		case KEY_NEXT:
+			state->cmd.key = malloc(state->cmd.key_size);
+			assert(state->cmd.key); // TODO manejar esto
+			goto PARSE;
+		case VAL_NEXT:
+			state->cmd.val = malloc(state->cmd.val_size);
+			assert(state->cmd.val); // TODO manejar esto
+			goto PARSE;
+		case INCOMPLETE:
+			state->buf_size = buf_end - cursor;
+			memmove(state->buf, cursor, state->buf_size);
+			break;
+		default:
+			fprintf(stderr, "no parse\n");
+			return MA_ERROR; 
+	}	
+ 
 
 	switch (status) {
 		case 1: return MA_OK;
@@ -331,10 +361,7 @@ int main() {
 			fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			printf("Todavia no implementamos esto jeje adios\n");
-			exit(EXIT_FAILURE);
-			enum message_action action;
-			// enum message_action action = handle_biny_message(data, evt.events);
+			enum message_action action = handle_biny_message(data, evt.events);
 
 			int sock = data->fd;
 			if (action == MA_OK) {
