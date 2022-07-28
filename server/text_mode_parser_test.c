@@ -49,7 +49,7 @@ int main() {
 		case INCOMPLETE:
 			printf("INCOMPLETE\n");
 			break;
-		case OK:
+		case PARSED:
 			print_cmd(cmd);
 			printf("\nOK\n");
       break;

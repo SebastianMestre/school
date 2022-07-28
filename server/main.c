@@ -176,7 +176,7 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	char* buf_end = state->buf + state->buf_size;
 	for (; line_count > 0; --line_count) {
 		switch (parse_text_command(&cursor, buf_end, &cmd)) {
-			case OK:
+			case PARSED:
 				// TODO correr comando
 				fprintf(stderr, "correr comando: tag = %d\n", cmd.tag);
 				break;
@@ -238,7 +238,7 @@ enum message_action handle_biny_message(struct fd_data* data, int events) {
 
 	PARSE: parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
 	switch (parse_status) {
-		case OK:
+		case PARSED:
 			// TODO correr comando (dar ownership de key y val)
 			fprintf(stderr, "correr comando: tag = %d\n", state->cmd.tag);
 			state->cmd.key_size = state->cmd.val_size = 0;

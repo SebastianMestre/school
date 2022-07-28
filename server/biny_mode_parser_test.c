@@ -57,8 +57,8 @@ void main() {
 		case INCOMPLETE:
 			puts("tag: INCOMPLETE");
 			return;
-		case OK:
-			puts("tag: OK");
+		case PARSED:
+			puts("tag: PARSED");
 			break;
 		case KEY_NEXT:
 			break;
@@ -80,8 +80,8 @@ void main() {
 				puts("key: INCOMPLETE");
 				free(cmd.key);
 				return;
-			case OK:
-				puts("key: OK");
+			case PARSED:
+				puts("key: PARSED");
 				break;
 			case VAL_NEXT:
 				break;
@@ -96,8 +96,8 @@ void main() {
 		assert(cmd.val);
 		status = parse_biny_command(&start, end, &cmd);
 		switch(status) {
-			case OK:
-				puts("val: OK");
+			case PARSED:
+				puts("val: PARSED");
 				break;
 			default:
 				puts("val: ERROR");

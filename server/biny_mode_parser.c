@@ -17,7 +17,7 @@ static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command*
 	assert(cmd->val);
 	
 	uint32_t nbytes = cmd->val_size - cmd->val_len;
-	if (nbytes == 0) return OK;
+	if (nbytes == 0) return PARSED;
 
 	uint32_t nbuffer = end - *start;
 	if (nbuffer == 0) return INCOMPLETE;
@@ -29,7 +29,7 @@ static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command*
 	
 	if (cmd->val_len < cmd->val_size) return INCOMPLETE;
 
-	return OK;
+	return PARSED;
 }
 // no modifica `start` si no hay suficientes datos
 static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
@@ -37,14 +37,14 @@ static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_com
 	uint32_t* val_size = (uint32_t*)*start;
 	cmd->val_size = ntohl(*val_size);
 	*start += 4;
-	return OK; 
+	return PARSED; 
 }
 
 static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
 	assert(cmd->key);
 	
 	uint32_t nbytes = cmd->key_size - cmd->key_len;
-	if (nbytes == 0) return OK;
+	if (nbytes == 0) return PARSED;
 
 	uint32_t nbuffer = end - *start;
 	if (nbuffer == 0) return INCOMPLETE;
@@ -56,7 +56,7 @@ static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command*
 	
 	if (cmd->key_len < cmd->key_size) return INCOMPLETE;
 
-	return OK;
+	return PARSED;
 }
 // no modifica `start` si no hay suficientes datos
 static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
@@ -64,14 +64,14 @@ static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_com
 	uint32_t* key_size = (uint32_t*)*start;
 	cmd->key_size = ntohl(*key_size);
 	*start += 4;
-	return OK; 
+	return PARSED; 
 }
 // no modifica `start` si no hay suficientes datos
 static enum status parse_pfx_by_id(uint8_t id, uint8_t** start, uint8_t* end) {
 	if (end - *start <= 0) return INCOMPLETE;
 	if (**start == id) {
 		*start += 1;
-		return OK;
+		return PARSED;
 	}
 	return MISMATCH;
 }
@@ -99,9 +99,9 @@ static enum status parse_pfx(uint8_t** start, uint8_t* end, struct biny_command*
 				assert(0);
 			}
 		if (status == INCOMPLETE) return INCOMPLETE;
-		if (status == OK) {
+		if (status == PARSED) {
 			cmd->tag = tag;
-			return OK;
+			return PARSED;
 		}	 
 	}
 	
@@ -116,15 +116,15 @@ enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_comman
 	// tenemos que parsear el prefijo
 	if (cmd->key_size == 0) {
 		status = parse_pfx(start, end, cmd);
-		if (status != OK) return status; 
+		if (status != PARSED) return status; 
 	}
 
-	if (cmd->tag == STATS) return OK;
+	if (cmd->tag == STATS) return PARSED;
 
 	// tenemos que parsear el largo de la clave
 	if (cmd->key_size == 0) {
 		status = parse_key_size(start, end, cmd);
-		if (status != OK) return status;
+		if (status != PARSED) return status;
 		return KEY_NEXT;
 	}
 
@@ -132,15 +132,15 @@ enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_comman
 	if (cmd->key_len < cmd->key_size) {
 		status = parse_key(start, end, cmd);
 		if (status == INCOMPLETE) return INCOMPLETE;
-		assert(status == OK);
+		assert(status == PARSED);
 	}
 
-	if (cmd->tag != PUT) return OK;
+	if (cmd->tag != PUT) return PARSED;
 
 	// tenemos que parsear el largo del valor
 	if (cmd->val_size == 0) {
 		status = parse_val_size(start, end, cmd);
-		if (status != OK) return status;
+		if (status != PARSED) return status;
 		return VAL_NEXT;
 	}
 
@@ -149,5 +149,5 @@ enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_comman
 		return parse_val(start, end, cmd);
 	}
 
-	return OK;
+	return PARSED;
 } 

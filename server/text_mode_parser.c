@@ -33,7 +33,7 @@ static enum status parse_(char const* prefix, char** start, char* end) {
 	*start += 1;
 	buf_len -= 1;
 
-	return OK;
+	return PARSED;
 }
 // parser para comandos de la forma "PREFIJO CLAVE\n"
 static enum status parse_k(char const* prefix, char** start, char* end, 
@@ -70,7 +70,7 @@ static enum status parse_k(char const* prefix, char** start, char* end,
 	memcpy(cmd->key, key_start, key_len);
 	cmd->key_len = key_len;
 	
-	return OK;
+	return PARSED;
 }
 // parser para comandos de la forma "PREFIJO CLAVE VALOR\n"
 static enum status parse_kv(char const* prefix, char** start, char* end, 
@@ -125,7 +125,7 @@ static enum status parse_kv(char const* prefix, char** start, char* end,
 	memcpy(cmd->val, val_start, val_len);
 	cmd->val_len = val_len;
 	
-	return OK;
+	return PARSED;
 }
 
 // parsea el formato correcto en funcion de `tag` 
@@ -156,9 +156,9 @@ enum status parse_text_command(char** start, char* end, struct text_command* cmd
 		// error de formato
 		if (status == INVALID) return INVALID;
 		// comando parseado
-		if (status == OK) {
+		if (status == PARSED) {
 			*start = out_start;
-			return OK;
+			return PARSED;
 		}
 	}
 
