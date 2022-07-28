@@ -1,5 +1,5 @@
--module(client).
--export([start/1, put/3, del/2, get/2, get/3, take/2, take/3, stats/1, stats/2]).
+-module(memcached).
+-export([start/1, put/3, del/2, get/2, get/3, take/2, take/3, stats/1, stats/2, close/1]).
 
 -define(PUT, 11).
 -define(DEL, 12).
@@ -74,8 +74,7 @@ handle_conn(Socket) ->
 			end;
 		close -> 
 			io:fwrite("close ~p~n", [Socket]),
-			gen_tcp:shutdown(Socket, read_write),
-			ok
+			gen_tcp:shutdown(Socket, read_write)
 	end.
 
 receive_code(Socket) ->
@@ -163,3 +162,5 @@ stats({connID, HandlePID}, Timeout) ->
 		Error -> Error
 	after Timeout -> timeout
 	end.
+
+close({connID, HandlePID}) -> HandlePID ! close.
