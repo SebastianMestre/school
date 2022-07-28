@@ -268,7 +268,24 @@ enum message_action handle_biny_message(struct fd_data* data, int events) {
 
 }
 
-int main() {
+int main(int argc, char** argv) {
+
+	int listen_text_sock, listen_biny_sock;
+	// no nos pasaron sockets --> estamos debuggeando
+	if (argc == 1) {
+		listen_text_sock = create_listen_socket("localhost", "8000");
+		listen_biny_sock = create_listen_socket("localhost", "8001");
+	}
+	else if (argc == 3) {
+		listen_text_sock = atoi(argv[1]);
+		listen_biny_sock = atoi(argv[2]);
+	}
+	else {
+		fprintf(stderr, "Numero de argumentos incompatible\n");
+		exit(EXIT_FAILURE);
+	}
+	if (listen_text_sock < 0) exit(EXIT_FAILURE);
+	if (listen_biny_sock < 0) exit(EXIT_FAILURE);
 
 	int err;
 
@@ -277,12 +294,6 @@ int main() {
 		perror("epoll.1");
 		exit(EXIT_FAILURE);
 	}
-
-	int listen_text_sock = create_listen_socket("localhost", "8000");
-	if (listen_text_sock < 0) exit(EXIT_FAILURE);
-
-	int listen_biny_sock = create_listen_socket("localhost", "8001");
-	if (listen_biny_sock < 0) exit(EXIT_FAILURE);
 
 	register_listen_socket_first(epollfd, listen_text_sock, TEXT);
 	register_listen_socket_first(epollfd, listen_biny_sock, BINY);
