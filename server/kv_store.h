@@ -11,6 +11,8 @@ struct kv_store;
 
 struct kv_store* kv_store_init();
 
+// TODO falta marcar cuando un valor es binario
+
 // pide que se libere espacio de memoria
 //
 // RESULT
