@@ -128,6 +128,17 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 	}
 }
 
+static void reset_biny_command(struct biny_command* cmd) {
+	cmd->key_size = cmd->val_size = 0;
+	cmd->key = cmd->val = NULL;
+}
+
+static void free_biny_command(struct biny_command* cmd) {
+	if (cmd->key_size > 0) free(cmd->key);
+	if (cmd->val_size > 0) free(cmd->val);
+	reset_biny_command(cmd);
+}
+
 enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
@@ -137,39 +148,51 @@ enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cm
 									cmd->val_len);
 				if (res != KV_STORE_OOM) break;
 				if (kv_store_evict(store) < 0) {
-					free(cmd->key);
-					free(cmd->val);
+					free_biny_command(cmd);
 					return CMD_EOOM;
 				}
 			}
-			if (res == KV_STORE_OK) return CMD_OK;
-			free(cmd->key);
-			free(cmd->val);
+			if (res == KV_STORE_OK) {
+				reset_biny_command(cmd);
+				return CMD_OK;
+			}
+			free_biny_command(cmd);
 			if (res == KV_STORE_OOM) return CMD_EOOM;
 			return CMD_EUNK;
 		}
 		case DEL: {
 			int res = kv_store_del(store, cmd->key, cmd->key_len);
+			free_biny_command(cmd);
 			if (res == KV_STORE_OK) return CMD_OK; 
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			return CMD_EUNK;
 		}
 		case GET: {
+			uint8_t* val;
+			uint32_t val_len;
 			int res = kv_store_get(store, cmd->key, cmd->key_len,
-									(char**)&cmd->val, &cmd->val_len);
+									(char**)val, &val_len);
+			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == KV_STORE_OOM) return CMD_EOOM;
 			if (res == CMD_OK) {
 				assert(cmd->val != NULL);
+				cmd->val = val;
+				cmd->val_size = cmd->val_len = val_len;
 				return CMD_OK;    
 			}
 		} return CMD_EUNK;
 		case TAKE: {
+			uint8_t* val;
+			uint32_t val_len;
 			int res = kv_store_take(store, cmd->key, cmd->key_len,
-									(char**)&cmd->val, &cmd->val_len);
+									(char**)&val, &val_len);
+			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == CMD_OK) {
 				assert(cmd->val != NULL);
+				cmd->val = val;
+				cmd->val_len = cmd->val_size = val_len;	
 				return CMD_OK;    
 			}
 		} return CMD_EUNK;
