@@ -12,10 +12,10 @@
 
 struct kv_entry {
 	char* key;
-	size_t key_length;
+	uint32_t key_length;
 
 	char* value;
-	size_t value_length;
+	uint32_t value_length;
 
 	uint64_t generation;
 };
@@ -51,7 +51,7 @@ struct kv_store* kv_store_init() {
 	return store;
 }
 
-static struct kv_entry* kv_entry_init(char* key, size_t key_length, char* value, size_t value_length, size_t generation) {
+static struct kv_entry* kv_entry_init(char* key, uint32_t key_length, char* value, uint32_t value_length, size_t generation) {
 	struct kv_entry* entry = malloc(sizeof(*entry));
 	if (!entry) {
 		return NULL;
@@ -74,7 +74,7 @@ static void kv_entry_free(struct kv_entry* entry) {
 	free(entry);
 }
 
-static struct kv_entry** lookup_key(struct kv_store* store, char* key, size_t key_length) {
+static struct kv_entry** lookup_key(struct kv_store* store, char* key, uint32_t key_length) {
 	for (int i = 0; i < store->size; ++i) {
 		struct kv_entry* entry = store->entries[i];
 		if (entry->key_length == key_length && memcmp(entry->key, key, key_length) == 0) {
@@ -84,7 +84,7 @@ static struct kv_entry** lookup_key(struct kv_store* store, char* key, size_t ke
 	return NULL;
 }
 
-static int kv_store_put_impl(struct kv_store* store, char* key, size_t key_length, char* value, size_t value_length) {
+static int kv_store_put_impl(struct kv_store* store, char* key, uint32_t key_length, char* value, uint32_t value_length) {
 
 	struct kv_entry** old_entry_ptr = lookup_key(store, key, key_length);
 
@@ -114,7 +114,7 @@ static int kv_store_put_impl(struct kv_store* store, char* key, size_t key_lengt
 	return KV_STORE_OK;
 }
 
-int kv_store_put(struct kv_store* store, char* key, size_t key_length, char* value, size_t value_length) {
+int kv_store_put(struct kv_store* store, char* key, uint32_t key_length, char* value, uint32_t value_length) {
 	pthread_mutex_lock(&store->m);
 
 	int result = kv_store_put_impl(store, key, key_length, value, value_length);
@@ -124,7 +124,7 @@ int kv_store_put(struct kv_store* store, char* key, size_t key_length, char* val
 	return result;
 }
 
-static int kv_store_get_impl(struct kv_store* store, char* key, size_t key_length, char** out_value, size_t* out_value_length) {
+static int kv_store_get_impl(struct kv_store* store, char* key, uint32_t key_length, char** out_value, uint32_t* out_value_length) {
 	struct kv_entry** entry_ptr = lookup_key(store, key, key_length);
 
 	if (!entry_ptr) {
@@ -150,7 +150,7 @@ static int kv_store_get_impl(struct kv_store* store, char* key, size_t key_lengt
 	return KV_STORE_OK;
 }
 
-int kv_store_get(struct kv_store* store, char* key, size_t key_length, char** out_value, size_t* out_value_length) {
+int kv_store_get(struct kv_store* store, char* key, uint32_t key_length, char** out_value, uint32_t* out_value_length) {
 	pthread_mutex_lock(&store->m);
 
 	int result = kv_store_get_impl(store, key, key_length, out_value, out_value_length);
@@ -160,7 +160,7 @@ int kv_store_get(struct kv_store* store, char* key, size_t key_length, char** ou
 	return result;
 }
 
-static int kv_store_del_impl(struct kv_store* store, char* key, size_t key_length) {
+static int kv_store_del_impl(struct kv_store* store, char* key, uint32_t key_length) {
 	struct kv_entry** entry_ptr = lookup_key(store, key, key_length);
 
 	if (!entry_ptr) {
@@ -174,7 +174,7 @@ static int kv_store_del_impl(struct kv_store* store, char* key, size_t key_lengt
 	return KV_STORE_OK;
 }
 
-int kv_store_del(struct kv_store* store, char* key, size_t key_length) {
+int kv_store_del(struct kv_store* store, char* key, uint32_t key_length) {
 	pthread_mutex_lock(&store->m);
 
 	int result = kv_store_del_impl(store, key, key_length);
@@ -184,7 +184,7 @@ int kv_store_del(struct kv_store* store, char* key, size_t key_length) {
 	return result;
 }
 
-static int kv_store_take_impl(struct kv_store* store, char* key, size_t key_length, char** out_value, size_t* out_value_length) {
+static int kv_store_take_impl(struct kv_store* store, char* key, uint32_t key_length, char** out_value, uint32_t* out_value_length) {
 	struct kv_entry** entry_ptr = lookup_key(store, key, key_length);
 
 	if (!entry_ptr) {
@@ -205,7 +205,7 @@ static int kv_store_take_impl(struct kv_store* store, char* key, size_t key_leng
 	return KV_STORE_OK;
 }
 
-int kv_store_take(struct kv_store* store, char* key, size_t key_length, char** out_value, size_t* out_value_length) {
+int kv_store_take(struct kv_store* store, char* key, uint32_t key_length, char** out_value, uint32_t* out_value_length) {
 	pthread_mutex_lock(&store->m);
 
 	int result = kv_store_take_impl(store, key, key_length, out_value, out_value_length);
