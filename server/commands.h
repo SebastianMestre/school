@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "kv_store.h"
 
 // PARSED: comando parseado correctamente
 // INVALID: linea invalida
@@ -14,6 +15,7 @@ enum cmd_tag { PUT, DEL, GET, TAKE, STATS };
 
 #define WORD_SIZE 2048
 
+// MAYBE usar uint32_t para `key_len` y `key_size`
 struct text_command {
 	enum cmd_tag tag;
 	char key[WORD_SIZE];
@@ -32,5 +34,17 @@ struct biny_command {
 	uint32_t val_len;   
 };
 
-// command_output run_biny_command()
-// command_output run_text_command()
+enum cmd_output { 
+	CMD_OK, 
+	CMD_EINVAL,
+	CMD_ENOTFOUND, 
+	CMD_EBINARY, 
+	CMD_EBIG, 
+	CMD_EUNK, 
+	CMD_EOOM 
+};
+// Toman un comando y lo corren sobre `store`.
+// Resultado en `cmd.val`.
+enum cmd_output run_text_command(struct kv_store* store, struct text_command* cmd);
+// Toma ownership sobre `cmd.key` (y `cmd.value`).
+enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cmd);
