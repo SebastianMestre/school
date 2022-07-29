@@ -6,6 +6,7 @@
 #define KV_STORE_UNK (-3)
 
 #include <stddef.h>
+#include <stdint.h>
 
 struct kv_store;
 
@@ -36,7 +37,7 @@ int kv_store_evict(struct kv_store* store);
 // 
 // ERRORES
 // no hay suficiente espacio de heap para insertar un nodo nuevo
-int kv_store_put(struct kv_store* store, char* key, size_t key_length, char* value, size_t value_length);
+int kv_store_put(struct kv_store* store, char* key, uint32_t key_length, char* value, uint32_t value_length);
 
 // pide el valor correspondiente a una clave
 // da ownership sobre el valor que se devuelve
@@ -54,7 +55,7 @@ int kv_store_put(struct kv_store* store, char* key, size_t key_length, char* val
 // ERRORES
 // no existe la clave en la estructura
 // no hay suficiente memoria para copiar el valor
-int kv_store_get(struct kv_store* store, char* key, size_t key_length, char** out_value, size_t* out_value_length);
+int kv_store_get(struct kv_store* store, char* key, uint32_t key_length, char** out_value, uint32_t* out_value_length);
 
 // pide que se se elimine la entrada correspondiente a una clave
 // no toma ownership de la key
@@ -68,7 +69,7 @@ int kv_store_get(struct kv_store* store, char* key, size_t key_length, char** ou
 // 
 // ERRORES
 // no existe la clave en la estructura
-int kv_store_del(struct kv_store* store, char* key, size_t key_length);
+int kv_store_del(struct kv_store* store, char* key, uint32_t key_length);
 
 // pide el valor correspondiente a una clave, y que se elimine la entrada correspondiente
 // no toma ownership de la key
@@ -85,6 +86,6 @@ int kv_store_del(struct kv_store* store, char* key, size_t key_length);
 // 
 // ERRORES
 // no existe la clave en la estructura
-int kv_store_take(struct kv_store* store, char* key, size_t key_length, char** out_value, size_t* out_value_length);
+int kv_store_take(struct kv_store* store, char* key, uint32_t key_length, char** out_value, uint32_t* out_value_length);
 
 int kv_store_stat(struct kv_store* store, int* out_stat);
