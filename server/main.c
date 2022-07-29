@@ -236,7 +236,8 @@ enum message_action handle_biny_message(struct fd_data* data, int events) {
 	uint8_t* buf_end = state->buf + state->buf_size; 
 	enum status parse_status;
 
-	PARSE: parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
+PARSE: 
+	parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
 	switch (parse_status) {
 		case PARSED:
 			// TODO correr comando (dar ownership de key y val)
