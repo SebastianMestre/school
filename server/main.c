@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "connections.h"
+#include "kv_store.h"
 #include "commands.h"
 #include "text_mode_parser.h"
 #include "biny_mode_parser.h"
@@ -127,7 +128,41 @@ enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	return MA_OK;
 }
 
-enum message_action handle_text_message(struct fd_data* data, int events) {
+// MAYBE armar el mensaje y mandarlo todo junto
+int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {
+	int out_val = 0;
+	const char* cmd_name;  
+	int cmd_name_len = cmd_output_name(res, &cmd_name);
+	if (write(client_socket, cmd_name, cmd_name_len) != cmd_name_len) { 
+		out_val = -1;
+	}
+	else if (res == CMD_OK) {
+		if (cmd->tag == GET || cmd->tag == TAKE) {
+			assert(cmd->val_len > 0);
+			if (write(client_socket, " ", 1) != 1) {
+				out_val = -1;
+			}
+			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
+				out_val = -1;
+			}
+		}
+		if (cmd->tag == STATS) {
+			fprintf(stderr, "no implementado :(\n");
+		}
+		cmd->val_len = 0;
+	}
+	if (out_val == 0) {
+		if (write(client_socket, "\n", 1) != 1) {
+			out_val = -1;
+		}
+	}
+	if (out_val < 0) {
+		fprintf(stderr, "error comunicandose con el cliente\n");
+	}
+	return out_val;
+}
+
+enum message_action handle_text_message(struct fd_data* data, int events, struct kv_store* store) {
 	int sock = data->fd;
 
 	struct text_client_state* state = data->client_state.text;
@@ -174,9 +209,11 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 	struct text_command cmd;
 	char* cursor = state->buf;
 	char* buf_end = state->buf + state->buf_size;
+	enum cmd_output res;
 	for (; line_count > 0; --line_count) {
 		switch (parse_text_command(&cursor, buf_end, &cmd)) {
 			case PARSED:
+				res = run_text_command(store, &cmd);				
 				// TODO correr comando
 				fprintf(stderr, "correr comando: tag = %d\n", cmd.tag);
 				break;
@@ -198,7 +235,40 @@ enum message_action handle_text_message(struct fd_data* data, int events) {
 
 }
 
-enum message_action handle_biny_message(struct fd_data* data, int events) {
+// MAYBE armar el mensaje y mandarlo todo junto
+int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
+	int out_val = 0;
+	uint8_t res_code = cmd_output_code(res);
+	if (write(client_socket, &res_code, 1) != 1) { 
+		out_val = -1;
+	}
+	else if (res == CMD_OK) {
+		if (cmd->tag == GET || cmd->tag == TAKE) {
+			assert(cmd->val);
+			uint32_t val_size = htonl(cmd->val_len);
+			if (write(client_socket, &val_size, 32) != 32) {
+				out_val = -1;
+			}
+			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
+				out_val = -1;
+			}
+		}
+		if (cmd->tag == STATS) {
+			fprintf(stderr, "no implementado :(\n");
+		}
+	}
+	if (cmd->val_size > 0) {
+		free(cmd->val);
+		cmd->val = NULL;
+		cmd->val_size = cmd->val_len = 0;
+	}
+	if (out_val < 0) {
+		fprintf(stderr, "error comunicandose con el cliente\n");
+	}
+	return out_val;
+}
+
+enum message_action handle_biny_message(struct fd_data* data, int events, struct kv_store* store) {
 	int sock = data->fd;
 
 	struct biny_client_state* state = data->client_state.biny;
@@ -235,14 +305,18 @@ enum message_action handle_biny_message(struct fd_data* data, int events) {
 	uint8_t* cursor	= state->buf;
 	uint8_t* buf_end = state->buf + state->buf_size; 
 	enum status parse_status;
-
+	enum cmd_output res;
 PARSE: 
 	parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
 	switch (parse_status) {
 		case PARSED:
+			res = run_biny_command(store, &state->cmd);
+			if (respond_biny_command(data->fd, &state->cmd, res) < 0) {
+				// TODO reiniciar el buffer, algo mas?
+				return MA_ERROR;
+			}
 			// TODO correr comando (dar ownership de key y val)
 			fprintf(stderr, "correr comando: tag = %d\n", state->cmd.tag);
-			state->cmd.key_size = state->cmd.val_size = 0;
 			goto PARSE;
 		case KEY_NEXT:
 			state->cmd.key = malloc(state->cmd.key_size);
@@ -299,6 +373,13 @@ int main(int argc, char** argv) {
 	register_listen_socket_first(epollfd, listen_text_sock, TEXT);
 	register_listen_socket_first(epollfd, listen_biny_sock, BINY);
 	
+	// inicializar kv_store
+	struct kv_store* store = kv_store_init();
+	if (store == NULL) {
+		fprintf(stderr, "error iniciando chache\n");
+		exit(EXIT_FAILURE);
+	}
+
 	fprintf(stderr, "ENTRANDO AL LOOP EPOLL\n");
 
 	while (1) {
@@ -352,7 +433,7 @@ int main(int argc, char** argv) {
 			fprintf(stderr, "TEXTO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			enum message_action action = handle_text_message(data, evt.events);
+			enum message_action action = handle_text_message(data, evt.events, store);
 
 			int sock = data->fd;
 			if (action == MA_OK) {
@@ -373,7 +454,7 @@ int main(int argc, char** argv) {
 			fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			enum message_action action = handle_biny_message(data, evt.events);
+			enum message_action action = handle_biny_message(data, evt.events, store);
 
 			int sock = data->fd;
 			if (action == MA_OK) {

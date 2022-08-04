@@ -19,6 +19,10 @@ static int try_alloc(struct kv_store* store, size_t size, void** ptr) {
 	return 0; 
 }
 
+static void reset_text_command(struct text_command* cmd) {
+	cmd->key_len = cmd->val_len = 0;
+}
+
 enum cmd_output run_text_command(struct kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
@@ -38,11 +42,13 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 				res = kv_store_put(store, key, cmd->key_len, val, cmd->val_len);
 				if (res != KV_STORE_OOM) break;
 				if (kv_store_evict(store) < 0) {
+					reset_text_command(&cmd);
 					free(key);
 					free(val);
 					return CMD_EOOM;
 				}
 			}
+			reset_text_command(cmd);
 			if (res == KV_STORE_OK) return CMD_OK;
 			free(val);
 			free(key);
@@ -51,6 +57,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 		}
 		case DEL: {
 			int res = kv_store_del(store, cmd->key, cmd->key_len);
+			reset_text_command(cmd);
 			if (res == KV_STORE_OK) return CMD_OK; 
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			return CMD_EUNK;
@@ -59,6 +66,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 			char* val;
 			uint32_t val_len;
 			int res = kv_store_get(store, cmd->key, cmd->key_len, &val, &val_len);
+			reset_text_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == KV_STORE_OOM) return CMD_EOOM;
 			
@@ -90,6 +98,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 			char* val;
 			uint32_t val_len;
 			int res = kv_store_take(store, cmd->key, cmd->key_len, &val, &val_len);
+			reset_text_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			
 			/** opcion 1: chequeamos que el valor no sea binario
@@ -122,6 +131,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 			kv_store_stat(store, &stats);
 			// TODO
 			fprintf(stderr, "stats: no implementado\n");
+			reset_text_command(cmd);
 		} break;
 		default:
 			assert(0);
