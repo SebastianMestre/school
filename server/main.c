@@ -128,37 +128,40 @@ enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	return MA_OK;
 }
 
-// MAYBE armar el mensaje y mandarlo todo junto
 int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {
 	int out_val = 0;
-	const char* cmd_name;  
-	int cmd_name_len = cmd_output_name(res, &cmd_name);
-	if (write(client_socket, cmd_name, cmd_name_len) != cmd_name_len) { 
-		out_val = -1;
-	}
-	else if (res == CMD_OK) {
+	char ans[2048];
+	int ans_len = 0;  
+	const char* output_name;
+
+	const char* cmd_output = cmd_output_name(res, &ans_len);   
+	if (res == CMD_OK) {
 		if (cmd->tag == GET || cmd->tag == TAKE) {
 			assert(cmd->val_len > 0);
-			if (write(client_socket, " ", 1) != 1) {
-				out_val = -1;
-			}
-			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
-				out_val = -1;
-			}
+			ans_len += 1 + cmd-> val_len;
 		}
 		if (cmd->tag == STATS) {
+			// TODO
 			fprintf(stderr, "no implementado :(\n");
 		}
+		// reiniciamos el comando
 		cmd->val_len = 0;
 	}
-	if (out_val == 0) {
-		if (write(client_socket, "\n", 1) != 1) {
-			out_val = -1;
-		}
+	if (ans_len < 2048) {
+		// ans = cmd_output ++ cmd->val? 
+		snprintf(ans, ans_len + 1, "%s %s", cmd_output, cmd->val);
 	}
-	if (out_val < 0) {
-		fprintf(stderr, "error comunicandose con el cliente\n");
+	else {
+		ans_len = sprintf(ans, "EBIG");
 	}
+	ans[ans_len++] = '\n';
+
+	int nbytes = write(client_socket, ans, ans_len);
+	if (nbytes != ans_len) {
+		out_val = -1;
+		fprintf(stderr, "no pude escribir al cliente \n");
+	}
+	
 	return out_val;
 }
 
@@ -235,7 +238,7 @@ enum message_action handle_text_message(struct fd_data* data, int events, struct
 
 }
 
-// MAYBE armar el mensaje y mandarlo todo junto
+// Mandamos el mensaje en partes, abortando si el write falla
 int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
 	int out_val = 0;
 	uint8_t res_code = cmd_output_code(res);
@@ -246,7 +249,7 @@ int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_o
 		if (cmd->tag == GET || cmd->tag == TAKE) {
 			assert(cmd->val);
 			uint32_t val_size = htonl(cmd->val_len);
-			if (write(client_socket, &val_size, 32) != 32) {
+			if (write(client_socket, &val_size, 4) != 4) {
 				out_val = -1;
 			}
 			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
