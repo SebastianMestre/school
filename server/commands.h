@@ -48,3 +48,7 @@ enum cmd_output {
 enum cmd_output run_text_command(struct kv_store* store, struct text_command* cmd);
 // Toma ownership sobre `cmd.key` (y `cmd.value`).
 enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cmd);
+
+const char* cmd_output_name(enum cmd_output output, int* len);
+
+uint8_t cmd_output_code(enum cmd_output output);

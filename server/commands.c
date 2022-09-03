@@ -6,16 +6,23 @@
 
 #include <stdio.h>
 
-#define ATTEMPTS 10
+#define ALLOC_ATTEMPTS 10
+#define OK 			101
+#define EINVAL 		111
+#define ENOTFOUND 	112
+#define EBINARY		113
+#define EBIG		114
+#define EUNK		115
+#define EOOM		116 // codigo nuevo
 
 static int try_alloc(struct kv_store* store, size_t size, void** ptr) {
 	int attempts;
-	for (attempts = 0; attempts < ATTEMPTS; attempts++) {
+	for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
 		*ptr = malloc(size);
 		if (*ptr != NULL) break;
 		if (kv_store_evict(store) < 0) return -1;
 	}
-	if (attempts == ATTEMPTS) return -1;
+	if (attempts == ALLOC_ATTEMPTS) return -1;
 	return 0; 
 }
 
@@ -38,11 +45,11 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 			}
 			memcpy(val, cmd->val, cmd->val_len);
 			int attempts, res;
-			for (attempts = 0; attempts < ATTEMPTS; attempts++) {
+			for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
 				res = kv_store_put(store, key, cmd->key_len, val, cmd->val_len);
 				if (res != KV_STORE_OOM) break;
 				if (kv_store_evict(store) < 0) {
-					reset_text_command(&cmd);
+					reset_text_command(cmd);
 					free(key);
 					free(val);
 					return CMD_EOOM;
@@ -153,7 +160,7 @@ enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cm
 	switch (cmd->tag) {
 		case PUT: {
 			int attempts, res;
-			for (attempts = 0; attempts < ATTEMPTS; attempts++) {
+			for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
 				res = kv_store_put(store, cmd->key, cmd->key_len, cmd->val,
 									cmd->val_len);
 				if (res != KV_STORE_OOM) break;
@@ -215,5 +222,31 @@ enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cm
 		} break;
 		default:
 			assert(0);
+	}
+}
+
+const char* cmd_output_name(enum cmd_output output, int* len) {
+	switch (output) {
+		case CMD_OK: 		return "OK";
+		case CMD_EINVAL: 	return "EINVAL";
+		case CMD_ENOTFOUND: return "ENOTFOUND";
+		case CMD_EBINARY: 	return "EBINARY";
+		case CMD_EBIG: 		return "EBIG";
+		case CMD_EUNK: 		return "EUNK";
+		case CMD_EOOM: 		return "EOOM";
+		default:			assert(0);
+	}
+}
+
+uint8_t cmd_output_code(enum cmd_output output) {
+	switch (output) {
+		case CMD_OK: 		return OK;
+		case CMD_EINVAL: 	return EINVAL; 
+		case CMD_ENOTFOUND: return ENOTFOUND;
+		case CMD_EBINARY: 	return EBINARY;
+		case CMD_EBIG: 		return EBIG;
+		case CMD_EUNK: 		return EUNK;
+		case CMD_EOOM: 		return EOOM;
+		default:			assert(0);
 	}
 }
