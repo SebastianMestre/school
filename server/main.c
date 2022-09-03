@@ -148,7 +148,9 @@ int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_o
 		cmd->val_len = 0;
 	}
 	if (ans_len < 2048) {
-		// ans = cmd_output ++ cmd->val? 
+		// ans = cmd_output ++ cmd->val?
+		// cmd_output es un string literal y tiene terminador 
+		// cmd->val no tiene terminador, funciona porque sabemos exactamente el largo
 		snprintf(ans, ans_len + 1, "%s %s", cmd_output, cmd->val);
 	}
 	else {
@@ -216,9 +218,12 @@ enum message_action handle_text_message(struct fd_data* data, int events, struct
 	for (; line_count > 0; --line_count) {
 		switch (parse_text_command(&cursor, buf_end, &cmd)) {
 			case PARSED:
+				fprintf(stderr, "corriendo comando: tag = %d\n", cmd.tag);
 				res = run_text_command(store, &cmd);				
-				// TODO correr comando
-				fprintf(stderr, "correr comando: tag = %d\n", cmd.tag);
+				if (respond_text_command(data->fd, &cmd, res) < 0) {
+					// TODO sth
+					return MA_ERROR;
+				}
 				break;
 			default:
 				fprintf(stderr, "no parse\n");
@@ -313,13 +318,12 @@ PARSE:
 	parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
 	switch (parse_status) {
 		case PARSED:
+			fprintf(stderr, "corriendo comando: tag = %d\n", state->cmd.tag);
 			res = run_biny_command(store, &state->cmd);
-			if (respond_biny_command(data->fd, &state->cmd, res) < 0) {
+			if (respond_biny_command(sock, &state->cmd, res) < 0) {
 				// TODO reiniciar el buffer, algo mas?
 				return MA_ERROR;
 			}
-			// TODO correr comando (dar ownership de key y val)
-			fprintf(stderr, "correr comando: tag = %d\n", state->cmd.tag);
 			goto PARSE;
 		case KEY_NEXT:
 			state->cmd.key = malloc(state->cmd.key_size);
