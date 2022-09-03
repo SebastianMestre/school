@@ -97,6 +97,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 				}
 				*/
 				memcpy(cmd->val, val, val_len);
+				cmd->val_len = val_len;
 				free(val);
 				return CMD_OK;    
 			}
@@ -128,6 +129,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 				}
 				*/
 				memcpy(cmd->val, val, val_len);
+				cmd->val_len = val_len;
 				free(val);
 				return CMD_OK;    
 			}
@@ -139,6 +141,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 			// TODO
 			fprintf(stderr, "stats: no implementado\n");
 			reset_text_command(cmd);
+			return CMD_OK;
 		} break;
 		default:
 			assert(0);
