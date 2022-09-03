@@ -15,7 +15,7 @@
 #define EUNK		115
 #define EOOM		116 // codigo nuevo
 
-static int try_alloc(struct kv_store* store, size_t size, void** ptr) {
+static int try_alloc(kv_store* store, size_t size, void** ptr) {
 	int attempts;
 	for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
 		*ptr = malloc(size);
@@ -30,7 +30,7 @@ static void reset_text_command(struct text_command* cmd) {
 	cmd->key_len = cmd->val_len = 0;
 }
 
-enum cmd_output run_text_command(struct kv_store* store, struct text_command* cmd) {
+enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
 			char* key;
@@ -71,7 +71,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 		}
 		case GET: {
 			char* val;
-			uint32_t val_len;
+			size_t val_len;
 			int res = kv_store_get(store, cmd->key, cmd->key_len, &val, &val_len);
 			reset_text_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
@@ -104,7 +104,7 @@ enum cmd_output run_text_command(struct kv_store* store, struct text_command* cm
 		} return CMD_EUNK;
 		case TAKE: {
 			char* val;
-			uint32_t val_len;
+			size_t val_len;
 			int res = kv_store_take(store, cmd->key, cmd->key_len, &val, &val_len);
 			reset_text_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
@@ -159,7 +159,7 @@ static void free_biny_command(struct biny_command* cmd) {
 	reset_biny_command(cmd);
 }
 
-enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cmd) {
+enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
 			int attempts, res;
@@ -189,7 +189,7 @@ enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cm
 		}
 		case GET: {
 			uint8_t* val;
-			uint32_t val_len;
+			size_t val_len;
 			int res = kv_store_get(store, cmd->key, cmd->key_len,
 									(char**)val, &val_len);
 			free_biny_command(cmd);
@@ -204,7 +204,7 @@ enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cm
 		} return CMD_EUNK;
 		case TAKE: {
 			uint8_t* val;
-			uint32_t val_len;
+			size_t val_len;
 			int res = kv_store_take(store, cmd->key, cmd->key_len,
 									(char**)&val, &val_len);
 			free_biny_command(cmd);

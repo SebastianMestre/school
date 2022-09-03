@@ -45,9 +45,9 @@ enum cmd_output {
 };
 // Toman un comando y lo corren sobre `store`.
 // Resultado en `cmd.val`.
-enum cmd_output run_text_command(struct kv_store* store, struct text_command* cmd);
+enum cmd_output run_text_command(kv_store* store, struct text_command* cmd);
 // Toma ownership sobre `cmd.key` (y `cmd.value`).
-enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cmd);
+enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd);
 
 const char* cmd_output_name(enum cmd_output output, int* len);
 

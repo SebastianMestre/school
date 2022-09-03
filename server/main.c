@@ -167,7 +167,7 @@ int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_o
 	return out_val;
 }
 
-enum message_action handle_text_message(struct fd_data* data, int events, struct kv_store* store) {
+enum message_action handle_text_message(struct fd_data* data, int events, kv_store* store) {
 	int sock = data->fd;
 
 	struct text_client_state* state = data->client_state.text;
@@ -276,7 +276,7 @@ int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_o
 	return out_val;
 }
 
-enum message_action handle_biny_message(struct fd_data* data, int events, struct kv_store* store) {
+enum message_action handle_biny_message(struct fd_data* data, int events, kv_store* store) {
 	int sock = data->fd;
 
 	struct biny_client_state* state = data->client_state.biny;
@@ -381,7 +381,7 @@ int main(int argc, char** argv) {
 	register_listen_socket_first(epollfd, listen_biny_sock, BINY);
 	
 	// inicializar kv_store
-	struct kv_store* store = kv_store_init();
+	kv_store* store = kv_store_init();
 	if (store == NULL) {
 		fprintf(stderr, "error iniciando chache\n");
 		exit(EXIT_FAILURE);
