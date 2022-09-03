@@ -214,3 +214,15 @@ int kv_store_take(struct kv_store* store, char* key, uint32_t key_length, char**
 
 	return result;
 }
+
+/********************************************************************/
+int kv_store_evict(struct kv_store* store) {
+	fprintf(stderr, "kv_store_evict: no implementado\n");
+	return 0;
+}
+
+int kv_store_stat(struct kv_store* store, int* out_stat) {
+	fprintf(stderr, "kv_store_stat: no implementado\n");
+	return 0;
+}
+/*******************************************************************/
