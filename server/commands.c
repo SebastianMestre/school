@@ -229,16 +229,35 @@ enum cmd_output run_biny_command(struct kv_store* store, struct biny_command* cm
 }
 
 const char* cmd_output_name(enum cmd_output output, int* len) {
+	const char* res;
 	switch (output) {
-		case CMD_OK: 		return "OK";
-		case CMD_EINVAL: 	return "EINVAL";
-		case CMD_ENOTFOUND: return "ENOTFOUND";
-		case CMD_EBINARY: 	return "EBINARY";
-		case CMD_EBIG: 		return "EBIG";
-		case CMD_EUNK: 		return "EUNK";
-		case CMD_EOOM: 		return "EOOM";
-		default:			assert(0);
+		case CMD_OK: 		
+			res = "OK";
+			break;
+		case CMD_EINVAL: 	
+			res = "EINVAL";
+			break;
+		case CMD_ENOTFOUND: 
+			res = "ENOTFOUND";
+			break;
+		case CMD_EBINARY: 	
+			res = "EBINARY";
+			break;
+		case CMD_EBIG: 		
+			res = "EBIG";
+			break;
+		case CMD_EUNK: 		
+			res = "EUNK";
+			break;
+		case CMD_EOOM: 		
+			res = "EOOM";
+			break;
+		default:
+			assert(0);
 	}
+	
+	*len = strlen(res);
+	return res;
 }
 
 uint8_t cmd_output_code(enum cmd_output output) {
