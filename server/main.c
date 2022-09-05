@@ -383,7 +383,7 @@ int main(int argc, char** argv) {
 	// inicializar kv_store
 	kv_store* store = kv_store_init();
 	if (store == NULL) {
-		fprintf(stderr, "error iniciando chache\n");
+		fprintf(stderr, "error iniciando cache\n");
 		exit(EXIT_FAILURE);
 	}
 

@@ -44,8 +44,8 @@ int kv_store_evict(kv_store* store);
 // no hay suficiente espacio de heap para insertar un nodo nuevo
 int kv_store_put(
 	kv_store* store,
-	char* key, size_t key_length,
-	char* value, size_t value_length);
+	unsigned char* key, size_t key_length,
+	unsigned char* value, size_t value_length);
 
 // pide el valor correspondiente a una clave
 // da ownership sobre el valor que se devuelve
@@ -65,8 +65,8 @@ int kv_store_put(
 // no hay suficiente memoria para copiar el valor
 int kv_store_get(
 	kv_store* store,
-	char* key, size_t key_length,
-	char** out_value, size_t* out_value_length);
+	unsigned char* key, size_t key_length,
+	unsigned char** out_value, size_t* out_value_length);
 
 // pide que se se elimine la entrada correspondiente a una clave
 // no toma ownership de la key
@@ -82,7 +82,7 @@ int kv_store_get(
 // no existe la clave en la estructura
 int kv_store_del(
 	kv_store* store,
-	char* key, size_t key_length);
+	unsigned char* key, size_t key_length);
 
 // pide el valor correspondiente a una clave, y que se elimine la entrada correspondiente
 // no toma ownership de la key
@@ -101,8 +101,8 @@ int kv_store_del(
 // no existe la clave en la estructura
 int kv_store_take(
 	kv_store* store,
-	char* key, size_t key_length,
-	char** out_value, size_t* out_value_length);
+	unsigned char* key, size_t key_length,
+	unsigned char** out_value, size_t* out_value_length);
 
 int kv_store_stat(
 	kv_store* store,

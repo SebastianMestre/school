@@ -33,12 +33,12 @@ static void reset_text_command(struct text_command* cmd) {
 enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
-			char* key;
+			unsigned char* key;
 			if (try_alloc(store, cmd->key_len, (void**)&key) < 0) {
 				return CMD_EOOM;
 			}
 			memcpy(key, cmd->key, cmd->key_len);
-			char* val;
+			unsigned char* val;
 			if (try_alloc(store, cmd->val_len, (void**)&val) < 0) {
 				free(key);
 				return CMD_EOOM;
@@ -70,7 +70,7 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			return CMD_EUNK;
 		}
 		case GET: {
-			char* val;
+			unsigned char* val;
 			size_t val_len;
 			int res = kv_store_get(store, cmd->key, cmd->key_len, &val, &val_len);
 			reset_text_command(cmd);
@@ -103,7 +103,7 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			}
 		} return CMD_EUNK;
 		case TAKE: {
-			char* val;
+			unsigned char* val;
 			size_t val_len;
 			int res = kv_store_take(store, cmd->key, cmd->key_len, &val, &val_len);
 			reset_text_command(cmd);
@@ -191,7 +191,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 			uint8_t* val;
 			size_t val_len;
 			int res = kv_store_get(store, cmd->key, cmd->key_len,
-									(char**)val, &val_len);
+									&val, &val_len);
 			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == KV_STORE_OOM) return CMD_EOOM;
@@ -206,7 +206,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 			uint8_t* val;
 			size_t val_len;
 			int res = kv_store_take(store, cmd->key, cmd->key_len,
-									(char**)&val, &val_len);
+									&val, &val_len);
 			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == CMD_OK) {

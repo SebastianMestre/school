@@ -27,8 +27,8 @@ struct kv_hashtable_wrapper* kv_store_init() {
 
 int kv_store_put(
 	struct kv_hashtable_wrapper* store,
-	char* key, size_t key_length,
-	char* value, size_t value_length
+	unsigned char* key, size_t key_length,
+	unsigned char* value, size_t value_length
 ) {
 	pthread_mutex_lock(&store->stat_lock);
 	store->stat.put_count++;
@@ -39,8 +39,8 @@ int kv_store_put(
 
 int kv_store_get(
 	struct kv_hashtable_wrapper* store,
-	char* key, size_t key_length,
-	char** out_value, size_t* out_value_length
+	unsigned char* key, size_t key_length,
+	unsigned char** out_value, size_t* out_value_length
 ) {
 	pthread_mutex_lock(&store->stat_lock);
 	store->stat.get_count++;
@@ -51,7 +51,7 @@ int kv_store_get(
 
 int kv_store_del(
 	struct kv_hashtable_wrapper* store,
-	char* key, size_t key_length
+	unsigned char* key, size_t key_length
 ) {
 	pthread_mutex_lock(&store->stat_lock);
 	store->stat.del_count++;
@@ -62,8 +62,8 @@ int kv_store_del(
 
 int kv_store_take(
 	struct kv_hashtable_wrapper* store,
-	char* key, size_t key_length,
-	char** out_value, size_t* out_value_length
+	unsigned char* key, size_t key_length,
+	unsigned char** out_value, size_t* out_value_length
 ) {
 	pthread_mutex_lock(&store->stat_lock);
 	store->stat.take_count++;
@@ -86,4 +86,6 @@ int kv_store_stat(struct kv_hashtable_wrapper* store, struct kv_store_stat* out)
 	result.key_count = hashtable_size(store->table);
 
 	*out = result;
+
+	return KV_STORE_OK;
 }
