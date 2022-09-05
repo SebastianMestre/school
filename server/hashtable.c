@@ -157,14 +157,14 @@ int hashtable_insert(
 		if (node == NULL) {
 			result = KV_STORE_OOM;
 		} else {
-			node->row = row;
 
+			node->row = row;
 			node_assign(node, key, key_size, value, value_size);
+			list_init(&node->lru);
 
 			list_push_start(&row->nodes, &node->probing);
 			increment_key_count(table);
 
-			// FIXME: hay que inicializar node->lru antes de esta linea
 			update_lru(table, node);
 
 			result = KV_STORE_OK;
