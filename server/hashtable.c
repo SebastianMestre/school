@@ -1,11 +1,10 @@
+#include <assert.h>
 #include <pthread.h>
-#include <string.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <stdint.h>
-
-#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "hashtable.h"
 #include "kv_store.h"
@@ -26,6 +25,9 @@ struct hashtable {
 	pthread_mutex_t cache_lock;
 	struct list cache;
 
+	pthread_mutex_t key_count_lock;
+	size_t key_count;
+
 	struct casilla casillas[SIZE];
 };
 
@@ -42,20 +44,18 @@ struct nodo {
 	struct list probe;
 };
 
+static bool nodo_matches(struct nodo* nodo, char* key, size_t key_size);
+struct nodo* nodo_from_lru_list(struct list* list);
+struct nodo* nodo_from_probing_list(struct list* list);
+static void nodo_free(struct nodo* nodo);
+static void nodo_assign(struct nodo* nodo, char* key, size_t key_size, char* value, size_t value_size);
 
 static void update_lru(struct hashtable* tabla, struct nodo* nodo);
-
 static bool evict_one(struct hashtable* tabla);
-
 static size_t hash(unsigned char* s, size_t n);
-
-static bool matches(char* key, size_t key_size, struct nodo* nodo);
-
-struct nodo* nodo_from_lru_list(struct list* list);
-
-struct nodo* nodo_from_probing_list(struct list* list);
-
 static struct list* scan_probing_list(struct list* centinela, char* key, size_t key_size);
+static void increment_key_count(struct hashtable* tabla);
+static void decrement_key_count(struct hashtable* tabla);
 
 
 struct hashtable* hashtable_create() {
@@ -64,11 +64,15 @@ struct hashtable* hashtable_create() {
 	list_init(&tabla->cache);
 	pthread_mutex_init(&tabla->cache_lock, NULL);
 
+	tabla->key_count = 0;
+	pthread_mutex_init(&tabla->key_count_lock, NULL);
+
 	for (int i = 0; i < SIZE; ++i) {
 		struct casilla* casilla = &tabla->casillas[i];
 		pthread_mutex_init(&casilla->lock, NULL);
 		list_init(&casilla->nodos);
 	}
+
 	return tabla;
 }
 
@@ -155,18 +159,17 @@ int hashtable_insert(
 
 	int result = KV_STORE_UNK;
 
+	char* to_free_key = NULL;
+	char* to_free_value = NULL;
+
 	if (it != centinela) {
 		struct nodo* nodo = nodo_from_probing_list(it);
 
-		// TODO: free fuera de la region critica
-		free(nodo->value);
-		free(nodo->key);
+		// haremos el free fuera de la region critica
+		to_free_key = nodo->key;
+		to_free_value = nodo->value;
 
-		nodo->key_size = key_size;
-		nodo->key = key;
-
-		nodo->value_size = value_size;
-		nodo->value = value;
+		nodo_assign(nodo, key, key_size, value, value_size);
 
 		update_lru(tabla, nodo);
 
@@ -180,23 +183,22 @@ int hashtable_insert(
 		} else {
 			nodo->bucket = bucket;
 
-			nodo->key_size = key_size;
-			nodo->key = key;
-
-			nodo->value_size = value_size;
-			nodo->value = value;
+			nodo_assign(nodo, key, key_size, value, value_size);
 
 			list_push_start(&tabla->casillas[bucket].nodos, &nodo->probe);
 
-			pthread_mutex_lock(&tabla->cache_lock);
-			list_push_start(&tabla->cache, &nodo->cache);
-			pthread_mutex_unlock(&tabla->cache_lock);
+			update_lru(tabla, nodo);
+
+			increment_key_count(tabla);
 
 			result = KV_STORE_OK;
 		}
 	}
 
 	pthread_mutex_unlock(&tabla->casillas[bucket].lock);
+
+	free(to_free_key);
+	free(to_free_value);
 
 	return result;
 
@@ -216,20 +218,22 @@ int hashtable_delete(
 
 	struct list* it = scan_probing_list(centinela, key, key_size);
 
+	struct nodo* to_free = NULL;
+
 	int result;
 	if (it != centinela) {
 		struct nodo* nodo = nodo_from_probing_list(it);
 
-		list_remove(it);
+		decrement_key_count(tabla);
+
+		list_remove(&nodo->probe);
 
 		pthread_mutex_lock(&tabla->cache_lock);
 		list_remove(&nodo->cache);
 		pthread_mutex_unlock(&tabla->cache_lock);
 
-		// TODO: free fuera de la region critica
-		free(nodo->key);
-		free(nodo->value);
-		free(nodo);
+		// haremos free fuera de la region critica
+		to_free = nodo;
 
 		result = KV_STORE_OK;
 
@@ -238,6 +242,8 @@ int hashtable_delete(
 	}
 
 	pthread_mutex_unlock(&tabla->casillas[bucket].lock);
+
+	nodo_free(to_free);
 
 	return result;
 }
@@ -258,9 +264,13 @@ int hashtable_take(
 
 	struct list* it = scan_probing_list(centinela, key, key_size);
 
+	struct nodo* to_free = NULL;
+
 	int result;
 	if (it != centinela) {
 		struct nodo* nodo = nodo_from_probing_list(it);
+
+		decrement_key_count(tabla);
 
 		list_remove(it);
 
@@ -271,9 +281,8 @@ int hashtable_take(
 		*out_value = nodo->value;
 		*out_value_size = nodo->value_size;
 
-		// TODO: free fuera de la region critica
-		free(nodo->key);
-		free(nodo);
+		nodo->value = NULL;
+		to_free = nodo; // haremos free fuera de la region critica
 
 		result = KV_STORE_OK;
 
@@ -285,6 +294,8 @@ int hashtable_take(
 	}
 
 	pthread_mutex_unlock(&tabla->casillas[bucket].lock);
+
+	nodo_free(to_free);
 
 	return result;
 }
@@ -298,6 +309,16 @@ int hashtable_evict(
 		return KV_STORE_UNK;
 }
 
+size_t hashtable_size(struct hashtable* tabla) {
+	pthread_mutex_lock(&tabla->key_count_lock);
+	size_t result = tabla->key_count;
+	pthread_mutex_unlock(&tabla->key_count_lock);
+	return result;
+}
+
+
+// Elimina una entrada de la tabla, en orden LRU aproximado.
+// Puede fallar si las filas de todas las entradas que intenta liberar están lockeadas.
 bool evict_one(struct hashtable* tabla) {
 	pthread_mutex_lock(&tabla->cache_lock);
 
@@ -307,21 +328,19 @@ bool evict_one(struct hashtable* tabla) {
 
 	struct list* centinela = &tabla->cache;
 	struct list* it;
-	for (
-		it = centinela->next;
-		it != centinela;
-		it = it->next) {
+	for (it = centinela->next; it != centinela; it = it->next) {
 
 		struct nodo* nodo = nodo_from_lru_list(it);
 		struct casilla* casilla = &tabla->casillas[nodo->bucket];
 
 		if (pthread_mutex_trylock(&casilla->lock) == 0) {
+
+			decrement_key_count(tabla);
+
 			list_remove(&nodo->cache);
 			list_remove(&nodo->probe);
 
-			free(nodo->key);
-			free(nodo->value);
-			free(nodo);
+			nodo_free(nodo);
 
 			result = true;
 			break;
@@ -335,24 +354,36 @@ bool evict_one(struct hashtable* tabla) {
 	return result;
 }
 
-void update_lru(struct hashtable* tabla, struct nodo* nodo) {
+static void increment_key_count(struct hashtable* tabla) {
+	pthread_mutex_lock(&tabla->key_count_lock);
+	tabla->key_count++;
+	pthread_mutex_unlock(&tabla->key_count_lock);
+}
+
+static void decrement_key_count(struct hashtable* tabla) {
+	pthread_mutex_lock(&tabla->key_count_lock);
+	assert(tabla->key_count > 0);
+	tabla->key_count--;
+	pthread_mutex_unlock(&tabla->key_count_lock);
+}
+
+// PRE: el lock de la fila del nodo está tomado por el thread actual
+static void update_lru(struct hashtable* tabla, struct nodo* nodo) {
 	pthread_mutex_lock(&tabla->cache_lock);
 	list_remove(&nodo->cache);
 	list_push_start(&tabla->cache, &nodo->cache);
 	pthread_mutex_unlock(&tabla->cache_lock);
 }
 
+// PRE: el lock de la fila está tomado por el thread actual
 static struct list* scan_probing_list(struct list* centinela, char* key, size_t key_size) {
 
 	struct list* it;
-	for (
-		it = centinela->next;
-		it != centinela;
-		it = it->next) {
+	for (it = centinela->next; it != centinela; it = it->next) {
 
 		struct nodo* nodo = nodo_from_probing_list(it);
 
-		if (matches(key, key_size, nodo)) {
+		if (nodo_matches(nodo, key, key_size)) {
 			break;
 		}
 	}
@@ -371,15 +402,35 @@ static size_t hash(unsigned char* s, size_t n) {
 	return result;
 }
 
-static bool matches(char* key, size_t key_size, struct nodo* nodo) {
+// asigna la clave y valor de un nodo
+static void nodo_assign(struct nodo* nodo, char* key, size_t key_size, char* value, size_t value_size){
+	nodo->key = key;
+	nodo->key_size = key_size;
+	nodo->value = value;
+	nodo->value_size = value_size;
+}
+
+// libera un nodo y sus datos (clave y valor)
+// si nodo es NULL, no se hace ninguna operacion
+static void nodo_free(struct nodo* nodo) {
+	if (!nodo) return;
+	free(nodo->key);
+	free(nodo->value);
+	free(nodo);
+}
+
+// devuelve true cuando la clave del nodo es igual a la dada
+static bool nodo_matches(struct nodo* nodo, char* key, size_t key_size) {
 	return key_size == nodo->key_size &&
 	       memcmp(key, nodo->key, key_size) == 0;
 }
 
+// dada la direccion de la lista lru en un nodo, devuelve la direccion del nodo
 struct nodo* nodo_from_lru_list(struct list* list) {
 	return (struct nodo*)((void*)list - offsetof(struct nodo, cache));
 }
 
+// dada la direccion de la lista de probing en un nodo, devuelve la direccion del nodo
 struct nodo* nodo_from_probing_list(struct list* list) {
 	return (struct nodo*)((void*)list - offsetof(struct nodo, probe));
 }

@@ -2,6 +2,12 @@
 
 #include <stddef.h>
 
+/*
+
+Este modulo implementa una tabla hash que sigue las normas impuestas por kv_store
+
+*/
+
 struct hashtable* hashtable_create();
 
 int hashtable_lookup(
@@ -41,3 +47,4 @@ int hashtable_take(
 
 int hashtable_evict(struct hashtable* t);
 
+size_t hashtable_size(struct hashtable* t);
