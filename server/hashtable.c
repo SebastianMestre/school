@@ -53,7 +53,7 @@ static void node_assign(struct node* node, unsigned char* key, size_t key_size, 
 static void update_lru(struct hashtable* table, struct node* node);
 static bool evict_one(struct hashtable* table);
 static size_t hash(unsigned char* s, size_t n);
-static struct list* find_in_probing_list(struct list* centinela, unsigned char* key, size_t key_size);
+static struct list* find_in_probing_list(struct list* probing, unsigned char* key, size_t key_size);
 static void increment_key_count(struct hashtable* table);
 static void decrement_key_count(struct hashtable* table);
 static struct row* find_row(struct hashtable* tabla, unsigned char* key, size_t key_size);
@@ -299,9 +299,9 @@ bool evict_one(struct hashtable* table) {
 
 	int iters = 0;
 
-	struct list* centinela = &table->lru;
+	struct list* lru = &table->lru;
 	struct list* it;
-	for (it = centinela->next; it != centinela; it = it->next) {
+	for (it = lru->next; it != lru; it = it->next) {
 
 		struct node* node = node_from_lru_list(it);
 		struct row* row = node->row;
@@ -316,6 +316,9 @@ bool evict_one(struct hashtable* table) {
 			node_free(node);
 
 			result = true;
+
+			pthread_mutex_unlock(&row->lock);
+
 			break;
 		}
 
@@ -349,10 +352,10 @@ static void update_lru(struct hashtable* table, struct node* node) {
 }
 
 // PRE: el lock de la fila está tomado por el thread actual
-static struct list* find_in_probing_list(struct list* centinela, unsigned char* key, size_t key_size) {
+static struct list* find_in_probing_list(struct list* probing, unsigned char* key, size_t key_size) {
 
 	struct list* it;
-	for (it = centinela->next; it != centinela; it = it->next) {
+	for (it = probing->next; it != probing; it = it->next) {
 
 		struct node* node = node_from_probing_list(it);
 
