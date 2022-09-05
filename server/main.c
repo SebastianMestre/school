@@ -239,6 +239,7 @@ enum message_action handle_text_message(struct fd_data* data, int events, kv_sto
 	switch (status) {
 		case 1: return MA_OK;
 		case 2: return MA_STOP;
+		default: assert(0);
 	}
 
 }
@@ -346,6 +347,7 @@ PARSE:
 	switch (status) {
 		case 1: return MA_OK;
 		case 2: return MA_STOP;
+		default: assert(0);
 	}
 
 }
