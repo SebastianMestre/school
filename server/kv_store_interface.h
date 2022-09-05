@@ -7,6 +7,15 @@
 
 #include <stddef.h>
 
+struct kv_store_stat {
+	size_t get_count;
+	size_t put_count;
+	size_t del_count;
+	size_t take_count;
+	size_t key_count;
+};
+
+
 kv_store* kv_store_init();
 
 // pide que se libere espacio de memoria
@@ -97,4 +106,4 @@ int kv_store_take(
 
 int kv_store_stat(
 	kv_store* store,
-	int* out_stat);
+	struct kv_store_stat* out_stat);

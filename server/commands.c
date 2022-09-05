@@ -136,7 +136,7 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 		} return CMD_EUNK;
 		case STATS: {
 			// ni idea que se supone que pase aca jaja
-			int stats;
+			struct kv_store_stat stats;
 			kv_store_stat(store, &stats);
 			// TODO
 			fprintf(stderr, "stats: no implementado\n");
@@ -218,7 +218,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 		} return CMD_EUNK;
 		case STATS: {
 			// ni idea que se supone que pase aca jaja
-			int stats;
+			struct kv_store_stat stats;
 			kv_store_stat(store, &stats);
 			// TODO
 			fprintf(stderr, "stats: no implementado\n");
