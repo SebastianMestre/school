@@ -9,8 +9,10 @@
 #include <sys/errno.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <sys/resource.h>
+#include <sys/sysinfo.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "connections.h"
 #include "kv_store.h"
@@ -19,6 +21,7 @@
 #include "biny_mode_parser.h"
 
 #define DATA_LIMIT RLIM_INFINITY
+#define MAX_THREADS 4
 
 enum protocol { TEXT, BINY };
 
@@ -350,48 +353,15 @@ int set_memory_limit(rlim_t limit) {
 	return 0;
 }
 
+struct server_data {
+	int epollfd;
+	kv_store* store;
+};
 
-int main(int argc, char** argv) {
-
-	set_memory_limit(DATA_LIMIT);
-
-	int listen_text_sock, listen_biny_sock;
-	// no nos pasaron sockets --> estamos debuggeando
-	if (argc == 1) {
-		listen_text_sock = create_listen_socket("localhost", "8000");
-		listen_biny_sock = create_listen_socket("localhost", "8001");
-	}
-	else if (argc == 3) {
-		listen_text_sock = atoi(argv[1]);
-		listen_biny_sock = atoi(argv[2]);
-	}
-	else {
-		fprintf(stderr, "Numero de argumentos incompatible\n");
-		exit(EXIT_FAILURE);
-	}
-	if (listen_text_sock < 0) exit(EXIT_FAILURE);
-	if (listen_biny_sock < 0) exit(EXIT_FAILURE);
-
-	int err;
-
-	int epollfd = epoll_create(1);
-	if (epollfd < 0) {
-		perror("epoll.1");
-		exit(EXIT_FAILURE);
-	}
-
-	register_listen_socket_first(epollfd, listen_text_sock, TEXT);
-	register_listen_socket_first(epollfd, listen_biny_sock, BINY);
+void* server(void* server_data) {
+	int epollfd = ((struct server_data*)server_data)->epollfd;
+	kv_store* store = ((struct server_data*)server_data)->store;
 	
-	// inicializar kv_store
-	kv_store* store = kv_store_init();
-	if (store == NULL) {
-		fprintf(stderr, "error iniciando cache\n");
-		exit(EXIT_FAILURE);
-	}
-
-	fprintf(stderr, "ENTRANDO AL LOOP EPOLL\n");
-
 	while (1) {
 		fprintf(stderr, "WAIT\n");
 		struct epoll_event evt;
@@ -479,6 +449,63 @@ int main(int argc, char** argv) {
 			}
 		} break;
 		}
+	}
+
+	return NULL;
+} 
+
+int main(int argc, char** argv) {
+
+	set_memory_limit(DATA_LIMIT);
+
+	int listen_text_sock, listen_biny_sock;
+	// no nos pasaron sockets --> estamos debuggeando
+	if (argc == 1) {
+		listen_text_sock = create_listen_socket("localhost", "8000");
+		listen_biny_sock = create_listen_socket("localhost", "8001");
+	}
+	else if (argc == 3) {
+		listen_text_sock = atoi(argv[1]);
+		listen_biny_sock = atoi(argv[2]);
+	}
+	else {
+		fprintf(stderr, "Numero de argumentos incompatible\n");
+		exit(EXIT_FAILURE);
+	}
+	if (listen_text_sock < 0) exit(EXIT_FAILURE);
+	if (listen_biny_sock < 0) exit(EXIT_FAILURE);
+
+	int err;
+
+	int epollfd = epoll_create(1);
+	if (epollfd < 0) {
+		perror("epoll.1");
+		exit(EXIT_FAILURE);
+	}
+
+	register_listen_socket_first(epollfd, listen_text_sock, TEXT);
+	register_listen_socket_first(epollfd, listen_biny_sock, BINY);
+	
+	// inicializar kv_store
+	kv_store* store = kv_store_init();
+	if (store == NULL) {
+		fprintf(stderr, "error iniciando cache\n");
+		exit(EXIT_FAILURE);
+	}
+
+	fprintf(stderr, "ENTRANDO AL LOOP EPOLL\n");
+	
+	// levantar threads
+	int nprocs = get_nprocs();
+	int nthreads = nprocs > MAX_THREADS ? MAX_THREADS : nprocs;
+	struct server_data data = {.epollfd = epollfd, .store = store};
+	pthread_t tid[nthreads];
+	for (int i = 0; i < nthreads; i++) {
+		// TODO error
+		pthread_create(tid + i, NULL, server, (void*)&data);
+	}
+	for (int i = 0; i < nthreads; i++) {
+		pthread_join(tid[i], NULL);
 	}
 
 	return 0;
