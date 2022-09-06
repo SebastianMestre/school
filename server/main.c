@@ -38,7 +38,7 @@ struct fd_data {
 #define TEXT_CLIENT_BUF_SIZE 2048
 
 struct text_client_state {
-	int buf_size;
+	size_t buf_size;
 	char buf[TEXT_CLIENT_BUF_SIZE];
 };
 
@@ -128,6 +128,39 @@ enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	return MA_OK;
 }
 
+
+// intenta leer del file descriptor hasta llenar el bufer dado.
+// devuelve un codigo de estado
+//
+// CODIGOS
+//   0 -- ok, se logro llenar el buffer
+//  -1 -- el file descriptor devolvio EAGAIN
+//  -2 -- se alcanzo el fin del file descriptor
+//  -3 -- se produjo un error al leer del file descriptor
+int read_until(int fd, unsigned char* buf, size_t* buf_size, size_t buf_capacity) {
+
+	while (*buf_size < buf_capacity) {
+		int read_bytes = read(fd, buf + *buf_size, buf_capacity - *buf_size);
+
+		if (read_bytes < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				return -1; // no hay mas input, hay que volver a epoll
+			} else {
+				return -3; // error, hay que frenar ahora
+			}
+		}
+
+		if (read_bytes == 0) {
+			return -2; // fin del input. procesar lo que queda y cortar
+		}
+
+		*buf_size += read_bytes;
+	}
+
+	return 0; // buffer lleno, se puede volver a llamar cuando haya mas espacio
+}
+
+
 int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {
 	int out_val = 0;
 	char ans[2048];
@@ -167,82 +200,51 @@ int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_o
 	return out_val;
 }
 
-enum message_action handle_text_message(struct fd_data* data, int events, kv_store* store) {
-	int sock = data->fd;
-
-	struct text_client_state* state = data->client_state.text;
-	assert(state);
-
-	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
-		fprintf(stderr, "HANGUP\n");
-		return MA_STOP;
-	}
-
-	int status = 0;
-
-	while (1) {
-		int read_bytes = read(sock, state->buf + state->buf_size, TEXT_CLIENT_BUF_SIZE - state->buf_size);
-
-		if (read_bytes < 0) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				status = 1;
-				break;
-			} else {
-				return MA_ERROR;
-			}
-		}
-
-		if (read_bytes == 0) {
-			fprintf(stderr, "texto: fin de la comunicacion -- sock = %d\n", sock);
-			status = 2;
-			break;
-		}
-		
-		state->buf_size += read_bytes;
-	}
-
-	// parsear comando
-
-	int line_count = 0;
-	for (int i = 0; i < state->buf_size; ++i)
-		line_count += state->buf[i] == '\n';
-
-	if (state->buf_size == TEXT_CLIENT_BUF_SIZE && line_count == 0) {
-		return MA_ERROR;
-	}
-
+int interpret_text_commands(int sock, struct text_client_state* state, kv_store* store) {
 	struct text_command cmd;
 	char* cursor = state->buf;
 	char* buf_end = state->buf + state->buf_size;
-	enum cmd_output res;
-	for (; line_count > 0; --line_count) {
-		switch (parse_text_command(&cursor, buf_end, &cmd)) {
-			case PARSED:
-				fprintf(stderr, "corriendo comando: tag = %d\n", cmd.tag);
-				res = run_text_command(store, &cmd);				
-				if (respond_text_command(data->fd, &cmd, res) < 0) {
-					// TODO sth
-					return MA_ERROR;
-				}
-				break;
-			default:
-				fprintf(stderr, "no parse\n");
-				return MA_ERROR;
-		}
+
+	while (cursor != buf_end) {
+		enum status parse_status = parse_text_command(&cursor, buf_end, &cmd);
+
+		// el comando es invalido, devuelvo error
+		if (parse_status == INVALID) return MA_ERROR;
+
+		// necesito mas input, reseteo el bufer y salgo
+		if (parse_status == INCOMPLETE) break;
+
+		assert(parse_status == PARSED);
+
+		enum cmd_output res = run_text_command(store, &cmd);				
+		if (respond_text_command(sock, &cmd, res) < 0) return MA_ERROR;
 	}
 
-	// los comandos recibidos son correctos y ya los corrimos
-	// reseteamos el buffer conservando lo que queda
-	state->buf_size = buf_end - cursor; 
+	state->buf_size = buf_end - cursor;
 	memmove(state->buf, cursor, state->buf_size);
 
-	switch (status) {
-		case 1: return MA_OK;
-		case 2: return MA_STOP;
-		default: assert(0);
-	}
-
+	return MA_OK;
 }
+
+enum message_action handle_text_message(struct fd_data* data, int events, kv_store* store) {
+	int sock = data->fd;
+	struct text_client_state* state = data->client_state.text;
+	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) return MA_STOP;
+
+	while (1) {
+		int read_status = read_until(sock, state->buf, &state->buf_size, TEXT_CLIENT_BUF_SIZE);
+		if (read_status == -3) return MA_ERROR;
+
+		int interpret_status = interpret_text_commands(sock, state, store);
+		if (interpret_status == MA_ERROR) return MA_ERROR;
+
+		if (read_status ==  0) continue;
+		if (read_status == -1) return MA_OK;
+		if (read_status == -2) return MA_STOP;
+	}
+}
+
+
 
 // Mandamos el mensaje en partes, abortando si el write falla
 int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
