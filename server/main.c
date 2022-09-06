@@ -53,7 +53,7 @@ struct text_client_state* create_text_client_state() {
 #define BINY_CLIENT_BUF_SIZE 2048
 
 struct biny_client_state {
-	int buf_size;
+	size_t buf_size;
 	uint8_t buf[BINY_CLIENT_BUF_SIZE];
 	struct biny_command cmd;
 };
@@ -290,28 +290,9 @@ enum message_action handle_biny_message(struct fd_data* data, int events, kv_sto
 		return MA_STOP;
 	}
 
-	int status = 0;
+	int status = read_until(sock, state->buf, &state->buf_size, BINY_CLIENT_BUF_SIZE);
 
-	while (1) {
-		int read_bytes = read(sock, state->buf + state->buf_size, BINY_CLIENT_BUF_SIZE - state->buf_size);
-
-		if (read_bytes < 0) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				status = 1;
-				break;
-			} else {
-				return MA_ERROR;
-			}
-		}
-
-		if (read_bytes == 0) {
-			fprintf(stderr, "binario: fin de la comunicacion -- sock = %d\n", sock);
-			status = 2;
-			break;
-		}
-		
-		state->buf_size += read_bytes;
-	}
+	if (status == -3) return MA_ERROR;
 
 	uint8_t* cursor	= state->buf;
 	uint8_t* buf_end = state->buf + state->buf_size; 
@@ -347,8 +328,10 @@ PARSE:
  
 
 	switch (status) {
-		case 1: return MA_OK;
-		case 2: return MA_STOP;
+		case 0: return MA_OK; // TODO: está ok esto? pueden haber quedado bytes en el socket
+
+		case -1: return MA_OK;
+		case -2: return MA_STOP;
 		default: assert(0);
 	}
 
