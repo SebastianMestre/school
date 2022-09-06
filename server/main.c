@@ -10,12 +10,15 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/resource.h>
 
 #include "connections.h"
 #include "kv_store.h"
 #include "commands.h"
 #include "text_mode_parser.h"
 #include "biny_mode_parser.h"
+
+#define DATA_LIMIT RLIM_INFINITY
 
 enum protocol { TEXT, BINY };
 
@@ -337,7 +340,20 @@ PARSE:
 
 }
 
+int set_memory_limit(rlim_t limit) {
+	struct rlimit r = {.rlim_cur = limit, .rlim_max = RLIM_INFINITY};
+	if (setrlimit(RLIMIT_DATA, &r) < 0) {
+		perror("set_memory_limit: ");
+		exit(EXIT_FAILURE);
+	}
+	
+	return 0;
+}
+
+
 int main(int argc, char** argv) {
+
+	set_memory_limit(DATA_LIMIT);
 
 	int listen_text_sock, listen_biny_sock;
 	// no nos pasaron sockets --> estamos debuggeando
