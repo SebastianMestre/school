@@ -25,7 +25,7 @@ struct hashtable {
 	pthread_mutex_t lru_lock;
 	struct list lru;
 
-	pthread_mutex_t key_count_lock;
+	pthread_spinlock_t key_count_lock;
 	size_t key_count;
 
 	struct row rows[SIZE];
@@ -67,7 +67,7 @@ struct hashtable* hashtable_create() {
 	pthread_mutex_init(&table->lru_lock, NULL);
 
 	table->key_count = 0;
-	pthread_mutex_init(&table->key_count_lock, NULL);
+	pthread_spin_init(&table->key_count_lock, PTHREAD_PROCESS_PRIVATE);
 
 	for (int i = 0; i < SIZE; ++i) {
 		struct row* row = &table->rows[i];
@@ -270,9 +270,9 @@ int hashtable_evict(struct hashtable* table) {
 }
 
 size_t hashtable_size(struct hashtable* table) {
-	pthread_mutex_lock(&table->key_count_lock);
+	pthread_spin_lock(&table->key_count_lock);
 	size_t result = table->key_count;
-	pthread_mutex_unlock(&table->key_count_lock);
+	pthread_spin_unlock(&table->key_count_lock);
 	return result;
 }
 
@@ -331,16 +331,16 @@ bool evict_one(struct hashtable* table) {
 }
 
 static void increment_key_count(struct hashtable* table) {
-	pthread_mutex_lock(&table->key_count_lock);
+	pthread_spin_lock(&table->key_count_lock);
 	table->key_count++;
-	pthread_mutex_unlock(&table->key_count_lock);
+	pthread_spin_unlock(&table->key_count_lock);
 }
 
 static void decrement_key_count(struct hashtable* table) {
-	pthread_mutex_lock(&table->key_count_lock);
+	pthread_spin_lock(&table->key_count_lock);
 	assert(table->key_count > 0);
 	table->key_count--;
-	pthread_mutex_unlock(&table->key_count_lock);
+	pthread_spin_unlock(&table->key_count_lock);
 }
 
 // PRE: el lock de la fila del nodo está tomado por el thread actual
