@@ -9,7 +9,7 @@
 
 int register_epoll(int epollfd, int fd, int op, int flags, void* data) {
 	fprintf(stderr, "epoll_ctl <~~ epollfd = %d, fd = %d, op = %d, flags = %x, data = %p\n", epollfd, fd, op, flags, data);
-	struct epoll_event evt;
+	struct epoll_event evt = {0};
 	evt.events = flags;
 	evt.data.ptr = data;
 	int err = epoll_ctl(epollfd, op, fd, &evt);

@@ -19,6 +19,7 @@
 #include "commands.h"
 #include "text_mode_parser.h"
 #include "biny_mode_parser.h"
+#include "try_alloc.h"
 
 #define DATA_LIMIT RLIM_INFINITY
 #define MAX_THREADS 4
@@ -48,8 +49,9 @@ struct text_client_state {
 	char buf[TEXT_CLIENT_BUF_SIZE];
 };
 
-struct text_client_state* create_text_client_state() {
-	struct text_client_state* result = malloc(sizeof(*result));
+struct text_client_state* create_text_client_state(kv_store* store) {
+	struct text_client_state* result;
+  try_alloc(store, sizeof(*result), &result);
 	if (result != NULL) {
 		memset(result, 0, sizeof(*result));
 	}
@@ -64,8 +66,9 @@ struct biny_client_state {
 	struct biny_command cmd;
 };
 
-struct biny_client_state* create_biny_client_state() {
-	struct biny_client_state* result = malloc(sizeof(*result));
+struct biny_client_state* create_biny_client_state(kv_store* store) {
+	struct biny_client_state* result;
+  try_alloc(store, sizeof(*result), &result);
 	if (result != NULL) {
 		memset(result, 0, sizeof(*result));
 	}
@@ -95,17 +98,23 @@ void register_listen_socket_again(int epollfd, int sock, struct fd_data* data) {
 		exit(EXIT_FAILURE);
 }
 
-void register_client_socket_first(int epollfd, int sock, enum protocol protocol) {
+void register_client_socket_first(int epollfd, int sock, enum protocol protocol, kv_store* store) {
 	struct fd_data* data = calloc(1, sizeof(*data));
 	data->fd = sock;
 	switch (protocol) {
 		case TEXT:
 			data->type = FD_TYPE_TEXT_CONN;
-			data->client_state.text = create_text_client_state();
+			data->client_state.text = create_text_client_state(store);
+      if (data->client_state.text == NULL) {
+        return;
+      }
 			break;
 		case BINY:
 			data->type = FD_TYPE_BINARY_CONN;
-			data->client_state.biny = create_biny_client_state();
+			data->client_state.biny = create_biny_client_state(store);
+      if (data->client_state.biny == NULL) {
+        return;
+      }
 			break;
 	}
 
@@ -386,7 +395,7 @@ void* server(void* server_data) {
 			enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
 			if (action == MA_OK) {
-				register_client_socket_first(epollfd, conn_sock, TEXT);
+				register_client_socket_first(epollfd, conn_sock, TEXT, store);
 			}
 
 			register_listen_socket_again(epollfd, listen_sock, data);
@@ -402,7 +411,7 @@ void* server(void* server_data) {
 			enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
 			if (action == MA_OK) {
-				register_client_socket_first(epollfd, conn_sock, BINY);
+				register_client_socket_first(epollfd, conn_sock, BINY, store);
 			}
 
 			register_listen_socket_again(epollfd, listen_sock, data);
