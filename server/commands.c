@@ -33,7 +33,7 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			memcpy(key, cmd->key, cmd->key_len);
 
 			unsigned char* val = try_alloc(store, cmd->val_len);
-			if (val != NULL) {
+			if (val == NULL) {
 				free(key);
 				return CMD_EOOM;
 			}
@@ -180,7 +180,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == KV_STORE_OOM) return CMD_EOOM;
 			if (res == CMD_OK) {
-				assert(cmd->val != NULL);
+				assert(val != NULL);
 				cmd->val = val;
 				cmd->val_size = val_size;
 				return CMD_OK;    
