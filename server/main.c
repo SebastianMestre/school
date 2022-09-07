@@ -241,6 +241,10 @@ void* server(void* server_data) {
 
 		fprintf(stderr, "DEJO DE ESPERAR\n");
 
+		if (event_count < 0 && errno == EINTR) {
+			continue;
+		}
+
 		assert(event_count > 0);
 
 		assert(event_count == 1); // TODO: borrar cuando manejemos varios eventos
