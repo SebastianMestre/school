@@ -22,7 +22,7 @@ struct row {
 };
 
 struct hashtable {
-	pthread_mutex_t lru_lock;
+	pthread_spinlock_t lru_lock;
 	struct list lru;
 
 	pthread_spinlock_t key_count_lock;
@@ -64,7 +64,7 @@ struct hashtable* hashtable_create() {
 	struct hashtable* table = malloc(sizeof(*table));
 
 	list_init(&table->lru);
-	pthread_mutex_init(&table->lru_lock, NULL);
+	pthread_spin_init(&table->lru_lock, PTHREAD_PROCESS_PRIVATE);
 
 	table->key_count = 0;
 	pthread_spin_init(&table->key_count_lock, PTHREAD_PROCESS_PRIVATE);
@@ -207,9 +207,9 @@ int hashtable_delete(
 		decrement_key_count(table);
 		list_remove(&node->probing);
 
-		pthread_mutex_lock(&table->lru_lock);
+		pthread_spin_lock(&table->lru_lock);
 		list_remove(&node->lru);
-		pthread_mutex_unlock(&table->lru_lock);
+		pthread_spin_unlock(&table->lru_lock);
 
 		result = KV_STORE_OK;
 	}
@@ -244,9 +244,9 @@ int hashtable_take(
 
 		list_remove(&node->probing);
 
-		pthread_mutex_lock(&table->lru_lock);
+		pthread_spin_lock(&table->lru_lock);
 		list_remove(&node->lru);
-		pthread_mutex_unlock(&table->lru_lock);
+		pthread_spin_unlock(&table->lru_lock);
 
 		*out_value = node->value;
 		*out_value_size = node->value_size;
@@ -293,7 +293,7 @@ static struct node* find_in_row(struct row* row, unsigned char* key, size_t key_
 // Elimina una entrada de la tabla, en orden LRU aproximado.
 // Puede fallar si las filas de todas las entradas que intenta liberar están lockeadas.
 bool evict_one(struct hashtable* table) {
-	pthread_mutex_lock(&table->lru_lock);
+	pthread_spin_lock(&table->lru_lock);
 
 	bool result = false;
 
@@ -325,7 +325,7 @@ bool evict_one(struct hashtable* table) {
 		iters++;
 	}
 
-	pthread_mutex_unlock(&table->lru_lock);
+	pthread_spin_unlock(&table->lru_lock);
 
 	return result;
 }
@@ -345,10 +345,10 @@ static void decrement_key_count(struct hashtable* table) {
 
 // PRE: el lock de la fila del nodo está tomado por el thread actual
 static void update_lru(struct hashtable* table, struct node* node) {
-	pthread_mutex_lock(&table->lru_lock);
+	pthread_spin_lock(&table->lru_lock);
 	list_remove(&node->lru);
 	list_push_start(&table->lru, &node->lru);
-	pthread_mutex_unlock(&table->lru_lock);
+	pthread_spin_unlock(&table->lru_lock);
 }
 
 // PRE: el lock de la fila está tomado por el thread actual
