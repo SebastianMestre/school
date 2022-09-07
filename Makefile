@@ -15,7 +15,7 @@ build/biny_mode_parser.o: server/biny_mode_parser.c server/biny_mode_parser.h se
 build/kv_hashtable.o: server/kv_hashtable.c server/hashtable.h server/kv_store_interface.h
 build/hashtable.o: server/hashtable.c server/hashtable.h server/kv_store.h server/list.h
 build/list.o: server/list.c server/list.h
-build/commands.o: server/commands.c server/commands.h
+build/commands.o: server/commands.c server/commands.h server/try_alloc.h server/kv_store.h
 build/connections.o: server/connections.c server/connections.h
 build/try_alloc.o: server/try_alloc.c server/try_alloc.h server/kv_store.h
 

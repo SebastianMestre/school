@@ -6,7 +6,8 @@
 
 #include <stdio.h>
 
-#define ALLOC_ATTEMPTS 10
+#include "try_alloc.h"
+
 #define OK 			101
 #define EINVAL 		111
 #define ENOTFOUND 	112
@@ -15,20 +16,11 @@
 #define EUNK		115
 #define EOOM		116 // codigo nuevo
 
-static int try_alloc(kv_store* store, size_t size, void** ptr) {
-	int attempts;
-	for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
-		*ptr = malloc(size);
-		if (*ptr != NULL) break;
-		if (kv_store_evict(store) < 0) return -1;
-	}
-	if (attempts == ALLOC_ATTEMPTS) return -1;
-	return 0; 
-}
-
 static void reset_text_command(struct text_command* cmd) {
 	cmd->key_len = cmd->val_len = 0;
 }
+
+#define ALLOC_ATTEMPTS 10
 
 enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
@@ -45,22 +37,14 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			}
 			memcpy(val, cmd->val, cmd->val_len);
 			int attempts, res;
-			for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
-				res = kv_store_put(store, key, cmd->key_len, val, cmd->val_len);
-				if (res != KV_STORE_OOM) break;
-				if (kv_store_evict(store) < 0) {
-					reset_text_command(cmd);
-					free(key);
-					free(val);
-					return CMD_EOOM;
-				}
-			}
+      res = kv_store_put(store, key, cmd->key_len, val, cmd->val_len);
 			reset_text_command(cmd);
-			if (res == KV_STORE_OK) return CMD_OK;
-			free(val);
-			free(key);
-			if (res == KV_STORE_OOM) return CMD_EOOM;
-			return CMD_EUNK;
+			if (res != KV_STORE_OK) {
+        free(val);
+        free(key);
+        return (res == KV_STORE_OOM) ? CMD_EOOM : CMD_EUNK;
+      }
+      return CMD_OK;
 		}
 		case DEL: {
 			int res = kv_store_del(store, cmd->key, cmd->key_len);
