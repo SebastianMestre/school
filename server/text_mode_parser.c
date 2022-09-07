@@ -1,6 +1,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "text_mode_parser.h"
 
@@ -27,7 +28,7 @@ static enum status parse_(char const* prefix, char** start, char* end) {
 	*start += prefix_len;
 	buf_len -= prefix_len;
 
-	if (buf_len <= 0) return INVALID;
+	if (buf_len <= 0) return INCOMPLETE;
 	if (**start != '\n') return INVALID;
 
 	*start += 1;
@@ -47,7 +48,7 @@ static enum status parse_k(char const* prefix, char** start, char* end,
 	*start += prefix_len;
 	buf_len -= prefix_len;
 
-	if (buf_len <= 0) return INVALID;
+	if (buf_len <= 0) return INCOMPLETE;
 	if (**start != ' ') return INVALID;
 
 	*start += 1;
@@ -56,12 +57,13 @@ static enum status parse_k(char const* prefix, char** start, char* end,
 	// parsear w1
 	char* key_start = *start;
 	int key_len = parse_word(key_start, end);
-	if (key_len <= 0) return INVALID;
+	if (key_len < 0) return INVALID;
+	if (key_len == 0) return INCOMPLETE;
 
 	*start += key_len;
 	buf_len -= key_len;
 
-	if (buf_len <= 0) return INVALID;
+	if (buf_len <= 0) return INCOMPLETE;
 	if (**start != '\n') return INVALID;
 
 	*start += 1;
@@ -95,7 +97,8 @@ static enum status parse_kv(char const* prefix, char** start, char* end,
 	// parsear key
 	char* key_start = *start;
 	int key_len = parse_word(key_start, end);
-	if (key_len <= 0) return INCOMPLETE;
+	if (key_len < 0) return INVALID;
+	if (key_len == 0) return INCOMPLETE;
 
 	*start += key_len;
 	buf_len -= key_len;
@@ -109,7 +112,8 @@ static enum status parse_kv(char const* prefix, char** start, char* end,
 	// parsear val
 	char* val_start = *start;
 	int val_len = parse_word(val_start, end);
-	if (val_len <= 0) return INCOMPLETE;
+	if (val_len < 0) return INVALID;
+	if (val_len == 0) return INCOMPLETE;
 
 	*start += val_len;
 	buf_len -= val_len;
@@ -149,13 +153,16 @@ static enum status parse_command_by_tag(char** start, char* end,
 }
 
 enum status parse_text_command(char** start, char* end, struct text_command* cmd) {
-	char* out_start = *start;
 	enum status fallback = INVALID;
 	for (int i = 0; i < N_CMDS; i++) {
+		char* out_start = *start;
 		enum status status = parse_command_by_tag(&out_start, end, cmd, i);
+		
 		if (status == INCOMPLETE) fallback = INCOMPLETE;
+		
 		// error de formato
 		if (status == INVALID) return INVALID;
+		
 		// comando parseado
 		if (status == PARSED) {
 			*start = out_start;
