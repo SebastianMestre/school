@@ -111,7 +111,7 @@ int hashtable_lookup(
 		// por cortesia, devolvemos NULL
 		*out_value = NULL;
 		*out_value_size = 0;
-		result = KV_STORE_UNK;
+		result = KV_STORE_NOTFOUND;
 	} else {
 
 		unsigned char* buf = evict_until_malloc(table, node->value_size);
@@ -200,9 +200,9 @@ int hashtable_delete(
 	pthread_mutex_lock(&row->lock);
 	struct node* node = find_in_row(row, key, key_size);
 
-	int result;
+	int result = KV_STORE_UNK;
 	if (node == NULL) {
-		result = KV_STORE_UNK;
+		result = KV_STORE_NOTFOUND;
 	} else {
 		decrement_key_count(table);
 		list_remove(&node->probing);
@@ -231,9 +231,9 @@ int hashtable_take(
 	pthread_mutex_lock(&row->lock);
 	struct node* node = find_in_row(row, key, key_size);
 
-	int result;
+	int result = KV_STORE_UNK;
 	if (node == NULL) {
-		result = KV_STORE_UNK;
+		result = KV_STORE_NOTFOUND;
 
 		*out_value = NULL;
 		*out_value_size = 0;
