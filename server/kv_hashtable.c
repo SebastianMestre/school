@@ -16,11 +16,18 @@ struct kv_hashtable_wrapper {
 
 
 struct kv_hashtable_wrapper* kv_store_init() {
+
 	struct kv_hashtable_wrapper* result = malloc(sizeof(*result));
+	if (result == NULL) return NULL;
+
+	result->table = hashtable_create();
+	if (result->table == NULL) {
+		free(result);
+		return NULL;
+	}
 
 	memset(&result->stat, 0, sizeof(result->stat));
 	pthread_spin_init(&result->stat_lock, PTHREAD_PROCESS_PRIVATE);
-	result->table = hashtable_create();
 
 	return result;
 }

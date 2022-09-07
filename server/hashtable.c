@@ -63,6 +63,9 @@ static struct node* find_in_row(struct row* row, unsigned char* key, size_t key_
 struct hashtable* hashtable_create() {
 	struct hashtable* table = malloc(sizeof(*table));
 
+	if (table == NULL)
+		return NULL;
+
 	list_init(&table->lru);
 	pthread_spin_init(&table->lru_lock, PTHREAD_PROCESS_PRIVATE);
 
