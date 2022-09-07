@@ -1,8 +1,8 @@
 PARSERS = build/text_mode_parser.o build/biny_mode_parser.o
 KV_STORE = build/kv_hashtable.o build/hashtable.o build/list.o
 
-server.out: build/main.o $(PARSERS) $(KV_STORE) build/commands.o build/connections.o  
-	gcc -lpthread -o $@ $^
+server.out: build/main.o $(PARSERS) $(KV_STORE) build/commands.o build/connections.o build/try_alloc.o
+	gcc -pthread -o $@ $^
 
 clean:
 	rm -rf build/
@@ -17,6 +17,7 @@ build/hashtable.o: server/hashtable.c server/hashtable.h server/kv_store.h serve
 build/list.o: server/list.c server/list.h
 build/commands.o: server/commands.c server/commands.h
 build/connections.o: server/connections.c server/connections.h
+build/try_alloc.o: server/try_alloc.c server/try_alloc.h server/kv_store.h
 
 
 build/%.o: server/%.c
