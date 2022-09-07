@@ -1,8 +1,15 @@
-#include <assert.h>
-#include <string.h>
 #include <arpa/inet.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/epoll.h>
+#include <unistd.h>
 
 #include "biny_mode_parser.h"
+#include "commands.h"
+#include "fd_utils.h"
+#include "try_alloc.h"
 
 #define MIN(a, b) (a) > (b) ? (b) : (a)
 // constantes
@@ -13,141 +20,197 @@
 #define TAKE_ID 14
 #define STATS_ID 21
 
-static enum status parse_val(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	assert(cmd->val);
-	
-	uint32_t nbytes = cmd->val_size - cmd->val_len;
-	if (nbytes == 0) return PARSED;
+#define BINY_CLIENT_BUF_SIZE 2048
 
-	uint32_t nbuffer = end - *start;
-	if (nbuffer == 0) return INCOMPLETE;
+enum biny_client_step { BC_START, BC_KEY_SIZE, BC_KEY, BC_VAL_SIZE, BC_VAL };
 
-	uint32_t ndata = MIN(nbuffer, nbytes);
-	memcpy(cmd->val + cmd->val_len, *start, ndata);
-	*start += ndata;
-	cmd->val_len += ndata;
-	
-	if (cmd->val_len < cmd->val_size) return INCOMPLETE;
+struct biny_client_state {
 
-	return PARSED;
-}
-// no modifica `start` si no hay suficientes datos
-static enum status parse_val_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	if (end - *start < 4) return INCOMPLETE;
-	uint32_t* val_size = (uint32_t*)*start;
-	cmd->val_size = ntohl(*val_size);
-	*start += 4;
-	return PARSED; 
-}
+	enum biny_client_step step;
 
-static enum status parse_key(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	assert(cmd->key);
-	
-	uint32_t nbytes = cmd->key_size - cmd->key_len;
-	if (nbytes == 0) return PARSED;
+	uint8_t operation;
 
-	uint32_t nbuffer = end - *start;
-	if (nbuffer == 0) return INCOMPLETE;
+	size_t cursor;
 
-	uint32_t ndata = MIN(nbuffer, nbytes);
-	memcpy(cmd->key + cmd->key_len, *start, ndata);
-	*start += ndata;
-	cmd->key_len += ndata;
-	
-	if (cmd->key_len < cmd->key_size) return INCOMPLETE;
+	uint8_t size_buf[4];
 
-	return PARSED;
-}
-// no modifica `start` si no hay suficientes datos
-static enum status parse_key_size(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	if (end - *start < 4) return INCOMPLETE;
-	uint32_t* key_size = (uint32_t*)*start;
-	cmd->key_size = ntohl(*key_size);
-	*start += 4;
-	return PARSED; 
-}
-// no modifica `start` si no hay suficientes datos
-static enum status parse_pfx_by_id(uint8_t id, uint8_t** start, uint8_t* end) {
-	if (end - *start <= 0) return INCOMPLETE;
-	if (**start == id) {
-		*start += 1;
-		return PARSED;
+	size_t key_size;
+	uint8_t* key;
+
+	size_t val_size;
+	uint8_t* val;
+
+	struct biny_command cmd;
+};
+
+
+struct biny_client_state* create_biny_client_state(kv_store* store) {
+	struct biny_client_state* result = try_alloc(store, sizeof(*result));
+	if (result != NULL) {
+		memset(result, 0, sizeof(*result));
+		result->step = BC_START;
 	}
-	return MISMATCH;
+	return result;
 }
 
-static enum status parse_pfx(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	enum status status;
-	for (enum cmd_tag tag = 0; tag < N_CMDS; tag++) {
-		switch (tag) {
-			case PUT:
-				status = parse_pfx_by_id(PUT_ID, start, end);
-				break;
-			case DEL:
-				status = parse_pfx_by_id(DEL_ID, start, end);
-				break;
-			case GET:
-				status = parse_pfx_by_id(GET_ID, start, end);
-				break;
-			case TAKE:
-				status = parse_pfx_by_id(TAKE_ID, start, end);
-				break;
-			case STATS:
-				status = parse_pfx_by_id(STATS_ID, start, end);
-				break;
-			default:
-				assert(0);
+
+// Mandamos el mensaje en partes, abortando si el write falla
+int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
+	int out_val = 0;
+	uint8_t res_code = cmd_output_code(res);
+	if (write(client_socket, &res_code, 1) != 1) { 
+		out_val = -1;
+	}
+	else if (res == CMD_OK) {
+		if (cmd->tag == GET || cmd->tag == TAKE) {
+			assert(cmd->val);
+			uint32_t val_size = htonl(cmd->val_len);
+			if (write(client_socket, &val_size, 4) != 4) {
+				out_val = -1;
 			}
-		if (status == INCOMPLETE) return INCOMPLETE;
-		if (status == PARSED) {
-			cmd->tag = tag;
-			return PARSED;
-		}	 
+			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
+				out_val = -1;
+			}
+		}
+		if (cmd->tag == STATS) {
+			fprintf(stderr, "no implementado :(\n");
+		}
 	}
-	
-	return INVALID;
+	if (cmd->val_size > 0) {
+		free(cmd->val);
+		cmd->val = NULL;
+		cmd->val_size = cmd->val_len = 0;
+	}
+	if (out_val < 0) {
+		fprintf(stderr, "error comunicandose con el cliente\n");
+	}
+	return out_val;
 }
 
-// para comenzar a parsear, el comando debe estar inicializado en 0
-// el parser detecta que falta parsear y continua a partir de ahi
-enum status parse_biny_command(uint8_t** start, uint8_t* end, struct biny_command* cmd) {
-	enum status status;
-	
-	// tenemos que parsear el prefijo
-	if (cmd->key_size == 0) {
-		status = parse_pfx(start, end, cmd);
-		if (status != PARSED) return status; 
+enum message_action handle_biny_message(struct biny_client_state* state, int sock, int events, kv_store* store) {
+
+	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
+		fprintf(stderr, "HANGUP\n");
+		return MA_STOP;
 	}
 
-	if (cmd->tag == STATS) return PARSED;
+	int read_status;
 
-	// tenemos que parsear el largo de la clave
-	if (cmd->key_size == 0) {
-		status = parse_key_size(start, end, cmd);
-		if (status != PARSED) return status;
-		return KEY_NEXT;
+	while (1) {
+
+		switch (state->step) {
+		case BC_START:
+			read_status = read_until(sock, &state->operation, &state->cursor, 1);
+			if (read_status < 0) {
+				if (read_status == -2) return MA_STOP;
+				else goto error_nothing;
+			}
+
+			state->cursor = 0;
+
+			if (state->operation == STATS_ID) {
+				break;
+			} else {
+				state->step = BC_KEY_SIZE;
+			}
+
+
+		case BC_KEY_SIZE: // fallthrough
+
+			read_status = read_until(sock, state->size_buf, &state->cursor, 4);
+			if (read_status < 0) goto error_nothing;
+
+			state->key_size = ntohl(*(uint32_t*)state->size_buf);
+			state->cursor = 0;
+			state->key = try_alloc(store, state->key_size);
+			if (state->key == NULL) goto error_oom;
+
+			state->step = BC_KEY;
+
+		case BC_KEY: // fallthrough
+
+			read_status = read_until(sock, state->key, &state->cursor, state->key_size);
+			if (read_status < 0) goto error_key;
+
+			state->cursor = 0;
+
+			if (state->operation == PUT_ID) {
+				state->step = BC_VAL_SIZE;
+			} else {
+				break;
+			}
+
+
+		case BC_VAL_SIZE: // fallthrough
+
+			read_status = read_until(sock, state->size_buf, &state->cursor, 4);
+			if (read_status < 0) goto error_key;
+
+			state->val_size = ntohl(*(uint32_t*)state->size_buf);
+			state->cursor = 0;
+			state->val = try_alloc(store, state->val_size);
+			if (state->key == NULL) goto error_oom;
+
+			state->step = BC_VAL;
+
+		case BC_VAL: // fallthrough
+			read_status = read_until(sock, state->val, &state->cursor, state->val_size);
+			if (read_status < 0) goto error_key_value;
+
+			state->cursor = 0;
+		}
+
+		struct biny_command cmd = {};
+
+		switch (state->operation) {
+		case PUT_ID:
+			cmd.tag = PUT;
+			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key = state->key;
+
+			cmd.val_len = cmd.val_size = state->val_size;
+			cmd.val = state->val;
+			break;
+		case DEL_ID:
+			cmd.tag = DEL;
+			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key = state->key;
+			break;
+		case GET_ID:
+			cmd.tag = GET;
+			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key = state->key;
+			break;
+		case TAKE_ID:
+			cmd.tag = TAKE;
+			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key = state->key;
+			break;
+		case STATS_ID:
+			cmd.tag = STATS;
+			break;
+		}
+
+		enum cmd_output res = run_biny_command(store, &cmd);
+		respond_biny_command(sock, &cmd, res);
+
+		memset(state, 0, sizeof(*state));
+		state->step = BC_START;
 	}
 
-	// tenemos que parsear la clave
-	if (cmd->key_len < cmd->key_size) {
-		status = parse_key(start, end, cmd);
-		if (status == INCOMPLETE) return INCOMPLETE;
-		assert(status == PARSED);
-	}
+error_key_value:
+	if (read_status == -1) return MA_OK;
+	free(state->val);
+	state->val = NULL;
+error_key:
+	if (read_status == -1) return MA_OK;
+	free(state->key);
+	state->key = NULL;
+error_nothing:
+	if (read_status == -1) return MA_OK;
+	return MA_ERROR;
 
-	if (cmd->tag != PUT) return PARSED;
-
-	// tenemos que parsear el largo del valor
-	if (cmd->val_size == 0) {
-		status = parse_val_size(start, end, cmd);
-		if (status != PARSED) return status;
-		return VAL_NEXT;
-	}
-
-	// tenemos que parsear el valor
-	if (cmd->val_len < cmd->val_size) {
-		return parse_val(start, end, cmd);
-	}
-
-	return PARSED;
-} 
+error_oom:
+	// TODO: respond OOM
+	return MA_ERROR;
+}

@@ -15,11 +15,13 @@
 #include <unistd.h>
 
 #include "connections.h"
+#include "message_action.h"
 #include "kv_store.h"
 #include "commands.h"
 #include "text_mode_parser.h"
 #include "biny_mode_parser.h"
 #include "try_alloc.h"
+#include "fd_utils.h"
 
 #define DATA_LIMIT RLIM_INFINITY
 #define MAX_THREADS 4
@@ -57,21 +59,6 @@ struct text_client_state* create_text_client_state(kv_store* store) {
 	return result;
 }
 
-#define BINY_CLIENT_BUF_SIZE 2048
-
-struct biny_client_state {
-	size_t buf_size;
-	uint8_t buf[BINY_CLIENT_BUF_SIZE];
-	struct biny_command cmd;
-};
-
-struct biny_client_state* create_biny_client_state(kv_store* store) {
-	struct biny_client_state* result = try_alloc(store, sizeof(*result));
-	if (result != NULL) {
-		memset(result, 0, sizeof(*result));
-	}
-	return result;
-}
 
 
 void register_listen_socket_first(int epollfd, int sock, enum protocol protocol) {
@@ -128,8 +115,6 @@ void register_client_socket_again(int epollfd, int sock, struct fd_data* data) {
 }
 
 
-enum message_action { MA_ERROR, MA_STOP, MA_OK };
-
 enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	*out_sock = -1;
 	int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
@@ -140,39 +125,6 @@ enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	*out_sock = conn_sock;
 	return MA_OK;
 }
-
-
-// intenta leer del file descriptor hasta llenar el bufer dado.
-// devuelve un codigo de estado
-//
-// CODIGOS
-//   0 -- ok, se logro llenar el buffer
-//  -1 -- el file descriptor devolvio EAGAIN
-//  -2 -- se alcanzo el fin del file descriptor
-//  -3 -- se produjo un error al leer del file descriptor
-int read_until(int fd, unsigned char* buf, size_t* buf_size, size_t buf_capacity) {
-
-	while (*buf_size < buf_capacity) {
-		int read_bytes = read(fd, buf + *buf_size, buf_capacity - *buf_size);
-
-		if (read_bytes < 0) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				return -1; // no hay mas input, hay que volver a epoll
-			} else {
-				return -3; // error, hay que frenar ahora
-			}
-		}
-
-		if (read_bytes == 0) {
-			return -2; // fin del input. procesar lo que queda y cortar
-		}
-
-		*buf_size += read_bytes;
-	}
-
-	return 0; // buffer lleno, se puede volver a llamar cuando haya mas espacio
-}
-
 
 int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {
 	int out_val = 0;
@@ -259,96 +211,8 @@ enum message_action handle_text_message(struct fd_data* data, int events, kv_sto
 
 
 
-// Mandamos el mensaje en partes, abortando si el write falla
-int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
-	int out_val = 0;
-	uint8_t res_code = cmd_output_code(res);
-	if (write(client_socket, &res_code, 1) != 1) { 
-		out_val = -1;
-	}
-	else if (res == CMD_OK) {
-		if (cmd->tag == GET || cmd->tag == TAKE) {
-			assert(cmd->val);
-			uint32_t val_size = htonl(cmd->val_len);
-			if (write(client_socket, &val_size, 4) != 4) {
-				out_val = -1;
-			}
-			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
-				out_val = -1;
-			}
-		}
-		if (cmd->tag == STATS) {
-			fprintf(stderr, "no implementado :(\n");
-		}
-	}
-	if (cmd->val_size > 0) {
-		free(cmd->val);
-		cmd->val = NULL;
-		cmd->val_size = cmd->val_len = 0;
-	}
-	if (out_val < 0) {
-		fprintf(stderr, "error comunicandose con el cliente\n");
-	}
-	return out_val;
-}
 
-enum message_action handle_biny_message(struct fd_data* data, int events, kv_store* store) {
-	int sock = data->fd;
 
-	struct biny_client_state* state = data->client_state.biny;
-	assert(state);
-
-	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
-		fprintf(stderr, "HANGUP\n");
-		return MA_STOP;
-	}
-
-	int status = read_until(sock, state->buf, &state->buf_size, BINY_CLIENT_BUF_SIZE);
-
-	if (status == -3) return MA_ERROR;
-
-	uint8_t* cursor	= state->buf;
-	uint8_t* buf_end = state->buf + state->buf_size; 
-	enum status parse_status;
-	enum cmd_output res;
-PARSE: 
-	parse_status = parse_biny_command(&cursor, buf_end, &state->cmd);
-	switch (parse_status) {
-		case PARSED:
-			fprintf(stderr, "corriendo comando: tag = %d\n", state->cmd.tag);
-			res = run_biny_command(store, &state->cmd);
-			if (respond_biny_command(sock, &state->cmd, res) < 0) {
-				// TODO reiniciar el buffer, algo mas?
-				return MA_ERROR;
-			}
-			goto PARSE;
-		case KEY_NEXT:
-			state->cmd.key = malloc(state->cmd.key_size);
-			assert(state->cmd.key); // TODO manejar esto
-			goto PARSE;
-		case VAL_NEXT:
-			state->cmd.val = malloc(state->cmd.val_size);
-			assert(state->cmd.val); // TODO manejar esto
-			goto PARSE;
-		case INCOMPLETE:
-			state->buf_size = buf_end - cursor;
-			memmove(state->buf, cursor, state->buf_size);
-			break;
-		default:
-			fprintf(stderr, "no parse\n");
-			return MA_ERROR; 
-	}	
- 
-
-	switch (status) {
-		case 0: return MA_OK; // TODO: está ok esto? pueden haber quedado bytes en el socket
-
-		case -1: return MA_OK;
-		case -2: return MA_STOP;
-		default: assert(0);
-	}
-
-}
 
 int set_memory_limit(rlim_t limit) {
 	struct rlimit r = {.rlim_cur = limit, .rlim_max = RLIM_INFINITY};
@@ -441,7 +305,7 @@ void* server(void* server_data) {
 			fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			enum message_action action = handle_biny_message(data, evt.events, store);
+			enum message_action action = handle_biny_message(data->client_state.biny, data->fd, evt.events, store);
 
 			int sock = data->fd;
 			if (action == MA_OK) {
