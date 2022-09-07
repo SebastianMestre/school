@@ -58,32 +58,51 @@ struct biny_client_state* create_biny_client_state(kv_store* store) {
 int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
 	int out_val = 0;
 	uint8_t res_code = cmd_output_code(res);
+
 	if (write(client_socket, &res_code, 1) != 1) { 
 		out_val = -1;
+		goto early_exit;
 	}
-	else if (res == CMD_OK) {
-		if (cmd->tag == GET || cmd->tag == TAKE) {
-			assert(cmd->val);
-			uint32_t val_size = htonl(cmd->val_len);
-			if (write(client_socket, &val_size, 4) != 4) {
-				out_val = -1;
-			}
-			else if (write(client_socket, cmd->val, cmd->val_len) != cmd->val_len) {
-				out_val = -1;
-			}
-		}
-		if (cmd->tag == STATS) {
-			fprintf(stderr, "no implementado :(\n");
-		}
+
+	if (res != CMD_OK) {
+		goto early_exit;
 	}
+
+	switch (cmd->tag) {
+	case GET: case TAKE:
+		assert(cmd->val);
+		uint32_t val_size = htonl(cmd->val_size);
+
+		if (write(client_socket, &val_size, 4) != 4) {
+			out_val = -1;
+			goto early_exit;
+		}
+
+		if (write(client_socket, cmd->val, cmd->val_size) != cmd->val_size) {
+			out_val = -1;
+			goto early_exit;
+		}
+		break;
+
+	case STATS:
+		fprintf(stderr, "no implementado :(\n");
+		break;
+
+	case DEL: case PUT:
+		break;
+	}
+
+early_exit:
 	if (cmd->val_size > 0) {
 		free(cmd->val);
 		cmd->val = NULL;
-		cmd->val_size = cmd->val_len = 0;
+		cmd->val_size = 0;
 	}
+
 	if (out_val < 0) {
 		fprintf(stderr, "error comunicandose con el cliente\n");
 	}
+
 	return out_val;
 }
 
@@ -165,25 +184,25 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 		switch (state->operation) {
 		case PUT_ID:
 			cmd.tag = PUT;
-			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key_size = state->key_size;
 			cmd.key = state->key;
 
-			cmd.val_len = cmd.val_size = state->val_size;
+			cmd.val_size = state->val_size;
 			cmd.val = state->val;
 			break;
 		case DEL_ID:
 			cmd.tag = DEL;
-			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key_size = state->key_size;
 			cmd.key = state->key;
 			break;
 		case GET_ID:
 			cmd.tag = GET;
-			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key_size = state->key_size;
 			cmd.key = state->key;
 			break;
 		case TAKE_ID:
 			cmd.tag = TAKE;
-			cmd.key_len = cmd.key_size = state->key_size;
+			cmd.key_size = state->key_size;
 			cmd.key = state->key;
 			break;
 		case STATS_ID:
@@ -192,7 +211,9 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 		}
 
 		enum cmd_output res = run_biny_command(store, &cmd);
-		respond_biny_command(sock, &cmd, res);
+		if (respond_biny_command(sock, &cmd, res) < 0) {
+			return MA_ERROR;
+		}
 
 		memset(state, 0, sizeof(*state));
 		state->step = BC_START;

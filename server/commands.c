@@ -150,8 +150,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 		case PUT: {
 			int attempts, res;
 			for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
-				res = kv_store_put(store, cmd->key, cmd->key_len, cmd->val,
-									cmd->val_len);
+				res = kv_store_put(store, cmd->key, cmd->key_size, cmd->val, cmd->val_size);
 				if (res != KV_STORE_OOM) break;
 				if (kv_store_evict(store) < 0) {
 					free_biny_command(cmd);
@@ -167,7 +166,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 			return CMD_EUNK;
 		}
 		case DEL: {
-			int res = kv_store_del(store, cmd->key, cmd->key_len);
+			int res = kv_store_del(store, cmd->key, cmd->key_size);
 			free_biny_command(cmd);
 			if (res == KV_STORE_OK) return CMD_OK; 
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
@@ -175,30 +174,28 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 		}
 		case GET: {
 			uint8_t* val;
-			size_t val_len;
-			int res = kv_store_get(store, cmd->key, cmd->key_len,
-									&val, &val_len);
+			size_t val_size;
+			int res = kv_store_get(store, cmd->key, cmd->key_size, &val, &val_size);
 			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == KV_STORE_OOM) return CMD_EOOM;
 			if (res == CMD_OK) {
 				assert(cmd->val != NULL);
 				cmd->val = val;
-				cmd->val_size = cmd->val_len = val_len;
+				cmd->val_size = val_size;
 				return CMD_OK;    
 			}
 		} return CMD_EUNK;
 		case TAKE: {
 			uint8_t* val;
-			size_t val_len;
-			int res = kv_store_take(store, cmd->key, cmd->key_len,
-									&val, &val_len);
+			size_t val_size;
+			int res = kv_store_take(store, cmd->key, cmd->key_size, &val, &val_size);
 			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == CMD_OK) {
 				assert(cmd->val != NULL);
 				cmd->val = val;
-				cmd->val_len = cmd->val_size = val_len;	
+				cmd->val_size = val_size;
 				return CMD_OK;    
 			}
 		} return CMD_EUNK;

@@ -86,21 +86,22 @@ void register_listen_socket_again(int epollfd, int sock, struct fd_data* data) {
 void register_client_socket_first(int epollfd, int sock, enum protocol protocol, kv_store* store) {
 	struct fd_data* data = calloc(1, sizeof(*data));
 	data->fd = sock;
+
 	switch (protocol) {
-		case TEXT:
-			data->type = FD_TYPE_TEXT_CONN;
-			data->client_state.text = create_text_client_state(store);
-      if (data->client_state.text == NULL) {
-        return;
-      }
-			break;
-		case BINY:
-			data->type = FD_TYPE_BINARY_CONN;
-			data->client_state.biny = create_biny_client_state(store);
-      if (data->client_state.biny == NULL) {
-        return;
-      }
-			break;
+	case TEXT:
+		data->type = FD_TYPE_TEXT_CONN;
+		data->client_state.text = create_text_client_state(store);
+		if (data->client_state.text == NULL) {
+			return;
+		}
+		break;
+	case BINY:
+		data->type = FD_TYPE_BINARY_CONN;
+		data->client_state.biny = create_biny_client_state(store);
+		if (data->client_state.biny == NULL) {
+			return;
+		}
+		break;
 	}
 
 	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;

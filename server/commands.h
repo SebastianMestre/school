@@ -26,12 +26,13 @@ struct text_command {
 
 struct biny_command {
 	enum cmd_tag tag;
+
 	uint8_t* key;
 	uint32_t key_size;
-	uint32_t key_len;
+
+	// En un PUT es un argumento. En un GET o un TAKE es un resultado.
 	uint8_t* val;
 	uint32_t val_size;
-	uint32_t val_len;   
 };
 
 enum cmd_output { 
