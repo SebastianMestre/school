@@ -13,8 +13,8 @@
 
 #define SIZE 1000000
 
-#define MAX_ITERS 15
-#define MAX_ATTEMPTS 5
+#define MAX_EVICT_STEPS 10
+#define MAX_EVICT_ATTEMPTS 10
 
 struct row {
 	pthread_mutex_t lock;
@@ -84,7 +84,7 @@ void* evict_until_malloc(struct hashtable* table, size_t size) {
 	if (result != NULL)
 		return result;
 
-	for (int attempts = 0; attempts < MAX_ATTEMPTS; ++attempts) {
+	for (int attempts = 0; attempts < MAX_EVICT_ATTEMPTS; ++attempts) {
 		if (!evict_one(table))
 			break;
 
@@ -297,11 +297,15 @@ bool evict_one(struct hashtable* table) {
 
 	bool result = false;
 
-	int iters = 0;
 
+	struct node* to_free = NULL;
+
+	int iters = 0;
 	struct list* lru = &table->lru;
-	struct list* it;
-	for (it = lru->next; it != lru; it = it->next) {
+	for (struct list* it = lru->next; it != lru; it = it->next) {
+
+		iters++;
+		if (iters > MAX_EVICT_STEPS) break;
 
 		struct node* node = node_from_lru_list(it);
 		struct row* row = node->row;
@@ -312,8 +316,7 @@ bool evict_one(struct hashtable* table) {
 
 			list_remove(&node->lru);
 			list_remove(&node->probing);
-
-			node_free(node);
+			to_free = node;
 
 			result = true;
 
@@ -322,10 +325,11 @@ bool evict_one(struct hashtable* table) {
 			break;
 		}
 
-		iters++;
 	}
 
 	pthread_spin_unlock(&table->lru_lock);
+
+	node_free(to_free);
 
 	return result;
 }
