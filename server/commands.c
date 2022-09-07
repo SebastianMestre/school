@@ -25,26 +25,29 @@ static void reset_text_command(struct text_command* cmd) {
 enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
-			unsigned char* key;
-			if (try_alloc(store, cmd->key_len, (void**)&key) < 0) {
+
+			unsigned char* key = try_alloc(store, cmd->key_len);
+			if (key == NULL) {
 				return CMD_EOOM;
 			}
 			memcpy(key, cmd->key, cmd->key_len);
-			unsigned char* val;
-			if (try_alloc(store, cmd->val_len, (void**)&val) < 0) {
+
+			unsigned char* val = try_alloc(store, cmd->val_len);
+			if (val != NULL) {
 				free(key);
 				return CMD_EOOM;
 			}
 			memcpy(val, cmd->val, cmd->val_len);
-			int attempts, res;
-      res = kv_store_put(store, key, cmd->key_len, val, cmd->val_len);
+
+			int res = kv_store_put(store, key, cmd->key_len, val, cmd->val_len);
 			reset_text_command(cmd);
 			if (res != KV_STORE_OK) {
-        free(val);
-        free(key);
-        return (res == KV_STORE_OOM) ? CMD_EOOM : CMD_EUNK;
-      }
-      return CMD_OK;
+				free(val);
+				free(key);
+				return (res == KV_STORE_OOM) ? CMD_EOOM : CMD_EUNK;
+			}
+
+			return CMD_OK;
 		}
 		case DEL: {
 			int res = kv_store_del(store, cmd->key, cmd->key_len);
