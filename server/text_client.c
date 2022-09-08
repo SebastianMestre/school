@@ -100,7 +100,7 @@ static enum status parse_text_command(char** start, char* buf_end, struct text_c
     char* cursor = *start;
     char* line_end = memchr(cursor, '\n', buf_end - cursor);
     if (line_end == NULL) return INCOMPLETE; 
-   
+	*start = line_end + 1;
     
     int word_len;
     switch (count_spaces(cursor, line_end)) {
@@ -150,7 +150,6 @@ PARSE_LAST:
     cmd->key_len = word_len;
     memcpy(cmd->key, cursor, word_len);
 PARSED:
-    *start = line_end + 1;
     return PARSED;
 }
 
@@ -159,18 +158,22 @@ static int interpret_text_commands(int sock, struct text_client_state* state, kv
 	char* cursor = state->buf;
 	char* buf_end = state->buf + state->buf_size;
 
+	enum cmd_output res;
+
 	while (cursor != buf_end) {
 		enum status parse_status = parse_text_command(&cursor, buf_end, &cmd);
 
-		// el comando es invalido, devuelvo error
-		if (parse_status == INVALID) return MA_ERROR;
+		// input incompleto
+		if (parse_status == INCOMPLETE) {
+			// el mensaje es demasiado largo, error
+			if (buf_end - cursor == TEXT_CLIENT_BUF_SIZE) return MA_ERROR;
+			else break;  
+		};
+		// el comando es invalido
+		if (parse_status == INVALID) res = CMD_EINVAL;
+		else if (parse_status == PARSED) res = run_text_command(store, &cmd);
+		else assert(0);
 
-		// necesito mas input, reseteo el bufer y salgo
-		if (parse_status == INCOMPLETE) break;
-
-		assert(parse_status == PARSED);
-
-		enum cmd_output res = run_text_command(store, &cmd);				
 		if (respond_text_command(sock, &cmd, res) < 0) return MA_ERROR;
 	}
 
