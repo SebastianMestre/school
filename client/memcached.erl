@@ -12,6 +12,7 @@
 -define(EBINARY, 113).
 -define(EBIG, 114).
 -define(EUNK, 115).
+-define(EOOM, 116).
 
 start(Address) ->
 	% TODO cambiar el puerto a 889
@@ -65,7 +66,7 @@ handle_conn(Socket) ->
 			case receive_code(Socket) of
 				{ok, ok} -> case receive_val(Socket) of
 					{ok, Val} -> 
-						PID ! {answer, ok, Val}, 
+						PID ! {answer, ok, binary_to_list(Val)}, 
 						handle_conn(Socket);
 					Error -> Error
 				end;
@@ -95,6 +96,7 @@ decode(?ENOTFOUND) -> enotfound;
 decode(?EBINARY) -> ebinary;
 decode(?EBIG) -> ebig;
 decode(?EUNK) -> eunk;
+decode(?EOOM) -> eoom;
 decode(_) 	-> unknown.
 
 binary_query(ID, Key) ->
@@ -151,8 +153,6 @@ take({connID, HandlePID}, K, Timeout) ->
 	after Timeout -> timeout
 	end.
 
-% Devuelve la respuesta en binario.
-% MAYBE parsearla? no entiendo bien cual seria el formato 	
 stats(Conn) -> stats(Conn, infinity).
 stats({connID, HandlePID}, Timeout) ->
 	HandlePID ! {stats, self()},
