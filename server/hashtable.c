@@ -305,7 +305,7 @@ bool evict_one(struct hashtable* table) {
 
 	int iters = 0;
 	struct list* lru = &table->lru;
-	for (struct list* it = lru->next; it != lru; it = it->next) {
+	for (struct list* it = lru->prev; it != lru; it = it->prev) {
 
 		iters++;
 		if (iters > MAX_EVICT_STEPS) break;
