@@ -131,8 +131,9 @@ void* server(void* server_data) {
 	
 	while (1) {
 		fprintf(stderr, "WAIT\n");
-		struct epoll_event evt;
-		int event_count = epoll_wait(epollfd, &evt, 1, -1);
+#define MAX_EVENTS 10
+		struct epoll_event evt[MAX_EVENTS];
+		int event_count = epoll_wait(epollfd, evt, MAX_EVENTS, -1);
 
 		fprintf(stderr, "DEJO DE ESPERAR\n");
 
@@ -142,85 +143,89 @@ void* server(void* server_data) {
 
 		assert(event_count > 0);
 
-		assert(event_count == 1); // TODO: borrar cuando manejemos varios eventos
+		fprintf(stderr, "event count: %d\n", event_count);
 
-		struct fd_data* data = evt.data.ptr;
+		// assert(event_count == 1); // TODO: borrar cuando manejemos varios eventos
+		for (int i = 0; i < event_count; i++) {
+			struct fd_data* data = evt[i].data.ptr;
 
-		switch (data->type) {
-		case FD_TYPE_TEXT_LISTEN: {
+			switch (data->type) {
+			case FD_TYPE_TEXT_LISTEN: {
 
-			fprintf(stderr, "TEXTO: NUEVO CLIENTE!\n");
+				fprintf(stderr, "TEXTO: NUEVO CLIENTE!\n");
 
-			int listen_sock = data->fd;
+				int listen_sock = data->fd;
 
-			int conn_sock;
-			enum message_action action = handle_new_client(listen_sock, &conn_sock);
+				int conn_sock;
+				enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
-			if (action == MA_OK) {
-				register_client_socket_first(epollfd, conn_sock, TEXT, store);
-			}
-
-			register_listen_socket_again(epollfd, listen_sock, data);
-
-		} break;
-		case FD_TYPE_BINARY_LISTEN: {
-			
-			fprintf(stderr, "BINARIO: NUEVO CLIENTE!\n");
-
-			int listen_sock = data->fd;
-
-			int conn_sock;
-			enum message_action action = handle_new_client(listen_sock, &conn_sock);
-
-			if (action == MA_OK) {
-				register_client_socket_first(epollfd, conn_sock, BINY, store);
-			}
-
-			register_listen_socket_again(epollfd, listen_sock, data);
-
-		} break;
-		case FD_TYPE_TEXT_CONN: {
-
-			fprintf(stderr, "TEXTO: ME HABLA UN CLIENTE!\n");
-			fprintf(stderr, "evt flags = %8x\n", evt.events);
-
-			enum message_action action = handle_text_message(data->client_state.text, data->fd, evt.events, store);
-
-			int sock = data->fd;
-			if (action == MA_OK) {
-				register_client_socket_again(epollfd, sock, data);
-			} else {
-				if (action == MA_ERROR) {
-					fprintf(stderr, "error handle_text_message sock = %d\n", sock);
+				if (action == MA_OK) {
+					register_client_socket_first(epollfd, conn_sock, TEXT, store);
 				}
-				free(data->client_state.text);
-				free(data);
-				close(sock);
-			}
 
+				register_listen_socket_again(epollfd, listen_sock, data);
 
-		} break;
-		case FD_TYPE_BINARY_CONN: {
-			
-			fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
-			fprintf(stderr, "evt flags = %8x\n", evt.events);
+			} break;
+			case FD_TYPE_BINARY_LISTEN: {
+				
+				fprintf(stderr, "BINARIO: NUEVO CLIENTE!\n");
 
-			enum message_action action = handle_biny_message(data->client_state.biny, data->fd, evt.events, store);
+				int listen_sock = data->fd;
 
-			int sock = data->fd;
-			if (action == MA_OK) {
-				register_client_socket_again(epollfd, sock, data);
-			} else {
-				if (action == MA_ERROR) {
-					fprintf(stderr, "error handle_biny_message sock = %d\n", sock);
+				int conn_sock;
+				enum message_action action = handle_new_client(listen_sock, &conn_sock);
+
+				if (action == MA_OK) {
+					register_client_socket_first(epollfd, conn_sock, BINY, store);
 				}
-				free(data->client_state.biny);
-				free(data);
-				close(sock);
+
+				register_listen_socket_again(epollfd, listen_sock, data);
+
+			} break;
+			case FD_TYPE_TEXT_CONN: {
+
+				fprintf(stderr, "TEXTO: ME HABLA UN CLIENTE!\n");
+				fprintf(stderr, "evt flags = %8x\n", evt[i].events);
+
+				enum message_action action = handle_text_message(data->client_state.text, data->fd, evt[i].events, store);
+
+				int sock = data->fd;
+				if (action == MA_OK) {
+					register_client_socket_again(epollfd, sock, data);
+				} else {
+					if (action == MA_ERROR) {
+						fprintf(stderr, "error handle_text_message sock = %d\n", sock);
+					}
+					free(data->client_state.text);
+					free(data);
+					close(sock);
+				}
+
+
+			} break;
+			case FD_TYPE_BINARY_CONN: {
+				
+				fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
+				fprintf(stderr, "evt flags = %8x\n", evt[i].events);
+
+				enum message_action action = handle_biny_message(data->client_state.biny, data->fd, evt[i].events, store);
+
+				int sock = data->fd;
+				if (action == MA_OK) {
+					register_client_socket_again(epollfd, sock, data);
+				} else {
+					if (action == MA_ERROR) {
+						fprintf(stderr, "error handle_biny_message sock = %d\n", sock);
+					}
+					free(data->client_state.biny);
+					free(data);
+					close(sock);
+				}
+			} break;
 			}
-		} break;
 		}
-	}
+
+		}
 
 	return NULL;
 } 
