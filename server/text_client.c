@@ -182,10 +182,15 @@ static int interpret_text_commands(int sock, struct text_client_state* state, kv
 }
 
 enum message_action handle_text_message(struct text_client_state* state, int sock, int events, kv_store* store) {
-	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) return MA_STOP;
+	
+	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
+		fprintf(stderr, "HANGUP\n");
+		return MA_STOP;
+	}
 
+	int read_status;
 	while (1) {
-		int read_status = read_until(sock, state->buf, &state->buf_size, TEXT_CLIENT_BUF_SIZE);
+		read_status = read_until(sock, state->buf, &state->buf_size, TEXT_CLIENT_BUF_SIZE);
 		if (read_status == -3) return MA_ERROR;
 
 		int interpret_status = interpret_text_commands(sock, state, store);
