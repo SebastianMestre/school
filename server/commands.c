@@ -218,7 +218,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 			free_biny_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == CMD_OK) {
-				assert(cmd->val != NULL);
+				assert(val != NULL);
 				cmd->val = val;
 				cmd->val_size = val_size;
 				return CMD_OK;    
