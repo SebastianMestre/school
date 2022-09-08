@@ -12,8 +12,6 @@
 #include "fd_utils.h"
 #include "try_alloc.h"
 
-//#include "text_mode_parser.h"
-
 #define TEXT_CLIENT_BUF_SIZE 2048
 
 struct text_client_state {
