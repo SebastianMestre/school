@@ -35,13 +35,9 @@ static int respond_text_command(int client_socket, struct text_command* cmd, enu
 
 	const char* cmd_output = cmd_output_name(res, &ans_len);   
 	if (res == CMD_OK) {
-		if (cmd->tag == GET || cmd->tag == TAKE) {
+		if (cmd->tag == GET || cmd->tag == TAKE || cmd->tag == STATS) {
 			assert(cmd->val_len > 0);
 			ans_len += 1 + cmd-> val_len;
-		}
-		if (cmd->tag == STATS) {
-			// TODO
-			fprintf(stderr, "no implementado :(\n");
 		}
 		// reiniciamos el comando
 		cmd->val_len = 0;

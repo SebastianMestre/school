@@ -69,7 +69,7 @@ int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_o
 	}
 
 	switch (cmd->tag) {
-	case GET: case TAKE:
+	case GET: case TAKE: case STATS:
 		assert(cmd->val);
 		uint32_t val_size = htonl(cmd->val_size);
 
@@ -83,11 +83,6 @@ int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_o
 			goto early_exit;
 		}
 		break;
-
-	case STATS:
-		fprintf(stderr, "no implementado :(\n");
-		break;
-
 	case DEL: case PUT:
 		break;
 	}

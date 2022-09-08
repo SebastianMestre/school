@@ -16,11 +16,37 @@
 #define EUNK		115
 #define EOOM		116 // codigo nuevo
 
+// TODO hace falta esto?
 static void reset_text_command(struct text_command* cmd) {
 	cmd->key_len = cmd->val_len = 0;
 }
 
 #define ALLOC_ATTEMPTS 10
+
+// retorna el tamaño del resultado
+// si val no es NULL, almacena las stats en val
+static int stats(kv_store* store, char* val) {
+	struct kv_store_stat stats;
+	kv_store_stat(store, &stats);
+	
+	int val_len;
+	const char* format = "PUTS=%lu DELS=%lu GETS=%lu TAKES=%lu KEYS=%lu"; 
+	if (val == NULL) {
+		val_len = snprintf(val, 0, format, 	stats.put_count, 
+											stats.del_count, 
+											stats.get_count, 
+											stats.take_count, 
+											stats.key_count);	
+	}
+	else {
+		val_len = sprintf(val, format, 	stats.put_count, 
+										stats.del_count, 
+										stats.get_count, 
+										stats.take_count, 
+										stats.key_count);
+	}
+	return val_len;
+}
 
 enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
@@ -122,11 +148,9 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			}
 		} return CMD_EUNK;
 		case STATS: {
-			struct kv_store_stat stats;
-			kv_store_stat(store, &stats);
-			// TODO
-			fprintf(stderr, "stats: no implementado\n");
-			reset_text_command(cmd);
+			// no estamos chequeando que alcance el tamaño del buffer
+			// deberia alcanzar...
+			cmd->val_len = stats(store, cmd->val);
 			return CMD_OK;
 		} break;
 		default:
@@ -134,6 +158,7 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	}
 }
 
+// TODO hace falta esto?
 static void reset_biny_command(struct biny_command* cmd) {
 	cmd->key_size = cmd->val_size = 0;
 	cmd->key = cmd->val = NULL;
@@ -200,10 +225,10 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 			}
 		} return CMD_EUNK;
 		case STATS: {
-			struct kv_store_stat stats;
-			kv_store_stat(store, &stats);
-			// TODO
-			fprintf(stderr, "stats: no implementado\n");
+			size_t size = stats(store, NULL);
+			cmd->val = try_alloc(store, size);
+			if (cmd->val == NULL) return CMD_EOOM;
+			cmd->val_size = stats(store, cmd->val);
 			return CMD_OK;
 		} break;
 		default:
