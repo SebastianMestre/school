@@ -277,8 +277,10 @@ int main(int argc, char** argv) {
 	struct server_data data = {.epollfd = epollfd, .store = store};
 	pthread_t tid[nthreads];
 	for (int i = 0; i < nthreads; i++) {
-		// TODO error
-		pthread_create(tid + i, NULL, server, (void*)&data);
+		if (pthread_create(tid + i, NULL, server, (void*)&data) < 0) {
+			fprintf(stderr, "error levantando threads\n");
+			exit(EXIT_FAILURE);
+		}
 	}
 	for (int i = 0; i < nthreads; i++) {
 		pthread_join(tid[i], NULL);
