@@ -137,7 +137,7 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 			state->key_size = ntohl(*(uint32_t*)state->size_buf);
 			state->cursor = 0;
 			state->key = try_alloc(store, state->key_size);
-			if (state->key == NULL) goto error_oom;
+			if (state->key == NULL) goto error_oom_key;
 
 			state->step = BC_KEY;
 
@@ -163,7 +163,7 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 			state->val_size = ntohl(*(uint32_t*)state->size_buf);
 			state->cursor = 0;
 			state->val = try_alloc(store, state->val_size);
-			if (state->key == NULL) goto error_oom;
+			if (state->val == NULL) goto error_oom_val;
 
 			state->step = BC_VAL;
 
@@ -225,8 +225,9 @@ error_key:
 error_nothing:
 	if (read_status == -1) return MA_OK;
 	return MA_ERROR;
-
-error_oom:
-	// TODO: respond OOM
-	return MA_ERROR;
+error_oom_val:
+	free(state->key);
+error_oom_key:
+	respond_biny_command(sock, NULL, CMD_EOOM);
+	return MA_OK;
 }
