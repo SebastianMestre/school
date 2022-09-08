@@ -6,7 +6,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-#include "biny_mode_parser.h"
+#include "biny_client.h"
 #include "commands.h"
 #include "fd_utils.h"
 #include "try_alloc.h"

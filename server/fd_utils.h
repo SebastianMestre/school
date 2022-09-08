@@ -1,6 +1,6 @@
 #pragma once
 
-#include<stddef.h>
+#include <stddef.h>
 
 // intenta leer del file descriptor hasta llenar el bufer dado.
 // devuelve un codigo de estado

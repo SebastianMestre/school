@@ -18,8 +18,8 @@
 #include "message_action.h"
 #include "kv_store.h"
 #include "commands.h"
-#include "text_mode_parser.h"
-#include "biny_mode_parser.h"
+#include "text_client.h"
+#include "biny_client.h"
 #include "try_alloc.h"
 #include "fd_utils.h"
 
@@ -41,24 +41,6 @@ struct fd_data {
 		struct biny_client_state* biny;
 	} client_state; 	
 };
-
-// TODO que hacemos si no podemos alocar el client_state?
-
-#define TEXT_CLIENT_BUF_SIZE 2048
-
-struct text_client_state {
-	size_t buf_size;
-	char buf[TEXT_CLIENT_BUF_SIZE];
-};
-
-struct text_client_state* create_text_client_state(kv_store* store) {
-	struct text_client_state* result = try_alloc(store, sizeof(*result));
-	if (result != NULL) {
-		memset(result, 0, sizeof(*result));
-	}
-	return result;
-}
-
 
 
 void register_listen_socket_first(int epollfd, int sock, enum protocol protocol) {
@@ -126,93 +108,6 @@ enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	*out_sock = conn_sock;
 	return MA_OK;
 }
-
-int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {
-	int out_val = 0;
-	char ans[2048];
-	int ans_len = 0;  
-	const char* output_name;
-
-	const char* cmd_output = cmd_output_name(res, &ans_len);   
-	if (res == CMD_OK) {
-		if (cmd->tag == GET || cmd->tag == TAKE) {
-			assert(cmd->val_len > 0);
-			ans_len += 1 + cmd-> val_len;
-		}
-		if (cmd->tag == STATS) {
-			// TODO
-			fprintf(stderr, "no implementado :(\n");
-		}
-		// reiniciamos el comando
-		cmd->val_len = 0;
-	}
-	if (ans_len < 2048) {
-		// ans = cmd_output ++ cmd->val?
-		// cmd_output es un string literal y tiene terminador 
-		// cmd->val no tiene terminador, funciona porque sabemos exactamente el largo
-		snprintf(ans, ans_len + 1, "%s %s", cmd_output, cmd->val);
-	}
-	else {
-		ans_len = sprintf(ans, "EBIG");
-	}
-	ans[ans_len++] = '\n';
-
-	int nbytes = write(client_socket, ans, ans_len);
-	if (nbytes != ans_len) {
-		out_val = -1;
-		fprintf(stderr, "no pude escribir al cliente \n");
-	}
-	
-	return out_val;
-}
-
-int interpret_text_commands(int sock, struct text_client_state* state, kv_store* store) {
-	struct text_command cmd;
-	char* cursor = state->buf;
-	char* buf_end = state->buf + state->buf_size;
-
-	while (cursor != buf_end) {
-		enum status parse_status = parse_text_command(&cursor, buf_end, &cmd);
-
-		// el comando es invalido, devuelvo error
-		if (parse_status == INVALID) return MA_ERROR;
-
-		// necesito mas input, reseteo el bufer y salgo
-		if (parse_status == INCOMPLETE) break;
-
-		assert(parse_status == PARSED);
-
-		enum cmd_output res = run_text_command(store, &cmd);				
-		if (respond_text_command(sock, &cmd, res) < 0) return MA_ERROR;
-	}
-
-	state->buf_size = buf_end - cursor;
-	memmove(state->buf, cursor, state->buf_size);
-
-	return MA_OK;
-}
-
-enum message_action handle_text_message(struct fd_data* data, int events, kv_store* store) {
-	int sock = data->fd;
-	struct text_client_state* state = data->client_state.text;
-	if (events & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) return MA_STOP;
-
-	while (1) {
-		int read_status = read_until(sock, state->buf, &state->buf_size, TEXT_CLIENT_BUF_SIZE);
-		if (read_status == -3) return MA_ERROR;
-
-		int interpret_status = interpret_text_commands(sock, state, store);
-		if (interpret_status == MA_ERROR) return MA_ERROR;
-
-		if (read_status ==  0) continue;
-		if (read_status == -1) return MA_OK;
-		if (read_status == -2) return MA_STOP;
-	}
-}
-
-
-
-
 
 
 int set_memory_limit(rlim_t limit) {
@@ -289,7 +184,7 @@ void* server(void* server_data) {
 			fprintf(stderr, "TEXTO: ME HABLA UN CLIENTE!\n");
 			fprintf(stderr, "evt flags = %8x\n", evt.events);
 
-			enum message_action action = handle_text_message(data, evt.events, store);
+			enum message_action action = handle_text_message(data->client_state.text, data->fd, evt.events, store);
 
 			int sock = data->fd;
 			if (action == MA_OK) {
