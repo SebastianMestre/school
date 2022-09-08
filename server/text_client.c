@@ -96,7 +96,9 @@ int get_word(char* start, int len, char sep) {
     return word_end - start;
 }
 
-static enum status parse_text_command(char** start, char* buf_end, struct text_command* cmd) {
+enum parse_status {INCOMPLETE, INVALID, PARSED};
+
+static enum parse_status parse_text_command(char** start, char* buf_end, struct text_command* cmd) {
     char* cursor = *start;
     char* line_end = memchr(cursor, '\n', buf_end - cursor);
     if (line_end == NULL) return INCOMPLETE; 
@@ -161,7 +163,7 @@ static int interpret_text_commands(int sock, struct text_client_state* state, kv
 	enum cmd_output res;
 
 	while (cursor != buf_end) {
-		enum status parse_status = parse_text_command(&cursor, buf_end, &cmd);
+		enum parse_status parse_status = parse_text_command(&cursor, buf_end, &cmd);
 
 		// input incompleto
 		if (parse_status == INCOMPLETE) {

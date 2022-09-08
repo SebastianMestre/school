@@ -10,7 +10,6 @@
 // MISMATCH: (para parsear un comando) no hay match en el prefijo
 // KEY_NEXT: parsear la clave (reservar memoria si es necesario)
 // KEY_VAL: parsear el valor (reservar memoria si es necesario)
-enum status { PARSED, INVALID, INCOMPLETE, MISMATCH, KEY_NEXT, VAL_NEXT };
 enum cmd_tag { PUT, DEL, GET, TAKE, STATS };
 
 #define WORD_SIZE 2048
