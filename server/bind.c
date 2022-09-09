@@ -8,6 +8,11 @@
 
 #include "connections.h"
 
+#define ADDRESS "localhost"
+#define TEXT_PORT 888
+#define BINY_PORT 889
+
+
 char* int_to_string(int a) {
 	int len = snprintf(NULL, 0, "%d", a);
 	char* str = malloc(len + 1); 
@@ -26,15 +31,15 @@ int main() {
 	}
 	// corriendo como root
 
-	int text_socket = create_listen_socket("localhost", "888");
+	int text_socket = create_listen_socket(ADDRESS, TEXT_PORT);
 	if (text_socket < 0) {
-		fprintf(stderr, "Error en la conexion al puerto 888\n");
+		fprintf(stderr, "Error en la conexion al puerto %d\n", TEXT_PORT);
 		exit(1);
 	}
-	int biny_socket = create_listen_socket("localhost", "889");
+	int biny_socket = create_listen_socket(ADDRESS, BINY_PORT);
 	if (biny_socket < 0) {
 		close (text_socket);
-		fprintf(stderr, "Error en la conexion al puerto 889\n");
+		fprintf(stderr, "Error en la conexion al puerto %d\n", BINY_PORT);
 		exit(1);
 	}
 
