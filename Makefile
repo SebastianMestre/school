@@ -1,7 +1,11 @@
 CLIENTS = build/text_client.o build/biny_client.o
 KV_STORE = build/kv_hashtable.o build/hashtable.o build/list.o
+UTILS = build/commands.o build/connections.o build/try_alloc.o build/fd_utils.o
 
-server.out: build/main.o $(CLIENTS) $(KV_STORE) build/commands.o build/connections.o build/try_alloc.o build/fd_utils.o
+start: build/bind.o build/connections.o build/server 
+	gcc -o $@ build/bind.o build/connections.o
+	
+build/server: build/main.o $(CLIENTS) $(KV_STORE) $(UTILS)
 	gcc -pthread -o $@ $^
 
 clean:
@@ -9,6 +13,7 @@ clean:
 	rm -f server.out
 .PHONY: clean
 
+build/bind.o: server/bind.c server/connections.h
 build/main.o: server/main.c server/connections.h server/kv_store.h server/commands.h server/text_client.h server/biny_client.h server/try_alloc.h server/fd_utils.h
 build/text_client.o: server/text_client.c server/text_client.h server/commands.h server/fd_utils.h server/try_alloc.h
 build/biny_client.o: server/biny_client.c server/biny_client.h server/commands.h server/fd_utils.h server/try_alloc.h

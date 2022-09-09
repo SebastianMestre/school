@@ -28,8 +28,7 @@
 
 % inicia conexion
 start(Address) ->
-	% TODO cambiar el puerto a 889
-	case gen_tcp:connect(Address, 8001, [binary, {active, false}, {packet,raw}]) of
+	case gen_tcp:connect(Address, 889, [binary, {active, false}, {packet,raw}]) of
 		{ok, Socket} ->  	
 			HandlePID = spawn(fun() -> handle_conn(Socket) end),
 			{ok, {connID, HandlePID}};

@@ -9,9 +9,10 @@
 #include "connections.h"
 
 #define ADDRESS "localhost"
-#define TEXT_PORT 888
-#define BINY_PORT 889
+#define TEXT_PORT "888"
+#define BINY_PORT "889"
 
+#define SERVER "build/server"
 
 char* int_to_string(int a) {
 	int len = snprintf(NULL, 0, "%d", a);
@@ -33,13 +34,13 @@ int main() {
 
 	int text_socket = create_listen_socket(ADDRESS, TEXT_PORT);
 	if (text_socket < 0) {
-		fprintf(stderr, "Error en la conexion al puerto %d\n", TEXT_PORT);
+		fprintf(stderr, "Error en la conexion al puerto %s\n", TEXT_PORT);
 		exit(1);
 	}
 	int biny_socket = create_listen_socket(ADDRESS, BINY_PORT);
 	if (biny_socket < 0) {
 		close (text_socket);
-		fprintf(stderr, "Error en la conexion al puerto %d\n", BINY_PORT);
+		fprintf(stderr, "Error en la conexion al puerto %s\n", BINY_PORT);
 		exit(1);
 	}
 
@@ -54,7 +55,7 @@ int main() {
 	char* arg1 = int_to_string(text_socket); assert(arg1);
 	char* arg2 = int_to_string(biny_socket); assert(arg2);
 
-	execl("./main","./main", arg1, arg2, NULL);
+	execl(SERVER, SERVER, arg1, arg2, NULL);
 	
 	// execl fallo
 	fprintf(stderr, "No pude levantar el servidor\n");
