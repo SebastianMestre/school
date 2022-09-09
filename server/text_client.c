@@ -107,7 +107,10 @@ static enum parse_status parse_text_command(char** start, char* buf_end, struct 
 	}
 	case DEL: case GET: case TAKE: {
 
-		char* key_start = memchr(line_start, ' ', line_end - line_start) + 1;
+		char* com_end = memchr(line_start, ' ', line_end - line_start);
+		if (com_end == NULL) return INVALID;
+
+		char* key_start = com_end + 1;
 		char* key_end = line_end;
 
 		if (key_start == key_end)
@@ -123,8 +126,14 @@ static enum parse_status parse_text_command(char** start, char* buf_end, struct 
 	}
 	case PUT: {
 
-		char* key_start = memchr(line_start, ' ', line_end - line_start) + 1;
+		char* com_end = memchr(line_start, ' ', line_end - line_start);
+		if (com_end == NULL) return INVALID;
+
+		char* key_start = com_end + 1;
+
 		char* key_end = memchr(key_start, ' ', line_end - key_start);
+		if (key_end == NULL) return INVALID;
+
 		char* val_start = key_end + 1;
 		char* val_end = line_end;
 
