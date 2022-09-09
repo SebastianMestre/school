@@ -7,6 +7,8 @@ Para correr el servidor en los puertos 888 y 889, se debe ejecutar `./start`.
 
 Para correr el servidor en los puertos 8000 y 8001, se debe ejecutar `./build/server`.
 
+Por defecto, el límite de memoria es 1GiB.
+
 # Lugares de interés en el programa
 
 - `server/bind.c` implementa la reducción de privilegios
