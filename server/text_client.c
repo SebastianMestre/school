@@ -21,10 +21,13 @@ struct text_client_state {
 
 struct text_client_state* create_text_client_state(kv_store* store) {
 	struct text_client_state* result = try_alloc(store, sizeof(*result));
-	if (result != NULL) {
-		memset(result, 0, sizeof(*result));
-	}
+	if (result == NULL) return NULL;
+	memset(result, 0, sizeof(*result));
 	return result;
+}
+
+void free_text_client_state(struct text_client_state* state) {
+	free(state);
 }
 
 static int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {

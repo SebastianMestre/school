@@ -53,6 +53,13 @@ struct biny_client_state* create_biny_client_state(kv_store* store) {
 	return result;
 }
 
+void free_biny_client_state(struct biny_client_state* state) {
+	if (state == NULL) return;
+	free(state->key);
+	free(state->val);
+	free(state);
+}
+
 
 // Mandamos el mensaje en partes, abortando si el write falla
 int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
