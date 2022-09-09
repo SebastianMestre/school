@@ -135,10 +135,10 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 			if (read_status < 0) goto error_nothing;
 
 			state->key_size = ntohl(*(uint32_t*)state->size_buf);
-			state->cursor = 0;
 			state->key = try_alloc(store, state->key_size);
 			if (state->key == NULL) goto error_oom_key;
 
+			state->cursor = 0;
 			state->step = BC_KEY;
 
 		case BC_KEY: // fallthrough
@@ -161,10 +161,10 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 			if (read_status < 0) goto error_key;
 
 			state->val_size = ntohl(*(uint32_t*)state->size_buf);
-			state->cursor = 0;
 			state->val = try_alloc(store, state->val_size);
 			if (state->val == NULL) goto error_oom_val;
 
+			state->cursor = 0;
 			state->step = BC_VAL;
 
 		case BC_VAL: // fallthrough
