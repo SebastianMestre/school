@@ -225,9 +225,10 @@ error_key:
 error_nothing:
 	if (read_status == -1) return MA_OK;
 	return MA_ERROR;
+
 error_oom_val:
 	free(state->key);
 error_oom_key:
 	respond_biny_command(sock, NULL, CMD_EOOM);
-	return MA_OK;
+	return MA_ERROR;
 }
