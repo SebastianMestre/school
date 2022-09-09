@@ -64,91 +64,83 @@ static int respond_text_command(int client_socket, struct text_command* cmd, enu
 
 int alphanumeric(char* str, int len) {
     for (int i = 0; i < len; i++) {
-        if (!isalnum(str[i])) return 0;
+        if (!isalnum(str[i]) && str[i] != ' ') return 0;
     }
     return 1;
 }
 
-static int count_spaces(char* start, char* end) {
-    int spaces = 0;
-    while (start != NULL && end - start > 0) {
-        start = memchr(start, ' ', end - start);
-        if (start != NULL) {
-            spaces++;
-            start++;
-        }
-    }
-    return spaces;
-}
-
-int cmp_to_string(const char* val, int len, const char* str) {
-    return (len == strlen(str)) && (memcmp(val, str, len) == 0);
-}
-
-int get_word(char* start, int len, char sep) {
-    char* word_end = memchr(start, sep, len);
-    if (word_end == NULL) return 0;
-    if (!alphanumeric(start, word_end - start)) return 0;
-    return word_end - start;
+int starts_with_word(char* start, char* end, char const* str) {
+	size_t len = strlen(str);
+	if (end - start < len) return 0;
+	if (memcmp(start, str, len) != 0) return 0;
+	return (end - start == len) || (start[len] == ' ');
 }
 
 enum parse_status {INCOMPLETE, INVALID, PARSED};
 
 static enum parse_status parse_text_command(char** start, char* buf_end, struct text_command* cmd) {
-    char* cursor = *start;
-    char* line_end = memchr(cursor, '\n', buf_end - cursor);
+    char* line_start = *start;
+
+    char* line_end = memchr(line_start, '\n', buf_end - line_start);
     if (line_end == NULL) return INCOMPLETE; 
+
+	if (!alphanumeric(line_start, line_end - line_start)) return INVALID;
+
 	*start = line_end + 1;
     
-    int word_len;
-    switch (count_spaces(cursor, line_end)) {
-        case 0:
-            if (cmp_to_string(cursor, line_end - cursor, "STATS")) {
-                cmd->tag = STATS;
-                goto PARSED;
-            }
-            return INVALID;
-        case 1:
-            word_len = get_word(cursor, line_end - cursor, ' ');
-            if (word_len <= 0) return INVALID;
+	if (starts_with_word(line_start, line_end, "STATS")) cmd->tag = STATS;
+	else if (starts_with_word(line_start, line_end, "DEL")) cmd->tag = DEL;
+	else if (starts_with_word(line_start, line_end, "GET")) cmd->tag = GET;
+	else if (starts_with_word(line_start, line_end, "TAKE")) cmd->tag = TAKE;
+	else if (starts_with_word(line_start, line_end, "PUT")) cmd->tag = PUT;
+	else return INVALID;
 
-            if (cmp_to_string(cursor, word_len, "DEL")) cmd ->tag = DEL;
-            else if (cmp_to_string(cursor, word_len, "GET")) cmd ->tag = GET;
-            else if (cmp_to_string(cursor, word_len, "TAKE")) cmd ->tag = TAKE;
-            else return INVALID;
+    switch (cmd->tag) {
+	case STATS: {
+		if (memchr(line_start, ' ', line_end - line_start) != NULL)
+			return INVALID;
 
-            cursor += word_len + 1;
-            goto PARSE_LAST;
-        case 2:
-            word_len = get_word(cursor, line_end - cursor, ' ');
-            if (word_len <= 0) return INVALID;
-            
-            if (cmp_to_string(cursor, word_len, "PUT")) cmd ->tag = PUT;
-            else return INVALID;
+		return PARSED;
+	}
+	case DEL: case GET: case TAKE: {
 
-            cursor += word_len + 1;
-            goto PARSE_PUT;
-        default:
-            return INVALID;
+		char* key_start = memchr(line_start, ' ', line_end - line_start) + 1;
+		char* key_end = line_end;
+
+		if (key_start == key_end)
+			return INVALID;
+
+		if (memchr(key_start, ' ', line_end - key_start) != NULL)
+			return INVALID;
+
+		cmd->key_len = key_end - key_start;
+		memcpy(cmd->key, key_start, cmd->key_len);
+
+		return PARSED;
+	}
+	case PUT: {
+
+		char* key_start = memchr(line_start, ' ', line_end - line_start) + 1;
+		char* key_end = memchr(key_start, ' ', line_end - key_start);
+		char* val_start = key_end + 1;
+		char* val_end = line_end;
+
+		if (key_start == key_end || val_start == val_end)
+			return INVALID;
+
+		if (memchr(val_start, ' ', line_end - val_start) != NULL)
+			return INVALID;
+
+		cmd->key_len = key_end - key_start;
+		memcpy(cmd->key, key_start, cmd->key_len);
+
+		cmd->val_len = val_end - val_start;
+		memcpy(cmd->val, val_start, cmd->val_len);
+
+		return PARSED;
+	}
     }
-PARSE_PUT:
-    word_len = get_word(cursor, line_end - cursor, ' ');
-    if (word_len <= 0) return INVALID;
-    cmd->key_len = word_len;
-    memcpy(cmd->key, cursor, word_len);
-    cursor += word_len + 1;
-PARSE_LAST:
-    word_len = line_end - cursor;
-    if (word_len <= 0) return INVALID;
-    if (cmd->tag == PUT) {
-        cmd->val_len = word_len;
-        memcpy(cmd->val, cursor, word_len);
-        goto PARSED;
-    }
-    cmd->key_len = word_len;
-    memcpy(cmd->key, cursor, word_len);
-PARSED:
-    return PARSED;
+
 }
 
 static int interpret_text_commands(int sock, struct text_client_state* state, kv_store* store) {
