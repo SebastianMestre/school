@@ -12,7 +12,6 @@ build/server: build/main.o build/server.o $(CLIENTS) $(KV_STORE) $(UTILS)
 
 clean:
 	rm -rf build/
-	rm -f server.out
 .PHONY: clean
 
 build/bind.o: server/bind.c server/connections.h
