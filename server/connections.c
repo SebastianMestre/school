@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/errno.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -7,7 +8,7 @@
 
 #include "connections.h"
 
-int register_epoll(int epollfd, int fd, int op, int flags, void* data) {
+static int register_epoll(int epollfd, int fd, int op, int flags, void* data) {
 	fprintf(stderr, "epoll_ctl <~~ epollfd = %d, fd = %d, op = %d, flags = %x, data = %p\n", epollfd, fd, op, flags, data);
 	struct epoll_event evt = {0};
 	evt.events = flags;
@@ -59,4 +60,24 @@ int create_listen_socket(char const* address, char const* port) {
 	}
 
 	return listen_sock;
+}
+
+int register_listen_socket_first(int epollfd, int sock, void* data) {
+	int flags = EPOLLIN | EPOLLONESHOT;
+	register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data);
+}
+
+int register_listen_socket_again(int epollfd, int sock, void* data) {
+	int flags = EPOLLIN | EPOLLONESHOT;
+	register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data);
+}
+
+int register_client_socket_first(int epollfd, int sock, void* data) {
+	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
+	register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data);
+}
+
+int register_client_socket_again(int epollfd, int sock, void* data) {
+	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
+	register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data);
 }
