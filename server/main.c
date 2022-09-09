@@ -13,7 +13,7 @@
 #include "kv_store.h"
 #include "server.h"
 
-#define DATA_LIMIT RLIM_INFINITY
+#define DATA_LIMIT (1<<30)
 #define MAX_THREADS 4
 
 int set_memory_limit(rlim_t limit) {
