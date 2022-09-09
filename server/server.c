@@ -41,8 +41,12 @@ static enum message_action handle_new_client(int listen_sock, int *out_sock) {
 }
 
 void register_listener(int epollfd, int sock, enum protocol protocol) {
-	// TODO usar try_alloc
 	struct fd_data *data = calloc(1, sizeof(*data));
+	if (data == NULL) {
+		fprintf(stderr, "fallo al iniciar: memoria insuficiente\n");
+		exit(EXIT_FAILURE);
+	}
+
 	switch (protocol) {
 	case TEXT:
 		data->type = FD_TYPE_TEXT_LISTEN;
