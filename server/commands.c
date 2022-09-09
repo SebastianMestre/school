@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
+#include <ctype.h>
 #include <stdio.h>
 
 #include "try_alloc.h"
@@ -48,6 +48,13 @@ static int stats(kv_store* store, char* val) {
 	return val_len;
 }
 
+static int imprimible(char* str, int len) {
+	for (int i = 0; i < len; i++) {
+		if (!isprint(str[i])) return 0;	
+	}
+	return 1;
+}
+
 enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
@@ -90,25 +97,16 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			if (res == KV_STORE_OOM) return CMD_EOOM;
 			
-			/** opcion 1: chequeamos que el valor no sea binario
-			if (res == KV_STORE_BIN) {
-				free(val);
-				return CMD_BIN;
-			}
-			*/
 			if (res == CMD_OK) {
 				assert(val != NULL);
 				if (val_len > WORD_SIZE) {
 					free(val);
 					return CMD_EBIG;
 				}
-				/** opcion 2:
-					chequeamos que el valor sea imprmible 
 				if (!imprimible(val, val_len)) {
 					free(val);
-					return CMD_EBIN; 
+					return CMD_EBINARY; 
 				}
-				*/
 				memcpy(cmd->val, val, val_len);
 				cmd->val_len = val_len;
 				free(val);
@@ -122,25 +120,16 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 			reset_text_command(cmd);
 			if (res == KV_STORE_NOTFOUND) return CMD_ENOTFOUND;
 			
-			/** opcion 1: chequeamos que el valor no sea binario
-			if (res == KV_STORE_BIN) {
-				free(val);
-				return CMD_BIN;
-			}
-			*/
 			if (res == CMD_OK) {
 				assert(val != NULL);
 				if (val_len > WORD_SIZE) {
 					free(val);
 					return CMD_EBIG;
 				}
-				/** opcion 2:
-					chequeamos que el valor sea imprmible 
 				if (!imprimible(val, val_len)) {
 					free(val);
-					return CMD_EBIN; 
+					return CMD_EBINARY; 
 				}
-				*/
 				memcpy(cmd->val, val, val_len);
 				cmd->val_len = val_len;
 				free(val);
