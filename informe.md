@@ -62,5 +62,5 @@ doblemente circulares de forma intrusiva sobre una sola estructura, llamada
 # Notas sobre manejo de errores
 
 Si una operación de un cliente en modo binario produce un OOM, se responde con
-el código adecuado y se patea a ese cliente.
-
+el código adecuado y se patea a ese cliente. En modo texto se responde y se
+mantiene la conexión.
