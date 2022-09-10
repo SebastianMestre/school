@@ -64,3 +64,7 @@ doblemente circulares de forma intrusiva sobre una sola estructura, llamada
 Si una operación de un cliente en modo binario produce un OOM, se responde con
 el código adecuado y se patea a ese cliente. En modo texto se responde y se
 mantiene la conexión.
+
+Si una instruccion de un cliente en modo texto supera el limite dado 
+(2048 caracteres), se corta la conexion con el cliente.
+A nuestro criterio, no hay manera razonable de recuperarse de este error.
