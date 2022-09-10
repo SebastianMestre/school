@@ -47,8 +47,6 @@ int main(int argc, char** argv) {
 	if (listen_text_sock < 0) exit(EXIT_FAILURE);
 	if (listen_biny_sock < 0) exit(EXIT_FAILURE);
 
-	int err;
-
 	int epollfd = epoll_create(1);
 	if (epollfd < 0) {
 		perror("epoll.1");

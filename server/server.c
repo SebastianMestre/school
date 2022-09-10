@@ -59,10 +59,13 @@ void register_listener(int epollfd, int sock, enum protocol protocol) {
 	}
 	data->fd = sock;
 	
-	if (register_listen_socket_first(epollfd, sock, data) < 0) exit(EXIT_FAILURE);
+	if (register_listen_socket_first(epollfd, sock, data) < 0) {
+		fprintf(stderr, "fallo al iniciar: register listen_socket\n");
+		exit(EXIT_FAILURE);
+	}
 }
 
-static int register_biny_client(int epollfd, int sock, enum protocol protocol, kv_store *store) {
+static int register_biny_client(int epollfd, int sock, kv_store *store) {
 	struct fd_data *data = try_alloc(store, sizeof(*data));
 	if (data == NULL)
 		goto error_nothing;
@@ -88,7 +91,7 @@ error_nothing:
 	return -1;
 }
 
-static int register_text_client(int epollfd, int sock, enum protocol protocol, kv_store *store) {
+static int register_text_client(int epollfd, int sock, kv_store *store) {
 	struct fd_data *data = try_alloc(store, sizeof(*data));
 	if (data == NULL)
 		goto error_nothing;
@@ -148,15 +151,17 @@ void *server(void *server_data) {
 				enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
 				if (action == MA_OK) {
-					if (register_text_client(epollfd, conn_sock, TEXT, store) < 0) {
+					if (register_text_client(epollfd, conn_sock, store) < 0) {
 						close(conn_sock);
 					}
 				}
 
 				// si falla el registro del listen socket, perdemos la capacidad de tomar clientes
 				// en ese caso morimos y listo
-				if (register_listen_socket_again(epollfd, listen_sock, data) < 0)
+				if (register_listen_socket_again(epollfd, listen_sock, data) < 0) {
+					fprintf(stderr, "TEXTO ERROR: no se pudo re-registrar el listen socket\n");
 					exit(EXIT_FAILURE);
+				}
 				
 			} break;
 			case FD_TYPE_BINARY_LISTEN: {
@@ -169,15 +174,17 @@ void *server(void *server_data) {
 				enum message_action action = handle_new_client(listen_sock, &conn_sock);
 
 				if (action == MA_OK) {
-					if (register_biny_client(epollfd, conn_sock, BINY, store) < 0) {
+					if (register_biny_client(epollfd, conn_sock, store) < 0) {
 						close(conn_sock);
 					}
 				}
 
 				// si falla el registro del listen socket, perdemos la capacidad de tomar clientes
 				// en ese caso morimos y listo
-				if (register_listen_socket_again(epollfd, listen_sock, data) < 0)
+				if (register_listen_socket_again(epollfd, listen_sock, data) < 0) {
+					fprintf(stderr, "BINARIO ERROR: no se pudo re-registrar el listen socket\n");
 					exit(EXIT_FAILURE);
+				}
 			
 			} break;
 			case FD_TYPE_TEXT_CONN: {

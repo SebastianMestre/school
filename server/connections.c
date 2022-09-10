@@ -64,20 +64,20 @@ int create_listen_socket(char const* address, char const* port) {
 
 int register_listen_socket_first(int epollfd, int sock, void* data) {
 	int flags = EPOLLIN | EPOLLONESHOT;
-	register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data);
+	return register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data);
 }
 
 int register_listen_socket_again(int epollfd, int sock, void* data) {
 	int flags = EPOLLIN | EPOLLONESHOT;
-	register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data);
+	return register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data);
 }
 
 int register_client_socket_first(int epollfd, int sock, void* data) {
 	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
-	register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data);
+	return register_epoll(epollfd, sock, EPOLL_CTL_ADD, flags, data);
 }
 
 int register_client_socket_again(int epollfd, int sock, void* data) {
 	int flags = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP;
-	register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data);
+	return register_epoll(epollfd, sock, EPOLL_CTL_MOD, flags, data);
 }

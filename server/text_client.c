@@ -34,7 +34,6 @@ static int respond_text_command(int client_socket, struct text_command* cmd, enu
 	int out_val = 0;
 	char ans[2048];
 	int ans_len = 0;  
-	const char* output_name;
 
 	const char* cmd_output = cmd_output_name(res, &ans_len);   
 	if (res == CMD_OK) {
@@ -151,6 +150,7 @@ static enum parse_status parse_text_command(char** start, char* buf_end, struct 
 
 		return PARSED;
 	}
+	default: assert(0);
     }
 
 }
