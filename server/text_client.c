@@ -78,7 +78,7 @@ int starts_with_word(char* start, char* end, char const* str) {
 	return (end - start == len) || (start[len] == ' ');
 }
 
-enum parse_status {INCOMPLETE, INVALID, PARSED};
+enum parse_status { INCOMPLETE, INVALID, PARSED };
 
 static enum parse_status parse_text_command(char** start, char* buf_end, struct text_command* cmd) {
     char* line_start = *start;
@@ -195,13 +195,13 @@ enum message_action handle_text_message(struct text_client_state* state, int soc
 	int read_status;
 	while (1) {
 		read_status = read_until(sock, state->buf, &state->buf_size, TEXT_CLIENT_BUF_SIZE);
-		if (read_status == -3) return MA_ERROR;
+		if (read_status == FD_ERROR) return MA_ERROR;
 
 		int interpret_status = interpret_text_commands(sock, state, store);
 		if (interpret_status == MA_ERROR) return MA_ERROR;
 
-		if (read_status ==  0) continue;
-		if (read_status == -1) return MA_OK;
-		if (read_status == -2) return MA_STOP;
+		if (read_status >=  0) continue;
+		if (read_status == FD_EAGAIN) return MA_OK;
+		if (read_status == FD_END) return MA_STOP;
 	}
 }

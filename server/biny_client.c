@@ -123,7 +123,7 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 		case BC_START:
 			read_status = read_until(sock, &state->operation, &state->cursor, 1);
 			if (read_status < 0) {
-				if (read_status == -2) return MA_STOP;
+				if (read_status == FD_END) return MA_STOP;
 				else goto error_nothing;
 			}
 
@@ -222,15 +222,15 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 	}
 
 error_key_value:
-	if (read_status == -1) return MA_OK;
+	if (read_status == FD_EAGAIN) return MA_OK;
 	free(state->val);
 	state->val = NULL;
 error_key:
-	if (read_status == -1) return MA_OK;
+	if (read_status == FD_EAGAIN) return MA_OK;
 	free(state->key);
 	state->key = NULL;
 error_nothing:
-	if (read_status == -1) return MA_OK;
+	if (read_status == FD_EAGAIN) return MA_OK;
 	return MA_ERROR;
 
 error_oom_val:
