@@ -1,3 +1,9 @@
+/** 
+ * Este modulo se encarga de bindear los puertos de escucha del servidor,
+ * bajar los privilegios y finalmente levantar el servidor.
+ * Asume que existe el ejecutable 'server' en el directorio 'build'.
+ * 
+ */ 
 #define _GNU_SOURCE
 
 #include <stdlib.h>
@@ -32,6 +38,7 @@ int main() {
 	}
 	// corriendo como root
 
+	// creamos sockets de escucha
 	int text_socket = create_listen_socket(ADDRESS, TEXT_PORT);
 	if (text_socket < 0) {
 		fprintf(stderr, "Error en la conexion al puerto %s\n", TEXT_PORT);
@@ -43,7 +50,7 @@ int main() {
 		fprintf(stderr, "Error en la conexion al puerto %s\n", BINY_PORT);
 		exit(1);
 	}
-
+	// no pudimos bajar privilegios
 	if (setgid(gid) < 0 || setuid(uid) < 0) {
 		perror("No pude bajar privilegios");
 		close(text_socket);

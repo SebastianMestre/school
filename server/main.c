@@ -1,3 +1,12 @@
+/**
+ * Modulo inicial del proyecto. Se encarga de:
+ *	establecer un limite de memoria (ver constante DATA_LIMIT)
+ *	verificar sockets de escucha (soporta modo de debuggeo sin privilegios)
+ *	crear la instancia de epoll utilizada para manejar las conexiones del servidor
+ *	inicializar la estructura de la cache
+ *	levantar threads que atiendan al servidor (ver constante MAX_THREADS)
+ */ 
+
 #define _GNU_SOURCE
 
 #include <stdio.h>

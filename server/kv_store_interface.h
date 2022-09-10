@@ -1,3 +1,8 @@
+/**
+ * Este modulo define una interfaz para un diccionario clave valor,
+ * el cual se utiliza para implementar la memcached.
+ */ 
+
 #pragma once
 
 #define KV_STORE_OK 0
@@ -7,6 +12,7 @@
 
 #include <stddef.h>
 
+// datos estadisticos sobre el estado y el historial de uso de la estructura
 struct kv_store_stat {
 	size_t get_count;
 	size_t put_count;
@@ -15,7 +21,7 @@ struct kv_store_stat {
 	size_t key_count;
 };
 
-
+// inicializa la estructura
 kv_store* kv_store_init();
 
 // pide que se libere espacio de memoria
@@ -104,6 +110,10 @@ int kv_store_take(
 	unsigned char* key, size_t key_length,
 	unsigned char** out_value, size_t* out_value_length);
 
+// pide estadisticas asociadas a la cache
+// 
+// RESULT
+// out_stat: los valores pedidos
 int kv_store_stat(
 	kv_store* store,
 	struct kv_store_stat* out_stat);

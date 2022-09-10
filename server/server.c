@@ -18,6 +18,7 @@
 #include "biny_client.h"
 #include "try_alloc.h"
 
+// Datos asociados al socket de conexion (escucha/cliente).
 struct fd_data {
 	enum fd_type {
 		FD_TYPE_BINARY_LISTEN,
@@ -31,8 +32,8 @@ struct fd_data {
 		struct biny_client_state *biny;
 	} client_state;
 };
-
-static enum message_action handle_new_client(int listen_sock, int *out_sock) {
+// Acepta cliente nuevo.
+static enum message_action handle_new_client(int listen_sock, int* out_sock) {
 	*out_sock = -1;
 	int conn_sock = accept4(listen_sock, NULL, NULL, SOCK_NONBLOCK);
 
@@ -65,7 +66,8 @@ void register_listener(int epollfd, int sock, enum protocol protocol) {
 	}
 }
 
-static int register_biny_client(int epollfd, int sock, kv_store *store) {
+// Registra cliente binario en epoll (por primera vez).
+static int register_biny_client(int epollfd, int sock, kv_store* store) {
 	struct fd_data *data = try_alloc(store, sizeof(*data));
 	if (data == NULL)
 		goto error_nothing;
@@ -91,7 +93,8 @@ error_nothing:
 	return -1;
 }
 
-static int register_text_client(int epollfd, int sock, kv_store *store) {
+// Registra cliente de texto en epoll (por primera vez).
+static int register_text_client(int epollfd, int sock, kv_store* store) {
 	struct fd_data *data = try_alloc(store, sizeof(*data));
 	if (data == NULL)
 		goto error_nothing;
@@ -117,12 +120,13 @@ error_nothing:
 	return -1;
 }
 
-void *server(void *server_data) {
-	int epollfd = ((struct server_data *)server_data)->epollfd;
-	kv_store *store = ((struct server_data *)server_data)->store;
+void* server(void* server_data) {
+	int epollfd = ((struct server_data*)server_data)->epollfd;
+	kv_store *store = ((struct server_data*)server_data)->store;
 
+	// Esperamos eventos de epoll.  
 	while (1) {
-		fprintf(stderr, "WAIT\n");
+		fprintf(stderr, "ESPERANDO...\n");
 #define MAX_EVENTS 10
 		struct epoll_event evt[MAX_EVENTS];
 		int event_count = epoll_wait(epollfd, evt, MAX_EVENTS, -1);
@@ -137,10 +141,12 @@ void *server(void *server_data) {
 
 		fprintf(stderr, "event count: %d\n", event_count);
 
+		// Atendemos todos los eventos disponibles.
 		for (int i = 0; i < event_count; i++) {
 			struct fd_data *data = evt[i].data.ptr;
 
 			switch (data->type) {
+			// Se conecto un cliente nuevo al modo texto.
 			case FD_TYPE_TEXT_LISTEN: {
 
 				fprintf(stderr, "TEXTO: NUEVO CLIENTE!\n");
@@ -164,6 +170,7 @@ void *server(void *server_data) {
 				}
 				
 			} break;
+			// Se conecto un cliente nuevo al modo binario.
 			case FD_TYPE_BINARY_LISTEN: {
 				
 				fprintf(stderr, "BINARIO: NUEVO CLIENTE!\n");
@@ -187,6 +194,7 @@ void *server(void *server_data) {
 				}
 			
 			} break;
+			// Nos habla un cliente de texto.
 			case FD_TYPE_TEXT_CONN: {
 
 				fprintf(stderr, "TEXTO: ME HABLA UN CLIENTE!\n");
@@ -206,6 +214,7 @@ void *server(void *server_data) {
 					close(sock);
 				}
 			} break;
+			// Nos habla un cliente binario.
 			case FD_TYPE_BINARY_CONN: {
 
 				fprintf(stderr, "BINARIO: ME HABLA UN CLIENTE!\n");
@@ -227,7 +236,7 @@ void *server(void *server_data) {
 			}
 		}
 	}
-
+	// nunca llegamos hasta aca
 	return NULL;
 }
 

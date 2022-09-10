@@ -1,3 +1,7 @@
+/**
+ * Este modulo se ocupa de atender el servidor.
+ * 
+ */
 #pragma once
 
 #include "kv_store.h"
@@ -9,8 +13,9 @@ struct server_data {
 	kv_store* store;
 };
 
-// maneja el servidor
-// la idea es correr esta funcion con varios threads
+// Atiende el servidor.
+// La idea es correr esta funcion con varios threads.
+// -- intenta alocar memoria en el heap --
 void* server(void* server_data); 
-// registra socket de escucha
+// Registra socket de escucha en epoll.
 void register_listener(int epollfd, int sock, enum protocol protocol);

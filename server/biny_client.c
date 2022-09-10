@@ -22,8 +22,14 @@
 
 #define BINY_CLIENT_BUF_SIZE 2048
 
+// Etapas en el parseo del comando
 enum biny_client_step { BC_START, BC_KEY_SIZE, BC_KEY, BC_VAL_SIZE, BC_VAL };
 
+// Estado del cliente
+// Incluye: 
+//	informacion sobre el parseo del comando
+// 	buffer para parseo
+//	datos del comando que estamos procesando	
 struct biny_client_state {
 
 	enum biny_client_step step;
@@ -61,7 +67,7 @@ void free_biny_client_state(struct biny_client_state* state) {
 }
 
 
-// Mandamos el mensaje en partes, abortando si el write falla
+// Mandamos el mensaje en partes, abortando si el write falla.
 int respond_biny_command(int client_socket, struct biny_command* cmd, enum cmd_output res) {
 	int out_val = 0;
 	uint8_t res_code = cmd_output_code(res);
@@ -118,7 +124,7 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 	int read_status;
 
 	while (1) {
-
+		// parseamos
 		switch (state->step) {
 		case BC_START:
 			read_status = read_until(sock, &state->operation, &state->cursor, 1);
@@ -180,7 +186,8 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 
 			state->cursor = 0;
 		}
-
+		
+		// corremos el comando
 		struct biny_command cmd = {};
 
 		switch (state->operation) {
@@ -213,6 +220,7 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 		}
 
 		enum cmd_output res = run_biny_command(store, &cmd);
+		// respondemos al cliente
 		if (respond_biny_command(sock, &cmd, res) < 0) {
 			return MA_ERROR;
 		}
@@ -220,7 +228,7 @@ enum message_action handle_biny_message(struct biny_client_state* state, int soc
 		memset(state, 0, sizeof(*state));
 		state->step = BC_START;
 	}
-
+	// manejo de errores 
 error_key_value:
 	if (read_status == FD_EAGAIN) return MA_OK;
 	free(state->val);

@@ -1,3 +1,10 @@
+/**
+ * Este modulo abstrae el objeto comando; presenta una estructura de datos
+ * para el modo texto y el modo binario. Define una interfaz para correr
+ * los comandos e interpretar su resultado.
+ * 
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -29,7 +36,7 @@ struct biny_command {
 	uint8_t* key;
 	uint32_t key_size;
 
-	// En un PUT es un argumento. En un GET o un TAKE es un resultado.
+	// En un PUT es un argumento. En un GET, TAKE o STATS es un resultado.
 	uint8_t* val;
 	uint32_t val_size;
 };
@@ -45,10 +52,11 @@ enum cmd_output {
 };
 // Toman un comando y lo corren sobre `store`.
 // Resultado en `cmd.val`.
+// -- intenta alocar memoria en el heap --
 enum cmd_output run_text_command(kv_store* store, struct text_command* cmd);
 // Toma ownership sobre `cmd.key` (y `cmd.value`).
 enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd);
-
+// Devuelve un string con el nombre de `output`; almacena el largo en `len`
 const char* cmd_output_name(enum cmd_output output, int* len);
-
+// Devuelve el codigo numerico de `output`. 
 uint8_t cmd_output_code(enum cmd_output output);

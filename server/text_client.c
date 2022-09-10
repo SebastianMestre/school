@@ -14,6 +14,7 @@
 
 #define TEXT_CLIENT_BUF_SIZE 2048
 
+// Tenemos un buffer y el tamaño de los datos almacenados.
 struct text_client_state {
 	size_t buf_size;
 	char buf[TEXT_CLIENT_BUF_SIZE];
@@ -30,6 +31,7 @@ void free_text_client_state(struct text_client_state* state) {
 	free(state);
 }
 
+// Responde al cliente con el resultado del comando.
 static int respond_text_command(int client_socket, struct text_command* cmd, enum cmd_output res) {
 	int out_val = 0;
 	char ans[2048];
@@ -64,13 +66,15 @@ static int respond_text_command(int client_socket, struct text_command* cmd, enu
 	return out_val;
 }
 
+// Chequea que el string tenga unicamente caracteres alfanumericos
+// separados por espacios. 
 int alphanumeric(char* str, int len) {
     for (int i = 0; i < len; i++) {
         if (!isalnum(str[i]) && str[i] != ' ') return 0;
     }
     return 1;
 }
-
+// Determina si la cadena de caracteres comienza con el string dado.
 int starts_with_word(char* start, char* end, char const* str) {
 	size_t len = strlen(str);
 	if (end - start < len) return 0;
@@ -78,8 +82,9 @@ int starts_with_word(char* start, char* end, char const* str) {
 	return (end - start == len) || (start[len] == ' ');
 }
 
+// Resultado del parseo.
 enum parse_status { INCOMPLETE, INVALID, PARSED };
-
+// Parsear comando.
 static enum parse_status parse_text_command(char** start, char* buf_end, struct text_command* cmd) {
     char* line_start = *start;
 
@@ -154,7 +159,7 @@ static enum parse_status parse_text_command(char** start, char* buf_end, struct 
     }
 
 }
-
+// Interpretamos el comando: parseamos, procesamos, respondemos al cliente.
 static int interpret_text_commands(int sock, struct text_client_state* state, kv_store* store) {
 	struct text_command cmd;
 	char* cursor = state->buf;

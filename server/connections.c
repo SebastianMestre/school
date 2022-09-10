@@ -8,6 +8,7 @@
 
 #include "connections.h"
 
+// Registra fd en el epoll y lo asocia con los datos dados.
 static int register_epoll(int epollfd, int fd, int op, int flags, void* data) {
 	fprintf(stderr, "epoll_ctl <~~ epollfd = %d, fd = %d, op = %d, flags = %x, data = %p\n", epollfd, fd, op, flags, data);
 	struct epoll_event evt = {0};

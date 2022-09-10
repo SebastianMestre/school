@@ -8,6 +8,7 @@
 typedef struct kv_hashtable_wrapper kv_store;
 #include "kv_store_interface.h"
 
+// Creamos una estructura concurrente a partir de la tabla hash.
 struct kv_hashtable_wrapper {
 	pthread_spinlock_t stat_lock;
 	struct kv_store_stat stat;
@@ -79,9 +80,7 @@ int kv_store_take(
 	return hashtable_take(store->table, key, key_length, out_value, out_value_length);
 }
 
-int kv_store_evict(
-	struct kv_hashtable_wrapper* store
-) {
+int kv_store_evict(struct kv_hashtable_wrapper* store) {
 	return hashtable_evict(store->table);
 }
 

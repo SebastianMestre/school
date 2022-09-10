@@ -16,15 +16,16 @@
 #define EUNK		115
 #define EOOM		116 // codigo nuevo
 
-// TODO hace falta esto?
+// Reinicia virtualmente el comando de texto.
 static void reset_text_command(struct text_command* cmd) {
 	cmd->key_len = cmd->val_len = 0;
 }
 
-#define ALLOC_ATTEMPTS 10
+// Cantidad de intentos maxima para  insertar un valor en cache.
+#define PUT_ATTEMPTS 10
 
-// retorna el tamaño del resultado
-// si val no es NULL, almacena las stats en val
+// Retorna el tamaño del resultado.
+// Si val no es NULL, almacena las stats en val.
 static int stats(kv_store* store, char* val) {
 	struct kv_store_stat stats;
 	kv_store_stat(store, &stats);
@@ -147,12 +148,12 @@ enum cmd_output run_text_command(kv_store* store, struct text_command* cmd) {
 	}
 }
 
-// TODO hace falta esto?
+// Reinicia virtualmente el comando binario.
 static void reset_biny_command(struct biny_command* cmd) {
 	cmd->key_size = cmd->val_size = 0;
 	cmd->key = cmd->val = NULL;
 }
-
+// Libera espacio de memoria ocupado por el comando binario.
 static void free_biny_command(struct biny_command* cmd) {
 	if (cmd->key_size > 0) free(cmd->key);
 	if (cmd->val_size > 0) free(cmd->val);
@@ -163,7 +164,7 @@ enum cmd_output run_biny_command(kv_store* store, struct biny_command* cmd) {
 	switch (cmd->tag) {
 		case PUT: {
 			int attempts, res;
-			for (attempts = 0; attempts < ALLOC_ATTEMPTS; attempts++) {
+			for (attempts = 0; attempts < PUT_ATTEMPTS; attempts++) {
 				res = kv_store_put(store, cmd->key, cmd->key_size, cmd->val, cmd->val_size);
 				if (res != KV_STORE_OOM) break;
 				if (kv_store_evict(store) < 0) {
