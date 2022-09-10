@@ -7,7 +7,6 @@
 #define FD_END -2
 #define FD_ERROR -3
 
-// TODO devolver algo mas expresivo
 
 // intenta leer del file descriptor hasta llenar el bufer dado.
 // en caso de error, devuelve un valor negativo

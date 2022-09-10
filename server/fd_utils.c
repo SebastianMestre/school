@@ -11,14 +11,14 @@ int read_until(int fd, unsigned char* buf, size_t* buf_size, size_t buf_capacity
 
 		if (read_bytes < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				return -1; // no hay mas input, hay que volver a epoll
+				return FD_EAGAIN; // no hay mas input, hay que volver a epoll
 			} else {
-				return -3; // error, hay que frenar ahora
+				return FD_ERROR; // error, hay que frenar ahora
 			}
 		}
 
 		if (read_bytes == 0) {
-			return -2; // fin del input. procesar lo que queda y cortar
+			return FD_END; // fin del input. procesar lo que queda y cortar
 		}
 
 		*buf_size += read_bytes;
