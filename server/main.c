@@ -16,6 +16,9 @@
 #define DATA_LIMIT (1<<30)
 #define MAX_THREADS 4
 
+#define DEBUG_TEXT_PORT "8000"
+#define DEBUG_BINY_PORT "8001"
+
 int set_memory_limit(rlim_t limit) {
 	struct rlimit r = {.rlim_cur = limit, .rlim_max = RLIM_INFINITY};
 	if (setrlimit(RLIMIT_DATA, &r) < 0) {
@@ -33,8 +36,8 @@ int main(int argc, char** argv) {
 	int listen_text_sock, listen_biny_sock;
 	// no nos pasaron sockets --> estamos debuggeando
 	if (argc == 1) {
-		listen_text_sock = create_listen_socket("localhost", "8000");
-		listen_biny_sock = create_listen_socket("localhost", "8001");
+		listen_text_sock = create_listen_socket("localhost", DEBUG_TEXT_PORT);
+		listen_biny_sock = create_listen_socket("localhost", DEBUG_BINY_PORT);
 	}
 	else if (argc == 3) {
 		listen_text_sock = atoi(argv[1]);
