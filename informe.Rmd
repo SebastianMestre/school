@@ -19,6 +19,10 @@ editor_options:
   markdown:
     wrap: 72
 ---
+```{r setup, include=TRUE, echo=FALSE}
+format_dec <- function(x) trimws(format(round(x, 2), nsmall=2))
+```
+
 
 # Alumnos
 
@@ -57,7 +61,6 @@ distribución de frecuencias, gráficos y medidas descriptivas.
 
 ```{r edadusuarios1, fig.cap="Distribución de edad de los usuarios", echo=FALSE, message=FALSE, warning=FALSE, out.width="90%"}
 library(qcc)
-
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 
 hist(usuarios$edad,
@@ -120,12 +123,31 @@ que los usuarios en grupos etarios más altos realicen menos recorridos individu
 
 ### Género
 
-Se analizará ahora la distrución del género. Algo interesante para
+Se analizará ahora la distribución del género. Algo interesante para
 acotar es que si un usuario no proporciona esta información, por defecto
 su género asignado será "Otro". Esto significa que los datos no
-representan exactamente la distribución de género real.
+representan exactamente la distribución de género real. Por lo tanto,
+aunque seria interesante considerar un rango mas amplio en el espectro
+de genero, no es posible discriminar a los usuarios que no se identifican con
+"Hombre"/"Mujer". Proveemos la tabla de frecuencias incluyendo el panorama general,
+y hacemos un analisis sobre el subconjunto binario masculino-femenino.
 
-```{r generousuarios1, fig.cap="Distribución de usuarios por Genero", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+```{r generousuarios1, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%"}
+cortusuarios <- table(usuarios$genero)
+Total <- sum
+# agrega totales
+tablausuarios <- addmargins(cbind(cortusuarios,cumsum(cortusuarios),cortusuarios/length(usuarios$genero)), margin=1, FUN=Total)
+pcumusuarios <- cumsum(cortusuarios)/length(usuarios$genero)
+# no queremos total en este campo
+pcumusuarios[length(pcumusuarios) + 1] <- ' '
+tablausuarios <- cbind(tablausuarios, pcumusuarios)
+colnames(tablausuarios) <- c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada")
+rownames(tablausuarios) <- c("Mujeres", "Hombres", "Otro", "Total")
+knitr::kable(tablausuarios, caption="Frecuencias Genero Usuarios")
+
+```
+
+```{r generousuarios2, fig.cap="Distribución de usuarios por Genero (revisado)", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 
 usuarios <- read.table("usuarios8.csv", header = TRUE, sep = ",")
 recorridos <- read.table("recorridos8.csv", header = TRUE, sep = ",")
@@ -142,44 +164,37 @@ hombres <- filtrarPorGenero(usuarios, "M")
 mujeres <- filtrarPorGenero(usuarios, "F")
 nonbiny <- filtrarPorGenero(usuarios, "OTRO")
 
+cant_usuarios_genero = c(dim(hombres)[1], dim(mujeres)[1])
+dim_bin = dim(hombres)[1] + dim(mujeres)[1]
+labels_usuarios_genero = c(paste("Hombres ", format_dec(dim(hombres)[1]/dim_bin*100), "%", sep = ""),
+                             paste("Mujeres ", format_dec(dim(mujeres)[1]/dim_bin*100), "%", sep = ""))
+pie(cant_usuarios_genero,
+    labels = labels_usuarios_genero,
+    col=c("#82B5F1","#E84B89"))
+```
+
+
+```{r generousuarios3, fig.cap="Distribución de recorridos por Genero (revisado)", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+
 viajes_hombres = filtrarPorGenero(usuariosrecorridos, "M")
 viajes_mujeres = filtrarPorGenero(usuariosrecorridos, "F")
 viajes_nonbiny = filtrarPorGenero(usuariosrecorridos, "OTRO")
 
-pieUsuariosXGenero <- function() {
-  cant_usuarios_genero = c(dim(hombres)[1], dim(mujeres)[1], dim(nonbiny)[1])
-  labels_usuarios_genero = c(paste("Hombres ", dim(hombres)[1]/dim(usuarios)[1]*100, "%", sep = ""),
-                             paste("Mujeres ", dim(mujeres)[1]/dim(usuarios)[1]*100, "%", sep = ""),
-                             paste("Otro ", dim(nonbiny)[1]/dim(usuarios)[1]*100, "%", sep = ""))
-  pie(cant_usuarios_genero,
-      labels = labels_usuarios_genero,
-      col=c("#82B5F1","#E84B89","#E5EC6D"))
-}
+dim_viajes_bin = dim(viajes_hombres)[1] + dim(viajes_mujeres)[1]
 
-pieUsuariosXGenero()
+cant_viajes_genero = c(dim(viajes_hombres)[1], dim(viajes_mujeres)[1])
+labels_viajes_genero = c(paste("Hombres ", format_dec(dim(viajes_hombres)[1]/dim_viajes_bin*100), "%", sep = ""),
+                           paste("Mujeres ", format_dec(dim(viajes_mujeres)[1]/dim_viajes_bin*100), "%", sep = ""))
+pie(cant_viajes_genero,
+    labels = labels_viajes_genero,
+    col=c("#82B5F1","#E84B89"))
+
 ```
 
-
-```{r generousuarios2, fig.cap="Distribución de recorridos por Genero", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
-pieViajesXGenero <- function() {
-  cant_viajes_genero = c(dim(viajes_hombres)[1], dim(viajes_mujeres)[1], dim(viajes_nonbiny)[1])
-  labels_viajes_genero = c(paste("Hombres ", round(dim(viajes_hombres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
-                           paste("Mujeres ", round(dim(viajes_mujeres)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""),
-                           paste("Otros ", round(dim(viajes_nonbiny)[1]/dim(usuariosrecorridos)[1]*100), "%", sep = ""))
-  pie(cant_viajes_genero,
-      labels = labels_viajes_genero,
-      col=c("#82B5F1","#E84B89","#E5EC6D"))
-}
-
-pieViajesXGenero()
-```
-
-De los gráficos (\ref{fig:generousuarios1}) y (\ref{fig:generousuarios2}) se puede observar que:\
+De los gráficos (\ref{fig:generousuarios2}) y (\ref{fig:generousuarios3}) se puede observar que:\
 - de entre los usuarios que eligen revelar su genero, la mayoría son mujeres\
-- de entre los recorridos relizados por usuarios que eligen revelar su genero, la mayoría los realizan mujeres\
-Limitandonos a los usuarios que eligen revelar su genero, se ve que estos datos tienen
-una relación directa, e inferimos que la razón por la que más recorridos los realizan
-personas de género femenino es que estas son la mayoría.
+- a pesar de haber casi el doble de mujeres que hombres en el sistema, ~45% de los viajes son realizados
+  hombres.
 
 
 
