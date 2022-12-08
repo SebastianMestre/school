@@ -233,11 +233,12 @@ barplot(freq, names.arg = c(
   ylab = "Frecuencia absoluta")
 ```
 
-La distribución muestra que el día en que se realizan más recorridos es el lunes,
-mientras que los días con menor frecuencia son viernes y domingo. La disminución
-de recorridos en los 2 días recién mencionados puede atribuirse a que las personas
-tiendan a quedarse en sus hogares a descansar durante el fin de semana, o que
-realizen actividades fuera de la casa, pero se transporten de otra manera.
+La figura (\ref{fig:diasdelasemana1}) muestra una distribucion de viajes muy pareja
+entre los dias de la semana, con un pequeño pico el dia lunes. Puede inferirse que
+predomina el uso de las bicicletas como medio de transporte, ya que en caso de ser
+este mayoritariamente recreativo se esperaria mayor actividad los fines de semana.
+Aun asi, es probable que esto tambien sea un factor ya que la distribucion es cuasi
+equitativa.
 
 ```{r diasdelasemana2, fig.cap="Tabla dias de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
 tablazaa <- cbind("Frecuencia Abs" = freq,
@@ -282,7 +283,7 @@ boxplot(recorridos$duracion / 60,
         col = c("#E97444"))
 ```
 
-Al observarlo, se nota que hay muchos valores alejados de la media.
+Al observarlo, se nota que hay muchos valores alejados de la media
 Estas son algunas de las medidas descriptivas de la variable (en
 minutos):\
 - Mínimo: 4\
