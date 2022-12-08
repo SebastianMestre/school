@@ -283,7 +283,7 @@ boxplot(recorridos$duracion / 60,
         col = c("#E97444"))
 ```
 
-Al observarlo, se nota que hay muchos valores alejados de la media
+Al observarlo, se nota que hay muchos valores alejados de la mediana
 Estas son algunas de las medidas descriptivas de la variable (en
 minutos):\
 - Mínimo: 4\
@@ -298,10 +298,12 @@ Podria considerarse la posibilidad de que sean errores de registro o del
 sistema; aunque en este caso tambien podrian adjudicarse a un
 error/eventualidad en relacion al usuario.
 
-Por otro lado, interpretamos que la mayor concentracion de outliers que
+Por otro lado, se interpreta que la mayor concentracion de outliers que
 se encuentran en el intervalo [60, 100] son resultados logicos del
 factor humano, ya que representan un intervalo de tiempo razonablemente
-menor.
+menor. Es decir, es esperable que ocasionalmente haya usuarios que no
+respeten los tiempos determinados; en este caso, puede ser explicado
+por viajes excepcionalmente largos.
 
 \newpage
 
