@@ -13,6 +13,8 @@ stateNames = sapply(0:k, function(x) { as.character(x) })
 mc <- new("markovchain", states = stateNames, transitionMatrix = P)
 
 # Ej a
+
+# TODO: conclusión
 steps <- 100
 result <- rmarkovchain(mc, n=steps, t0="25")
 plot(result, xlim=c(0,steps), ylim=c(0,k))
@@ -31,6 +33,8 @@ print(P[0+1, 0+1])
 print(P[k+1, k+1])
 
 # Ej c
+
+# TODO: conclusion
 
 mean(markovchain::absorptionProbabilities(mc)[,1])
 mean(markovchain::absorptionProbabilities(mc)[,2])
