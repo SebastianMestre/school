@@ -19,7 +19,7 @@ mc <- ruina(100, 0.5, "mc3")
 
 ## b)
 
-jugar <- function(S, p, k) {
+se_arruina <- function(S, p, k) {
   mc <- ruina(S, p)
   estado <- as.character(k)
   while(estado != "0") {
@@ -32,7 +32,7 @@ jugar <- function(S, p, k) {
 prob_ruina <- function(S, p, k, n = 100) {
   acc <- 0
   for (i in 1:n) {
-    if (jugar(S, p, k)) {
+    if (se_arruina(S, p, k)) {
       acc <- acc + 1 
     }
   }

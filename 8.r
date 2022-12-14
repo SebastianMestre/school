@@ -24,5 +24,5 @@ for (t in 1:n) {
     D_t <- D_t + 1
   }
 }
-plot(N, type = "l")
-plot(D)
+plot(N, type = "s")
+# plot(D)
