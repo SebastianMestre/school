@@ -18,8 +18,12 @@ proceso <- function(p, k) {
   return(res)
 }
 
-# hay q guardar los resultados intermedios
 esperanza <- function(p, k, n = 1000) {
   muestras <- sapply(1:n, function(x) { return (proceso(p, k))})
-  return (mean(muestras))
+  return (list(muestras, mean(muestras)))
 }
+
+# res <- esperanza(0.75, 10, n = 10000)
+# muestras <- res[1][[1]]
+# E <- res[2][[1]] 
+
