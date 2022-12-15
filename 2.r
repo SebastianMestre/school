@@ -23,6 +23,17 @@ esperanza <- function(p, k, n = 1000) {
   return (list(muestras, mean(muestras)))
 }
 
+p <- 0.3
+k <- 3
+
+print(esperanza(p, k, n=10000))
+
+N <- (p^(-k-1)-p^(-1))/(p^(-1)-1)
+print(N)
+
+N2 <- (p^(-k)-1)/(1-p)
+print(N2)
+
 # res <- esperanza(0.75, 10, n = 10000)
 # muestras <- res[1][[1]]
 # E <- res[2][[1]] 
