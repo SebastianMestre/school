@@ -21,6 +21,10 @@ editor_options:
 ---
 ```{r setup, include=TRUE, echo=FALSE}
 format_dec <- function(x) trimws(format(round(x, 2), nsmall=2))
+
+format_dec_many <- function(xs) {
+  return (sapply(xs, format_dec))
+}
 ```
 
 
@@ -76,14 +80,28 @@ Se observa en el histograma de la Figura (\ref{fig:edadusuarios1}) que la mayorÃ
 
 
 ```{r edadusuarios2, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%"}
+
+# tabla de edades
+
+cantidad <- length(usuarios$edad)
+
 cortusuarios <- table(cut(usuarios$edad, breaks=10, right=FALSE, dig.lab = 0))
+
+cortusuarios_acum <- cumsum(cortusuarios)
+
+pusuarios <- cortusuarios / cantidad
+pusuarios <- format_dec_many(pusuarios)
+
+pcumusuarios <- cumsum(cortusuarios) / cantidad
+pcumusuarios <- format_dec_many(pcumusuarios)
+pcumusuarios[length(pcumusuarios) + 1] <- ' '  # no queremos total en este campo
+
 Total <- sum
 # agrega totales
-tablausuarios <- addmargins(cbind(cortusuarios,cumsum(cortusuarios),cortusuarios/length(usuarios$edad)), margin=1, FUN=Total)
-pcumusuarios <- cumsum(cortusuarios)/length(usuarios$edad)
-# no queremos total en este campo
-pcumusuarios[length(pcumusuarios) + 1] <- ' '
+tablausuarios <- cbind(cortusuarios, cortusuarios_acum, pusuarios)
+tablausuarios <- addmargins(tablausuarios, margin=1, FUN=Total)
 tablausuarios <- cbind(tablausuarios, pcumusuarios)
+
 colnames(tablausuarios) <- (c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada"))
 knitr::kable(tablausuarios, caption="Frecuencias Edad Usuarios")
 
@@ -133,14 +151,28 @@ de genero, no es posible discriminar a los usuarios que no se identifican con
 y hacemos un analisis sobre el subconjunto binario masculino-femenino.
 
 ```{r generousuarios1, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%"}
+
+# tabla de generos
+
+cantidad <- length(usuarios$genero)
+
 cortusuarios <- table(usuarios$genero)
+
+cortusuarios_acum <- cumsum(cortusuarios)
+
+pusuarios <- cortusuarios/cantidad
+pusuarios <- format_dec_many(pusuarios)
+
+pcumusuarios <- cortusuarios_acum/cantidad
+pcumusuarios <- format_dec_many(pcumusuarios)
+pcumusuarios[length(pcumusuarios) + 1] <- ' '  # no queremos total en este campo
+
 Total <- sum
 # agrega totales
-tablausuarios <- addmargins(cbind(cortusuarios,cumsum(cortusuarios),cortusuarios/length(usuarios$genero)), margin=1, FUN=Total)
-pcumusuarios <- cumsum(cortusuarios)/length(usuarios$genero)
-# no queremos total en este campo
-pcumusuarios[length(pcumusuarios) + 1] <- ' '
+tablausuarios <- cbind(cortusuarios, cortusuarios_acum, pusuarios)
+tablausuarios <- addmargins(tablausuarios, margin=1, FUN=Total)
 tablausuarios <- cbind(tablausuarios, pcumusuarios)
+
 colnames(tablausuarios) <- c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada")
 rownames(tablausuarios) <- c("Mujeres", "Hombres", "Otro", "Total")
 knitr::kable(tablausuarios, caption="Frecuencias Genero Usuarios")
@@ -241,10 +273,11 @@ Aun asi, es probable que esto tambien sea un factor ya que la distribucion es cu
 equitativa.
 
 ```{r diasdelasemana2, fig.cap="Tabla dias de la semana", message=FALSE, echo = FALSE, warning = FALSE, out.width="90%"}
+
 tablazaa <- cbind("Frecuencia Abs" = freq,
-                   "Frecuencia Rel" = freq / length(recorridos$dia),
+                   "Frecuencia Rel" = format_dec_many(freq / length(recorridos$dia)),
                    "Frecencia Acum Abs" = cumsum(freq),
-                   "Frecuencia Acum Rel" = cumsum(freq / length(recorridos$dia)))
+                   "Frecuencia Acum Rel" = format_dec_many(cumsum(freq / length(recorridos$dia))))
 
 row.names(tablazaa) <- c(
   "Lunes",
