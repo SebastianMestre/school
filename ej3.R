@@ -1,6 +1,6 @@
 
 # E_n: La señal es incorrecta en el momento n
-sampleEn <- function(p, n) {
+muestra_En <- function(p, n) {
   en <- runif(1)
   if (en < p) {
     return(1)
@@ -10,26 +10,26 @@ sampleEn <- function(p, n) {
 }
 
 # N_n: La cantidad de señales incorrectas hasta el momento n
-sampleNn <- function(p, n) {
+muestra_Nn <- function(p, n) {
   nn <- 0
   for (i in 1:n) {
-    nn <- nn + sampleEn(p, i)
+    nn <- nn + muestra_En(p, i)
   }
   return(nn)
 }
 
-valoresCaracteristicos <- function(muestras) {
+valores_caracteristicos <- function(muestras) {
   return(c(mean(muestras), var(muestras)))
 }
 
 analizarEn <- function(p, n, m=1000) {
-  muestras <- sapply(1:m, function (x) { return(sampleEn(p,n)) })
-  return(valoresCaracteristicos(muestras))
+  muestras <- sapply(1:m, function (x) { return(muestra_En(p,n)) })
+  return(valores_caracteristicos(muestras))
 }
 
 analizarNn <- function(p, n, m=1000) {
-  muestras <- sapply(1:m, function (x) { return(sampleNn(p,n)) })
-  return(valoresCaracteristicos(muestras))
+  muestras <- sapply(1:m, function (x) { return(muestra_Nn(p,n)) })
+  return(valores_caracteristicos(muestras))
 }
 
 # De acá en adelante, tomamos la probabilidad de que la señal
@@ -38,12 +38,12 @@ p <- 0.37
 
 # Simulamos una realizacion del proceso E_10
 # En una ejecución de ejemplo dió 1
-resultado <- sampleEn(p, 10)
+resultado <- muestra_En(p, 10)
 print(resultado)
 
 # Simulamos una realización del proceso N_10
 # En una ejecución de ejemplo dió 4
-resultado <- sampleNn(p, 10)
+resultado <- muestra_Nn(p, 10)
 print(resultado)
 
 # Simulamos 1000 realizaciones de cada proceso para estimar
