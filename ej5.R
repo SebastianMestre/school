@@ -1,24 +1,29 @@
 library("markovchain")
 
-k = 50
+k = 100
 
-P = matrix(rep(0, (k+1)*(k+1)), nrow=k+1)
-for (i in 0:k) {
-  for (j in 0:k) {
-    P[i+1, j+1] <- choose(k, j) * (i/k)^j * (1 - i/k)^(k-j)
+crear_matriz <- function(k) {
+  P = matrix(data=0, nrow=k+1, ncol=k+1)
+  for (i in 0:k) {
+    for (j in 0:k) {
+      P[i+1, j+1] <- choose(k, j) * (i/k)^j * (1 - i/k)^(k-j)
+    }
   }
+  return(P)
 }
 
-stateNames = sapply(0:k, function(x) { as.character(x) })
-mc <- new("markovchain", states = stateNames, transitionMatrix = P)
+P <- crear_matriz(k)
+estados = sapply(0:k, as.character)
+mc <- new("markovchain", states = estados, transitionMatrix = P)
 
 # Ej a
 
-# TODO: conclusión
-steps <- 100
-result <- rmarkovchain(mc, n=steps, t0="25")
-plot(result, xlim=c(0,steps), ylim=c(0,k))
-print(result)
+steps <- 500
+trayectoria <- rmarkovchain(mc, n=steps, t0="50")
+
+
+plot(trayectoria, xlim=c(0,steps), ylim=c(0,k), type="l", xlab="generación", ylab="cantidad de genes tipo A")
+print(trayectoria)
 
 # Ej b
 
