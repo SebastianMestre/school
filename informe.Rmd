@@ -96,13 +96,15 @@ pcumusuarios <- cumsum(cortusuarios) / cantidad
 pcumusuarios <- format_dec_many(pcumusuarios)
 pcumusuarios[length(pcumusuarios) + 1] <- ' '  # no queremos total en este campo
 
-Total <- sum
+Total <- function (s) { sum(sapply(s, as.numeric)) }
 # agrega totales
 tablausuarios <- cbind(cortusuarios, cortusuarios_acum, pusuarios)
 tablausuarios <- addmargins(tablausuarios, margin=1, FUN=Total)
 tablausuarios <- cbind(tablausuarios, pcumusuarios)
+tablausuarios[11,3] <- "1.00"
 
 colnames(tablausuarios) <- (c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada"))
+
 knitr::kable(tablausuarios, caption="Frecuencias Edad Usuarios")
 
 ```
@@ -167,11 +169,12 @@ pcumusuarios <- cortusuarios_acum/cantidad
 pcumusuarios <- format_dec_many(pcumusuarios)
 pcumusuarios[length(pcumusuarios) + 1] <- ' '  # no queremos total en este campo
 
-Total <- sum
+Total <- function (s) { sum(sapply(s, as.numeric)) }
 # agrega totales
 tablausuarios <- cbind(cortusuarios, cortusuarios_acum, pusuarios)
 tablausuarios <- addmargins(tablausuarios, margin=1, FUN=Total)
 tablausuarios <- cbind(tablausuarios, pcumusuarios)
+tablausuarios[4,3] <- "1.00"
 
 colnames(tablausuarios) <- c("Frecuencia absoluta","Frecuencia absoluta acumulada","Frecuencia relativa","Frecuencia relativa acumulada")
 rownames(tablausuarios) <- c("Mujeres", "Hombres", "Otro", "Total")
