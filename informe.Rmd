@@ -434,7 +434,9 @@ mascara_iguales <- function(a, b) {
   result <- igualar_levelset(a, b) == b
 }
 
-mismaEstacion <- mascara_iguales(recorridos$direccion_estacion_origen, recorridos$direccion_estacion_destino)
+# mismaEstacion <- mascara_iguales(recorridos$direccion_estacion_origen, recorridos$direccion_estacion_destino)
+
+mismaEstacion <- recorridos$direccion_estacion_origen == recorridos$direccion_estacion_destino
 
 cant_total <- dim(recorridos)[1]
 cant_dstta_estacion <- dim(recorridos[!mismaEstacion,])[1]
