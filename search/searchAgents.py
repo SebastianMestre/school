@@ -370,16 +370,16 @@ def cornersHeuristic(state, problem):
     remainingCorners = [
         corner
         for hasCorner, corner
-        in zip(cornerSet, self.corners)
+        in zip(cornerSet, corners)
         if not hasCorner
     ]
 
     if remainingCorners == []:
         return 0
 
-    distanceToCorners = [manhattanDistance(position, corner) for corner in remainingCorners]
+    distanceToCorners = [util.manhattanDistance(position, corner) for corner in remainingCorners]
     distanceToNearestCorner = min(distanceToCorners)
-    distanceBetweenCorners = min(self.top, self.right)
+    distanceBetweenCorners = min(problem.walls.height-2, problem.walls.width-2)
     cornerCount = len(remainingCorners)
 
     return distanceToNearestCorner + (cornerCount - 1) * distanceBetweenCorners

@@ -122,7 +122,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     priorityFunction = lambda (state, actions): problem.getCostOfActions(actions) + heuristic(state, problem)
-    return search(problem, PriorityQueueWithFunction(priorityFunction))
+    return search(problem, util.PriorityQueueWithFunction(priorityFunction))
 
 # Abbreviations
 bfs = breadthFirstSearch
