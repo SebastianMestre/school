@@ -358,9 +358,10 @@ def cornersHeuristic(state, problem):
 
     # IDEA:
     # suponemos que no hay paredes.
-    # suponemos que el mapa es cuadrado.
     # vamos "greedy" a la esquina mas cercana.
-    # despues visitamos las otras esquinas, suponiendo que se puede ir en linea recta.
+    # despues visitamos las otras esquinas, suponiendo que se puede ir en linea recta,
+    # y suponiendo que (en el caso de faltar 3 esquinas) no empiezo desde la esquina del medio;
+    # es decir, me basta recorrer el ancho y el alto para ir a las esquinas restantes.
 
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
@@ -374,15 +375,26 @@ def cornersHeuristic(state, problem):
         if not hasCorner
     ]
 
-    if remainingCorners == []:
+    if len(remainingCorners) == 0:
         return 0
 
     distanceToCorners = [util.manhattanDistance(position, corner) for corner in remainingCorners]
     distanceToNearestCorner = min(distanceToCorners)
-    distanceBetweenCorners = min(walls.height-2, walls.width-2)
-    cornerCount = len(remainingCorners)
 
-    return distanceToNearestCorner + (cornerCount - 1) * distanceBetweenCorners
+    minX = min([x for (x, y) in remainingCorners])
+    maxX = max([x for (x, y) in remainingCorners])
+    # Max distance between corners along the x-axis.
+    dX = maxX - minX
+
+    minY = min([y for (x, y) in remainingCorners])
+    maxY = max([y for (x, y) in remainingCorners])
+    # Max distance between corners along the x-axis.
+    dY = maxY - minY
+    
+    if len(remainingCorners) <= 4:
+        return distanceToNearestCorner + dX + dY
+    elif len(remainginCorners) == 4:
+        return distanceToNearestCorner + dX + dY + min(dX, dY)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -472,8 +484,34 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    
+    food = foodGrid.asList()
+
+    if len(food) == 0:
+        return 0
+
+    minX = min([x for (x, y) in food])
+    maxX = max([x for (x, y) in food])
+    dX = maxX - minX
+    
+    minY = min([y for (x, y) in food])
+    maxY = max([y for (x, y) in food])
+    dY = maxY - minY
+
+    minDistance = min([util.manhattanDistance(position, f) for f in food])
+
+    # Heuristica 1: distancia a la comdia mas cercana + 
+    # ancho + alto de la "caja" que contiene a la comida.
+    h1 = minDistance + dX + dY
+    
+    
+    # Heuristica 2: distancia a la comida mas cercana + un paso por cada miga restante. 
+    h2 = minDistance + len(food) - 1
+
+    # Heuristica: maximo de heuristica 1 y heuristica 2.
+    # Intuitivamente, la heuristica 1 es mejor para menor densidad de comida;
+    # la heuristica 2, en el caso opuesto.
+    return max(h1, h2)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
