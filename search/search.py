@@ -100,13 +100,13 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    return search(problem, Stack())
+    return search(problem, util.Stack())
 
 def breadthFirstSearch(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    return search(problem, Queue())
+    return search(problem, util.Queue())
 
 def uniformCostSearch(problem):
     "Search the node of least total cost first."
