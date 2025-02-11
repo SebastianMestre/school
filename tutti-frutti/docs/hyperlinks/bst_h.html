@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <h1>Documentacion</h1>
+        <h2>bst.h</h2>
+
+        <p> <a href="../index.html"> raiz </a> </p>
+
+        <p> expone una cantidad de funciones para interactuar con BSTs, ademas de una estructura para representar este tipo de arboles</p>
+        <ul>
+            <li>BST BST_new (bool (*comp)(void*,void*) ) | devuelve un BST ordenado mediante el comparador comp</li>
+            <li>void BST_insert (BST this, void* value)</li>
+            <li>void* BST_find (BST this, void* value)</li>
+            <li>size_t BST_count (BST this, void* value)</li>
+            <li>void BST_free (BST this)</li>
+            <li>void BST_free_shared (BST this)</li>
+        </ul>
+
+        <ul>
+            <li>Node Node_new (void* value);</li>
+            <li>Node Node_insert (Node this, void* value, bool(*comp)(void*,void*));</li>
+            <li>void* Node_find (Node this, void* value, bool (*comp)(void*, void*));</li>
+            <li>size_t Node_count (Node this, void* value, bool (*comp)(void*, void*));</li>
+            <li>void Node_free (Node this);</li>
+            <li>void Node_free_shared (Node this);</li>
+        </ul>
+
+    </body>
+</html>
