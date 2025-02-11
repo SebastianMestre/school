@@ -1,0 +1,5 @@
+Federico
+cohete,SI,5
+repasador,SI,9
+Carlos
+abecedario,NO,8
