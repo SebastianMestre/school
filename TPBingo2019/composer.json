@@ -1,0 +1,10 @@
+{
+    "autoload": {
+       "psr-4": {
+          "Bingo\\": "src"
+       }
+    },
+    "require": {
+        "phpunit/phpunit": "^6"
+    }
+}
