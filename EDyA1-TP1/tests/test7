@@ -1,0 +1,5 @@
+mi_valor = cargar 5
+el_doble = cargar mi_valor mi_valor +
+imprimir el_doble
+evaluar mi_valor
+salir
